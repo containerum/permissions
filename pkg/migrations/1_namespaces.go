@@ -12,10 +12,10 @@ func init() {
 			return err
 		}
 
-		_, err := db.Model(model.Namespace{}).CreateTable(&orm.CreateTableOptions{IfNotExists: true})
+		_, err := db.Model(&model.Namespace{}).CreateTable(&orm.CreateTableOptions{IfNotExists: true})
 		return err
 	}, func(db migrations.DB) error {
-		if _, err := db.Model(model.Namespace{}).DropTable(&orm.DropTableOptions{IfExists: true}); err != nil {
+		if _, err := db.Model(&model.Namespace{}).DropTable(&orm.DropTableOptions{IfExists: true}); err != nil {
 			return err
 		}
 
