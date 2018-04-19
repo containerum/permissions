@@ -13,6 +13,8 @@ type Volume struct {
 	NamespaceID int    `sql:"ns_id,type:UUID,notnull"`
 	GlusterName string `sql:"gluster_name,notnull"`
 	StorageID   string `sql:"storage_id,type:UUID,notnull"`
+
+	Permission []*Permission `pg:"polymorphic:resource_" sql:"-"`
 }
 
 func (v *Volume) BeforeUpdate(db orm.DB) error {
