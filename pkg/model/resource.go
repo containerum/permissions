@@ -9,12 +9,12 @@ import (
 
 type Resource struct {
 	ID          string     `sql:"id,pk,type:uuid,default:uuid_generate_v4()"`
-	CreateTime  time.Time  `sql:"create_time,default:now(),type:TIMESTAMPTZ,notnull"`
+	CreateTime  time.Time  `sql:"create_time,default:now(),notnull"`
 	Deleted     bool       `sql:"deleted,notnull"`
-	DeleteTime  *time.Time `sql:"delete_time,type:TIMESTAMPTZ"`
+	DeleteTime  *time.Time `sql:"delete_time"`
 	TariffID    string     `sql:"tariff_id,type:uuid,notnull"`
-	OwnerUserID string     `sql:"owner_user_id,type:uuid,notnull"`
-	Label       string     `sql:"label,notnull"`
+	OwnerUserID string     `sql:"owner_user_id,type:uuid,notnull,unique:unique_owner_label"`
+	Label       string     `sql:"label,notnull,unique:unique_owner_label"`
 }
 
 func (r *Resource) BeforeDelete(db orm.DB) error {

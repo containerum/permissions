@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/go-pg/migrations"
@@ -16,7 +17,21 @@ func setupDB() (*pg.DB, error) {
 		return nil, err
 	}
 
+	pgLog := log.Logger{}
+	pgLog.SetOutput(logrus.WithField("component", "db").WriterLevel(logrus.DebugLevel))
+	pg.SetLogger(&pgLog)
+
 	db := pg.Connect(options)
+
+	db.OnQueryProcessed(func(event *pg.QueryProcessedEvent) {
+		entry := logrus.WithField("component", "db")
+		query, err := event.FormattedQuery()
+		if err != nil {
+			entry = entry.WithError(err)
+		}
+		entry.WithField("query", query).Debugf("Args: %v", event.Params)
+	})
+
 	logrus.WithField("addr", options.Addr).Info("run migrations")
 
 	oldVer, newVer, err := migrations.Run(db, "up")
