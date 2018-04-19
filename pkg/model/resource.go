@@ -1,10 +1,10 @@
 package model
 
 import (
+	"errors"
 	"time"
 
 	"github.com/go-pg/pg/orm"
-	"github.com/pkg/errors"
 )
 
 type Resource struct {
