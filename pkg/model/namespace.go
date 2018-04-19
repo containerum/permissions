@@ -11,5 +11,5 @@ type Namespace struct {
 	MaxIntServices int `sql:"max_int_services,notnull"`
 	MaxTraffic     int `sql:"max_traffic,notnull"`
 
-	Volumes []*Volume `sql:"-"`
+	Volumes []*Volume `pg:"fk:ns_id" sql:"-"`
 }

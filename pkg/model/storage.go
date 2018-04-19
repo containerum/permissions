@@ -10,5 +10,5 @@ type Storage struct {
 	Replicas int      `sql:"replicas,notnull"`
 	IPs      []string `sql:"ips,notnull,type:inet[],array"`
 
-	Volumes []*Volume `sql:"-"`
+	Volumes []*Volume `pg:"fk:storage_id" sql:"-"`
 }
