@@ -12,10 +12,13 @@ func init() {
 			return err
 		}
 
-		_, err := db.Model(&model.Namespace{}).CreateTable(&orm.CreateTableOptions{IfNotExists: true})
-		return err
+		if _, err := orm.CreateTable(db, &model.Storage{}, &orm.CreateTableOptions{IfNotExists: true, FKConstraints: true}); err != nil {
+			return err
+		}
+
+		return nil
 	}, func(db migrations.DB) error {
-		if _, err := db.Model(&model.Namespace{}).DropTable(&orm.DropTableOptions{IfExists: true}); err != nil {
+		if _, err := orm.DropTable(db, &model.Storage{}, &orm.DropTableOptions{IfExists: true}); err != nil {
 			return err
 		}
 
