@@ -31,7 +31,10 @@
   name = "git.containerum.net/ch/kube-client"
   version = "~0.9.0"
 
-
 [[constraint]]
   branch = "master"
   name = "git.containerum.net/ch/utils"
+
+[[constraint]]
+  name = "github.com/go-playground/locales"
+  version = "~0.12.1"

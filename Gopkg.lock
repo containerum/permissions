@@ -11,6 +11,7 @@
   name = "git.containerum.net/ch/kube-client"
   packages = [
     "pkg/cherry",
+    "pkg/cherry/adaptors/cherrylog",
     "pkg/cherry/adaptors/gonic"
   ]
   revision = "7ccb027698fdd902e09da3586337afaf4cc3bad9"
@@ -27,6 +28,12 @@
   name = "github.com/gin-contrib/sse"
   packages = ["."]
   revision = "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/gin-gonic/contrib"
+  packages = ["ginrus"]
+  revision = "9b830a15f6abcf9e160f47ee01fc00691cc1981a"
 
 [[projects]]
   name = "github.com/gin-gonic/gin"
@@ -61,7 +68,9 @@
   name = "github.com/go-playground/locales"
   packages = [
     ".",
-    "currency"
+    "currency",
+    "en",
+    "en_US"
   ]
   revision = "f63010822830b6fe52288ee52d5a1151088ce039"
   version = "v0.12.1"
@@ -115,7 +124,7 @@
     "unix",
     "windows"
   ]
-  revision = "3ccc7e5779793fd54564baf60c51bf017955e0ba"
+  revision = "a2a45943ae67364d56c5d7d62dee78cff16c8dc8"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v8"
@@ -125,7 +134,10 @@
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v9"
-  packages = ["."]
+  packages = [
+    ".",
+    "translations/en"
+  ]
   revision = "1b8c8e19cd250435025214492d9a08411d760fdd"
   version = "v9.12.0"
 
@@ -138,6 +150,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c21155519412e49d1170571fb8177ebedd0a58ee2705cbf2b9eb040d2d7bb50b"
+  inputs-digest = "85dd336a4bc80496d648c71163633bab5acc5545f18c7a0045cb397536df060d"
   solver-name = "gps-cdcl"
   solver-version = 1
