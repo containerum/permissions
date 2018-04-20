@@ -27,7 +27,7 @@
   branch = "master"
   name = "git.containerum.net/ch/utils"
   packages = ["httputil"]
-  revision = "2d19ad6be22f3bc788bd049bacd91f0cacf5471e"
+  revision = "0c31c414efa017dc1932f5e663dba8f00b3dcfe9"
 
 [[projects]]
   branch = "master"
@@ -141,7 +141,9 @@
     "idna",
     "internal/timeseries",
     "lex/httplex",
-    "trace"
+    "trace",
+    "webdav",
+    "webdav/internal/xml"
   ]
   revision = "d41e8174641f662c5a2d1c7a5f9e828788eb8706"
 
@@ -235,6 +237,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2358e7c3e1a2bd8e24e66573ce32ae60ccc3a12a3772cc20a02948f4d5c1258b"
+  inputs-digest = "aaaed6a895361df7ee270b28f751aec3df5bab64c6cb472483aadd84f31e35ae"
   solver-name = "gps-cdcl"
   solver-version = 1
