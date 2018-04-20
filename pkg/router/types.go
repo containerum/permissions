@@ -3,6 +3,7 @@ package router
 import (
 	"net/textproto"
 
+	umtypes "git.containerum.net/ch/json-types/user-manager"
 	"git.containerum.net/ch/kube-client/pkg/cherry"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/utils/httputil"
@@ -68,6 +69,22 @@ func (tv *TranslateValidate) ValidateHeaders(headerTagMap map[string]string) gin
 }
 
 type Router struct {
-	gin.IRouter
-	*TranslateValidate
+	engine gin.IRouter
+	tv     *TranslateValidate
+}
+
+func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
+	ret := &Router{
+		engine: engine,
+		tv:     tv,
+	}
+	ret.engine.Use(httputil.SaveHeaders)
+	ret.engine.Use(httputil.PrepareContext)
+	ret.engine.Use(httputil.RequireHeaders(errors.ErrRequiredHeadersNotProvided, umtypes.UserIDHeader, umtypes.UserRoleHeader))
+	ret.engine.Use(tv.ValidateHeaders(map[string]string{
+		umtypes.UserIDHeader:   "uuid",
+		umtypes.UserRoleHeader: "eq=admin|eq=user",
+	}))
+	ret.engine.Use(httputil.SubstituteUserMiddleware(tv.Validate, tv.UniversalTranslator, errors.ErrRequestValidationFailed))
+	return ret
 }

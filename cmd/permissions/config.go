@@ -9,6 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
+	"github.com/go-playground/locales/en"
+	"github.com/go-playground/locales/en_US"
+	"github.com/go-playground/universal-translator"
 	"github.com/sirupsen/logrus"
 
 	_ "git.containerum.net/ch/permissions/pkg/migrations" // to run migrations
@@ -86,4 +89,15 @@ func setupDB() (*pg.DB, error) {
 		"new_ver": newVer,
 	}).Info("migrate up")
 	return db, err
+}
+
+func getListenAddr() (la string, err error) {
+	if la = os.Getenv("LISTEN_ADDR"); la == "" {
+		return "", errors.New("environment LISTEN_ADDR is not specified")
+	}
+	return la, nil
+}
+
+func setupTranslator() *ut.UniversalTranslator {
+	return ut.New(en.New(), en.New(), en_US.New())
 }
