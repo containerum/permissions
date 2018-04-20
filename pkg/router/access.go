@@ -27,5 +27,19 @@ func (ah *accessHandlers) getUserAccessesHandler(ctx *gin.Context) {
 func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	handlers := &accessHandlers{acts: acts, tv: r.tv}
 
+	// swagger:operation GET /access getResourcesAccesses
+	//
+	// Returns user accesses to resources
+	//
+	// ---
+	// parameters:
+	//	- $ref: '#/parameters/UserIDHeader'
+	//	- $ref: '#/parameters/UserRoleHeader'
+	//	- $ref: '#/parameters/SubstitutedUserID'
+	// responses:
+	//	'200':
+	//	  description: accesses response
+	//	default:
+	//	  description: error
 	r.engine.GET("/access", handlers.getUserAccessesHandler)
 }

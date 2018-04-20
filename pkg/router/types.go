@@ -75,7 +75,7 @@ type Router struct {
 
 func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 	ret := &Router{
-		engine: engine,
+		engine: engine.Group("/"),
 		tv:     tv,
 	}
 	ret.engine.Use(httputil.SaveHeaders)

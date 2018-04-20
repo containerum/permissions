@@ -1,0 +1,92 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Permissions service stores user resources and allows to manage access to resources",
+    "title": "Permissions API"
+  },
+  "paths": {
+    "/access": {
+      "get": {
+        "description": "Returns user accesses to resources",
+        "operationId": "getResourcesAccesses",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "accessObject": {
+      "type": "object",
+      "properties": {
+        "access": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "label": {
+          "type": "string"
+        }
+      }
+    },
+    "resourceAccesses": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "array",
+          "items": {
+            "type": "accessObject"
+          }
+        },
+        "volume": {
+          "type": "array",
+          "items": {
+            "type": "accessObject"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "SubstitutedUserID": {
+      "type": "string",
+      "format": "uuid",
+      "description": "User ID to run actions for admin",
+      "name": "user-id",
+      "in": "query"
+    },
+    "UserIDHeader": {
+      "type": "string",
+      "format": "uuid",
+      "name": "X-User-ID",
+      "in": "header",
+      "required": true
+    },
+    "UserRoleHeader": {
+      "enum": [
+        "user",
+        "admin"
+      ],
+      "type": "string",
+      "name": "X-User-Role",
+      "in": "header",
+      "required": true
+    }
+  }
+}

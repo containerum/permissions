@@ -13,6 +13,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/router"
 	"git.containerum.net/ch/permissions/pkg/utils/validation"
+	"git.containerum.net/ch/permissions/static"
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -45,6 +46,8 @@ func main() {
 	g.Use(gonic.Recovery(errors.ErrInternal, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin_recovery"))))
 	g.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true))
 	binding.Validator = &validation.GinValidatorV9{Validate: validate} // gin has no local validator
+
+	g.StaticFS("/static", static.HTTP)
 
 	r := router.NewRouter(g, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
 	r.SetupAccessRoutes(nil)
