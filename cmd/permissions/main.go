@@ -12,6 +12,7 @@ import (
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/router"
+	"git.containerum.net/ch/permissions/pkg/server"
 	"git.containerum.net/ch/permissions/pkg/utils/validation"
 	"git.containerum.net/ch/permissions/static"
 	"github.com/gin-gonic/contrib/ginrus"
@@ -42,6 +43,8 @@ func main() {
 	exitOnError(err)
 	defer db.Close()
 
+	srv := server.NewServer(db)
+
 	g := gin.New()
 	g.Use(gonic.Recovery(errors.ErrInternal, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin_recovery"))))
 	g.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true))
@@ -50,7 +53,7 @@ func main() {
 	g.StaticFS("/static", static.HTTP)
 
 	r := router.NewRouter(g, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
-	r.SetupAccessRoutes(nil)
+	r.SetupAccessRoutes(srv)
 
 	// for graceful shutdown
 	httpsrv := &http.Server{
