@@ -35,3 +35,9 @@ SID = 9
     Message = "Owner for resource already exists"
     Comment = "Resource can have only one owner"
     Kind = 5
+
+[[error]]
+    Name = "ErrDatabase"
+    StatusHTTP = 500
+    Message = "Database error"
+    Kind = 6
