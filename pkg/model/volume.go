@@ -36,3 +36,13 @@ func (v *Volume) BeforeUpdate(db orm.DB) error {
 	}
 	return err
 }
+
+func (v *Volume) AfterInsert(db orm.DB) error {
+	return db.Insert(&Permission{
+		ResourceID:         v.ID,
+		UserID:             v.OwnerUserID,
+		ResourceKind:       ResourceVolume,
+		InitialAccessLevel: AccessOwner,
+		CurrentAccessLevel: AccessOwner,
+	})
+}

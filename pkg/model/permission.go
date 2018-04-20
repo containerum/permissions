@@ -64,6 +64,7 @@ func (p *Permission) BeforeInsert(db orm.DB) error {
 		cnt, err := db.Model((*Permission)(nil)).
 			Column("id").
 			Where("resource_id = ?", p.ResourceID).
+			Where("resource_kind = ?", p.ResourceKind).
 			Where("initial_access_level = ?", AccessOwner).
 			SelectAndCount()
 		if err != nil {
