@@ -10,6 +10,7 @@ import (
 
 type AccessActions interface {
 	GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error)
+	SetUserAccesses(ctx context.Context, userID string, accessLevel model.AccessLevel) error
 }
 
 func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error) {
@@ -51,4 +52,24 @@ func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto
 	}
 
 	return ret, nil
+}
+
+func (s *Server) SetUserAccesses(ctx context.Context, userID string, access model.AccessLevel) error {
+	s.log.WithField("user_id", userID).Infof("Set user accesses to %s", access)
+
+	nsIDsQuery := s.db.Model((*model.Namespace)(nil)).Column("id").Where("owner_user_id = ?", userID)
+	volIDsQuery := s.db.Model((*model.Volume)(nil)).Column("id").Where("owner_user_id = ?", userID)
+
+	// We can lower initial access lever, upper current access level (but not greater then initial) or set to initial
+	_, err := s.db.Model((*model.Permission)(nil)).
+		Where("resource_id IN (? UNION ALL ?)", nsIDsQuery, volIDsQuery).
+		Set(`current_access_level = CASE WHEN current_access_level > ?0 THEN ?0
+											WHEN current_access_level <= ?0 AND initial_access_level > ?0 THEN ?0
+											ELSE initial_access_level`, access).
+		Update()
+	if err != nil {
+		return errors.ErrDatabase().Log(err, s.log)
+	}
+
+	return nil
 }

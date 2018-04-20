@@ -14,7 +14,7 @@
     "/access": {
       "get": {
         "description": "Returns user accesses to resources",
-        "operationId": "getResourcesAccesses",
+        "operationId": "GetResourcesAccesses",
         "parameters": [
           {
             "$ref": "#/parameters/UserIDHeader"
@@ -27,14 +27,48 @@
           }
         ]
       }
+    },
+    "/admin/accesses": {
+      "put": {
+        "summary": "Assign access level for all user resources. Used for billing purposes.",
+        "operationId": "SetResourcesAccesses",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SetResourcesAccessesRequest"
+            }
+          }
+        ]
+      }
     }
   },
   "definitions": {
-    "accessObject": {
+    "AccessLevel": {
+      "type": "string",
+      "enum": [
+        "none",
+        "read",
+        "readdelete",
+        "write",
+        "owner"
+      ]
+    },
+    "AccessObject": {
       "type": "object",
       "properties": {
         "access": {
-          "type": "string"
+          "$ref": "#/definitions/AccessLevel"
         },
         "id": {
           "type": "string",
@@ -45,7 +79,7 @@
         }
       }
     },
-    "resourceAccesses": {
+    "ResourceAccesses": {
       "type": "object",
       "properties": {
         "namespace": {
@@ -61,6 +95,17 @@
           }
         }
       }
+    },
+    "SetResourcesAccessesRequest": {
+      "description": "SetUserAccessRequest is a request object for setting user accesses",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/AccessLevel"
+        }
+      },
+      "x-go-name": "SetUserAccessesRequest",
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     }
   },
   "parameters": {

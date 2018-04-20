@@ -1,15 +1,13 @@
 package model
 
 import (
-	"database/sql/driver"
-	"fmt"
-	"strings"
 	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/pg/orm"
 )
 
+// swagger:ignore
 type ResourceKind string // enum
 
 const (
@@ -17,35 +15,18 @@ const (
 	ResourceVolume    ResourceKind = "volume"
 )
 
-type AccessLevel int // enum
-//go:generate stringer -type=AccessLevel -trimprefix=Access
+// swagger:ignore
+type AccessLevel string // enum
+
 const (
-	AccessNone AccessLevel = iota
-	AccessRead
-	AccessReadDelete
-	AccessWrite
-	AccessOwner
+	AccessNone       AccessLevel = "none"
+	AccessRead       AccessLevel = "read"
+	AccessReadDelete AccessLevel = "readdelete"
+	AccessWrite      AccessLevel = "write"
+	AccessOwner      AccessLevel = "owner"
 )
 
-func (i AccessLevel) Value() (driver.Value, error) {
-	return strings.ToLower(i.String()), nil
-}
-
-func (i *AccessLevel) Scan(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("invalid enum value %[1]v (%[1]T)", v)
-	}
-	str = strings.ToLower(str)
-	for idx := 0; idx < len(_AccessLevel_index)-1; idx++ {
-		if strings.ToLower(_AccessLevel_name[_AccessLevel_index[idx]:_AccessLevel_index[idx+1]]) == str {
-			*i = AccessLevel(idx)
-			return nil
-		}
-	}
-	return fmt.Errorf("invalid enum value %v", v)
-}
-
+// swagger:ignore
 type Permission struct {
 	tableName struct{} `sql:"permissions"`
 
@@ -87,4 +68,11 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 		return errors.ErrInternal().AddDetails("initial access level must be greater than current access level")
 	}
 	return nil
+}
+
+// SetUserAccessRequest is a request object for setting user accesses
+//
+// swagger:model SetResourcesAccessesRequest
+type SetUserAccessesRequest struct {
+	Access AccessLevel `json:"access"`
 }

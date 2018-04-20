@@ -7,6 +7,7 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
+// swagger:ignore
 type Resource struct {
 	ID          string     `sql:"id,pk,type:uuid,default:uuid_generate_v4()"`
 	CreateTime  time.Time  `sql:"create_time,default:now(),notnull"`

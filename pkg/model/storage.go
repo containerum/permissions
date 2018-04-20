@@ -1,5 +1,6 @@
 package model
 
+// swagger:ignore
 type Storage struct {
 	tableName struct{} `sql:"storages"`
 

@@ -2,6 +2,7 @@ package model
 
 import "github.com/go-pg/pg/orm"
 
+// swagger:ignore
 type Namespace struct {
 	tableName struct{} `sql:"namespaces"`
 
