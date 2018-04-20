@@ -38,3 +38,7 @@
 [[constraint]]
   name = "github.com/go-playground/locales"
   version = "~0.12.1"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/auth"
