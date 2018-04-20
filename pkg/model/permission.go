@@ -74,5 +74,17 @@ func (p *Permission) BeforeInsert(db orm.DB) error {
 			return errors.ErrOwnerAlreadyExists()
 		}
 	}
+	if p.CurrentAccessLevel > p.InitialAccessLevel {
+		// that`s our error if we will here
+		return errors.ErrInternal().AddDetails("initial access level must be greater than current access level")
+	}
+	return nil
+}
+
+func (p *Permission) BeforeUpdate(db orm.DB) error {
+	if p.CurrentAccessLevel > p.InitialAccessLevel {
+		// that`s our error if we will here
+		return errors.ErrInternal().AddDetails("initial access level must be greater than current access level")
+	}
 	return nil
 }
