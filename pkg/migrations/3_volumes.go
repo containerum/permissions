@@ -26,12 +26,12 @@ func init() {
 		return nil
 	}, func(db migrations.DB) error {
 		if _, err := db.Model(&model.Volume{}).Exec( /* language=sql*/
-			`ALTER TABLE "?TableName" DROP CONSTRAINT namespace_fk`); err != nil {
+			`ALTER TABLE "?TableName" DROP CONSTRAINT IF EXISTS namespace_fk`); err != nil {
 			return err
 		}
 
 		if _, err := db.Model(&model.Volume{}).Exec( /* language=sql */
-			`ALTER TABLE "?TableName" DROP CONSTRAINT storage_fk`); err != nil {
+			`ALTER TABLE "?TableName" DROP CONSTRAINT IF EXISTS storage_fk`); err != nil {
 			return err
 		}
 

@@ -26,11 +26,11 @@ func init() {
 			return err
 		}
 
-		if _, err := db.Exec( /* language=sql */ "DROP TYPE ACCESS_LEVEL"); err != nil {
+		if _, err := db.Exec( /* language=sql */ "DROP TYPE IF EXISTS ACCESS_LEVEL"); err != nil {
 			return err
 		}
 
-		if _, err := db.Exec( /* language=sql */ "DROP TYPE RESOURCE_KIND"); err != nil {
+		if _, err := db.Exec( /* language=sql */ "DROP TYPE IF EXISTS RESOURCE_KIND"); err != nil {
 			return err
 		}
 

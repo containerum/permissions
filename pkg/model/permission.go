@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/go-pg/pg/orm"
 )
 
 type ResourceKind string // enum
@@ -54,4 +57,21 @@ type Permission struct {
 	InitialAccessLevel    AccessLevel  `sql:"initial_access_level,type:ACCESS_LEVEL,notnull"` // WARN: custom type here, do not forget create it
 	CurrentAccessLevel    AccessLevel  `sql:"current_access_level,type:ACCESS_LEVEL,notnull"` // WARN: custom type here, do not forget create it
 	AccessLevelChangeTime time.Time    `sql:"access_level_change_time,default:now(),notnull"`
+}
+
+func (p *Permission) BeforeInsert(db orm.DB) error {
+	if p.InitialAccessLevel == AccessOwner {
+		cnt, err := db.Model((*Permission)(nil)).
+			Column("id").
+			Where("resource_id = ?", p.ResourceID).
+			Where("initial_access_level = ?", AccessOwner).
+			SelectAndCount()
+		if err != nil {
+			return err
+		}
+		if cnt > 0 {
+			return errors.ErrOwnerAlreadyExists()
+		}
+	}
+	return nil
 }

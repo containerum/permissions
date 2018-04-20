@@ -28,3 +28,10 @@ SID = 9
     StatusHTTP = 500
     Message = "Internal error"
     Kind = 4
+
+[[error]]
+    Name = "ErrOwnerAlreadyExists"
+    StatusHTTP = 400
+    Message = "Owner for resource already exists"
+    Comment = "Resource can have only one owner"
+    Kind = 5

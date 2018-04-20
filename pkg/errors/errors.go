@@ -60,6 +60,20 @@ func ErrInternal(params ...func(*cherry.Err)) *cherry.Err {
 	}
 	return err
 }
+
+// ErrOwnerAlreadyExists error
+// Resource can have only one owner
+func ErrOwnerAlreadyExists(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Owner for resource already exists", StatusHTTP: 400, ID: cherry.ErrID{SID: 0x9, Kind: 0x5}, Details: []string(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
 func renderTemplate(templText string) string {
 	buf := &bytes.Buffer{}
 	templ, err := template.New("").Parse(templText)
