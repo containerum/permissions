@@ -13,6 +13,8 @@ func exitOnError(err error) {
 }
 
 func main() {
+	exitOnError(setupLogger())
+
 	_, err := setupDB()
 	exitOnError(err)
 }
