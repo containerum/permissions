@@ -42,3 +42,7 @@
 [[constraint]]
   branch = "develop"
   name = "git.containerum.net/ch/auth"
+
+[[constraint]]
+  branch = "v2"
+  name = "gopkg.in/urfave/cli.v2"
