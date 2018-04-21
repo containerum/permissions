@@ -26,7 +26,10 @@
 [[projects]]
   branch = "master"
   name = "git.containerum.net/ch/utils"
-  packages = ["httputil"]
+  packages = [
+    "httputil",
+    "uuid"
+  ]
   revision = "0c31c414efa017dc1932f5e663dba8f00b3dcfe9"
 
 [[projects]]
@@ -243,6 +246,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6e02ddd62a2be2dd06f3e651d638f612ec67ac7c3e63d672382d45fbf1f2d308"
+  inputs-digest = "3994a4952c447fdbcb25a553bf05639af46c33a7f35de96455220ab3dfc8fbb1"
   solver-name = "gps-cdcl"
   solver-version = 1

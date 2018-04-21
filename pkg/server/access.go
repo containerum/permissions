@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"git.containerum.net/ch/auth/proto"
+	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
-	"github.com/go-pg/pg"
 )
 
 type AccessActions interface {
@@ -17,21 +17,9 @@ type AccessActions interface {
 func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error) {
 	s.log.WithField("user_id", userID).Info("get user resource accesses")
 
-	var userPermissions []struct {
-		model.Permission `pg:",override"`
-
-		Label string `sql:"label"`
-	}
-	err := s.db.Model(&userPermissions).
-		Column("permissions.*").
-		ColumnExpr("coalesce(ns.label, vol.label) AS label").
-		Join("LEFT JOIN namespaces AS ns").JoinOn("permissions.resource_id = ns.id").JoinOn("permissions.resource_kind = 'namespace'").
-		Join("LEFT JOIN volumes AS vol").JoinOn("permissions.resource_id = vol.id").JoinOn("permissions.resource_kind = 'volume'").
-		Where("permissions.user_id = ?", userID).
-		Where("label IS NOT NULL").
-		Select()
+	userPermissions, err := s.db.GetUserAccesses(ctx, userID)
 	if err != nil {
-		return nil, errors.ErrDatabase().Log(err, s.log)
+		return nil, err
 	}
 
 	ret := &authProto.ResourcesAccess{
@@ -58,25 +46,15 @@ func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto
 func (s *Server) SetUserAccesses(ctx context.Context, userID string, access model.AccessLevel) error {
 	s.log.WithField("user_id", userID).Infof("Set user accesses to %s", access)
 
-	err := s.handleTransactionError(s.db.RunInTransaction(func(tx *pg.Tx) error {
-		nsIDsQuery := tx.Model((*model.Namespace)(nil)).Column("id").Where("owner_user_id = ?", userID)
-		volIDsQuery := tx.Model((*model.Volume)(nil)).Column("id").Where("owner_user_id = ?", userID)
-
-		// We can lower initial access lever, upper current access level (but not greater then initial) or set to initial
-		_, err := s.db.Model((*model.Permission)(nil)).
-			Where("resource_id IN (? UNION ALL ?)", nsIDsQuery, volIDsQuery).
-			Set(`current_access_level = CASE WHEN current_access_level > ?0 THEN ?0
-											WHEN current_access_level <= ?0 AND initial_access_level > ?0 THEN ?0
-											ELSE initial_access_level`, access).
-			Update()
-		if err != nil {
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		if err := tx.SetUserAccesses(ctx, userID, access); err != nil {
 			return err
 		}
 
 		// TODO: update accesses on auth
 
 		return nil
-	}))
+	})
 
 	if err != nil {
 		return errors.ErrDatabase().Log(err, s.log)

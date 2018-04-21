@@ -2,11 +2,9 @@ package main
 
 import (
 	"errors"
-	"strings"
 
+	"git.containerum.net/ch/permissions/pkg/dao"
 	"github.com/gin-gonic/gin"
-	"github.com/go-pg/migrations"
-	"github.com/go-pg/pg"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/en_US"
 	"github.com/go-playground/universal-translator"
@@ -48,33 +46,8 @@ func setupLogger(ctx *cli.Context) error {
 	return nil
 }
 
-func setupDB(ctx *cli.Context) (*pg.DB, error) {
-	options, err := pg.ParseURL(ctx.String(DBAddrFlag.Name))
-	if err != nil {
-		return nil, err
-	}
-
-	db := pg.Connect(options)
-
-	db.OnQueryProcessed(func(event *pg.QueryProcessedEvent) {
-		entry := logrus.WithField("component", "db")
-		query, err := event.FormattedQuery()
-		if err != nil {
-			entry = entry.WithError(err)
-		}
-		query = strings.Join(strings.Fields(query), " ") // drop "\n", "\t" and exceeded spaces
-		entry.WithField("query", query).Debugf("Args: %v", event.Params)
-	})
-
-	logrus.WithField("addr", options.Addr).Info("run migrations")
-
-	oldVer, newVer, err := migrations.Run(db, "up")
-	logrus.WithError(err).WithFields(logrus.Fields{
-		"addr":    options.Addr,
-		"old_ver": oldVer,
-		"new_ver": newVer,
-	}).Info("migrate up")
-	return db, err
+func setupDB(ctx *cli.Context) (*dao.DAO, error) {
+	return dao.SetupDAO(ctx.String(DBAddrFlag.Name))
 }
 
 func getListenAddr(ctx *cli.Context) (string, error) {
