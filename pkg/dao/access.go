@@ -61,7 +61,11 @@ func (dao *DAO) setResourceAccess(ctx context.Context, permission model.Permissi
 										ELSE EXCLUDED.initial_access_level`).
 		Insert()
 
-	return err
+	if err != nil {
+		return errors.ErrDatabase().Log(err, dao.log)
+	}
+
+	return nil
 }
 
 func (dao *DAO) SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel model.AccessLevel, toUserID string) error {
@@ -96,7 +100,11 @@ func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resourc
 		Where("initial_access_level < ?", "owner"). // do not delete owner permission
 		Delete()
 
-	return err
+	if err != nil {
+		return errors.ErrDatabase().Log(err, dao.log)
+	}
+
+	return nil
 }
 
 func (dao *DAO) DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error {
