@@ -3,8 +3,7 @@ package main
 import (
 	"errors"
 	"log"
-	"os"
-	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-pg/migrations"
@@ -13,6 +12,7 @@ import (
 	"github.com/go-playground/locales/en_US"
 	"github.com/go-playground/universal-translator"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/urfave/cli.v2"
 
 	_ "git.containerum.net/ch/permissions/pkg/migrations" // to run migrations
 )
@@ -26,8 +26,8 @@ const (
 
 var opMode operationMode
 
-func setupLogger() error {
-	mode := os.Getenv("MODE")
+func setupLogger(ctx *cli.Context) error {
+	mode := ctx.String(ModeFlag.Name)
 	switch mode {
 	case "debug":
 		opMode = modeDebug
@@ -38,19 +38,9 @@ func setupLogger() error {
 		gin.SetMode(gin.ReleaseMode)
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 
-		logLevelString := os.Getenv("LOG_LEVEL")
-		var level logrus.Level
-		if logLevelString == "" {
-			level = logrus.InfoLevel
-		} else {
-			levelI, err := strconv.Atoi(logLevelString)
-			if err != nil {
-				return err
-			}
-			level = logrus.Level(levelI)
-			if level > logrus.DebugLevel || level < logrus.PanicLevel {
-				return errors.New("invalid log level")
-			}
+		level := logrus.Level(ctx.Int(LogLevelFlag.Name))
+		if level > logrus.DebugLevel || level < logrus.PanicLevel {
+			return errors.New("invalid log level")
 		}
 		logrus.SetLevel(level)
 	default:
@@ -59,8 +49,8 @@ func setupLogger() error {
 	return nil
 }
 
-func setupDB() (*pg.DB, error) {
-	options, err := pg.ParseURL(os.Getenv("DB_URL"))
+func setupDB(ctx *cli.Context) (*pg.DB, error) {
+	options, err := pg.ParseURL(ctx.String(DBAddrFlag.Name))
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +67,7 @@ func setupDB() (*pg.DB, error) {
 		if err != nil {
 			entry = entry.WithError(err)
 		}
+		query = strings.Join(strings.Fields(query), " ") // drop "\n", "\t" and exceeded spaces
 		entry.WithField("query", query).Debugf("Args: %v", event.Params)
 	})
 
@@ -91,11 +82,8 @@ func setupDB() (*pg.DB, error) {
 	return db, err
 }
 
-func getListenAddr() (la string, err error) {
-	if la = os.Getenv("LISTEN_ADDR"); la == "" {
-		return "", errors.New("environment LISTEN_ADDR is not specified")
-	}
-	return la, nil
+func getListenAddr(ctx *cli.Context) (string, error) {
+	return ctx.String(ListenAddrFlag.Name), nil
 }
 
 func setupTranslator() *ut.UniversalTranslator {
