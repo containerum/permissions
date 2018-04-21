@@ -54,7 +54,7 @@ func (dao *DAO) SetUserAccesses(ctx context.Context, userID string, level model.
 }
 
 func (dao *DAO) setResourceAccess(ctx context.Context, permission model.Permission) error {
-	_, err := dao.db.Model(permission).
+	_, err := dao.db.Model(&permission).
 		OnConflict(`(resource_type, resource_id, user_id) DO UPDATE`).
 		Set("initial_access_level = EXCLUDED.initial_access_level").
 		Set(`current_access_level = CASE WHEN current_access_level < EXCLUDED.initial_access_level THEN current_access_level
@@ -93,10 +93,10 @@ func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLev
 }
 
 func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resource, kind string, userID string) error {
-	_, err := dao.db.Model((*model.Permission)(nil)).
-		Where("user_id = ?", userID).
-		Where("resource_kind = ?", kind).
-		Where("resource_id = ?", resource.ID).
+	_, err := dao.db.Model(&model.Permission{UserID: userID, ResourceID: resource.ID, ResourceKind: kind}).
+		Where("user_id = ?user_id").
+		Where("resource_kind = ?resource_kind").
+		Where("resource_id = ?resource_id").
 		Where("initial_access_level < ?", "owner"). // do not delete owner permission
 		Delete()
 
