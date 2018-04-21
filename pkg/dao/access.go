@@ -52,3 +52,38 @@ func (dao *DAO) SetUserAccesses(ctx context.Context, userID string, level model.
 	// TODO: user not found error
 	return nil
 }
+
+func (dao *DAO) setResourceAccess(ctx context.Context, permission model.Permission) error {
+	_, err := dao.db.Model(permission).
+		OnConflict(`(resource_type, resource_id, user_id) DO UPDATE`).
+		Set("initial_access_level = EXCLUDED.initial_access_level").
+		Set(`current_access_level = CASE WHEN current_access_level < EXCLUDED.initial_access_level THEN current_access_level
+										ELSE EXCLUDED.initial_access_level`).
+		Insert()
+
+	return err
+}
+
+func (dao *DAO) SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel model.AccessLevel, toUserID string) error {
+	dao.log.WithField("ns_id", ns.ID).Debugf("set namespace access %s to %s", accessLevel, toUserID)
+
+	return dao.setResourceAccess(ctx, model.Permission{
+		ResourceKind:       "Namespace",
+		ResourceID:         ns.ID,
+		UserID:             toUserID,
+		InitialAccessLevel: accessLevel,
+		CurrentAccessLevel: accessLevel,
+	})
+}
+
+func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLevel model.AccessLevel, toUserID string) error {
+	dao.log.WithField("vol_id", vol.ID).Debugf("set volume access %s to %s", accessLevel, toUserID)
+
+	return dao.setResourceAccess(ctx, model.Permission{
+		ResourceKind:       "Volume",
+		ResourceID:         vol.ID,
+		UserID:             toUserID,
+		InitialAccessLevel: accessLevel,
+		CurrentAccessLevel: accessLevel,
+	})
+}

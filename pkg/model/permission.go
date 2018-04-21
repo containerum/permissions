@@ -23,10 +23,10 @@ type Permission struct {
 	tableName struct{} `sql:"permissions"`
 
 	ID                    string      `sql:"id,pk,type:uuid,default:uuid_generate_v4()"`
-	ResourceKind          string      `sql:"resource_type,notnull"` // WARN: custom type here, do not forget create it
-	ResourceID            string      `sql:"resource_id,type:UUID,notnull"`
+	ResourceKind          string      `sql:"resource_type,notnull,unique:unique_user_access"` // WARN: custom type here, do not forget create it
+	ResourceID            string      `sql:"resource_id,type:UUID,notnull,unique:unique_user_access"`
 	CreateTime            time.Time   `sql:"create_time,default:now(),notnull"`
-	UserID                string      `sql:"user_id,type:uuid,notnull"`
+	UserID                string      `sql:"user_id,type:uuid,notnull,unique:unique_user_access"`
 	InitialAccessLevel    AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull"` // WARN: custom type here, do not forget create it
 	CurrentAccessLevel    AccessLevel `sql:"current_access_level,type:ACCESS_LEVEL,notnull"` // WARN: custom type here, do not forget create it
 	AccessLevelChangeTime time.Time   `sql:"access_level_change_time,default:now(),notnull"`

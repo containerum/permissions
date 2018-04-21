@@ -21,7 +21,7 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 	return db.Insert(&Permission{
 		ResourceID:         ns.ID,
 		UserID:             ns.OwnerUserID,
-		ResourceKind:       ResourceNamespace,
+		ResourceKind:       "Namespace",
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})

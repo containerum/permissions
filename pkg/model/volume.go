@@ -42,7 +42,7 @@ func (v *Volume) AfterInsert(db orm.DB) error {
 	return db.Insert(&Permission{
 		ResourceID:         v.ID,
 		UserID:             v.OwnerUserID,
-		ResourceKind:       ResourceVolume,
+		ResourceKind:       "Volume",
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})
