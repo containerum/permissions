@@ -74,6 +74,38 @@ func (ah *accessHandlers) setVolumeAccessHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
+	userID := httputil.MustGetUserID(ctx.Request.Context())
+	var req model.DeleteUserAccessRequest
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := ah.acts.DeleteNamespaceAccess(ctx, userID, ctx.Param("label"), req.UserName); err != nil {
+		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (ah *accessHandlers) deleteVolumeAccessHandler(ctx *gin.Context) {
+	userID := httputil.MustGetUserID(ctx.Request.Context())
+	var req model.DeleteUserAccessRequest
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := ah.acts.DeleteVolumeAccess(ctx, userID, ctx.Param("label"), req.UserName); err != nil {
+		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	handlers := &accessHandlers{acts: acts, tv: r.tv}
 
@@ -158,4 +190,50 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	default:
 	//	  description: error
 	r.engine.PUT("/volumes/:label/access", handlers.setVolumeAccessHandler)
+
+	// swagger:operation DELETE /namespaces/{label}/access DeleteNamespaceAccess
+	//
+	// Delete namespace permission to user.
+	//
+	// ---
+	// parameters:
+	// - $ref: '#/parameters/UserIDHeader'
+	// - $ref: '#/parameters/UserRoleHeader'
+	// - $ref: '#/parameters/SubstitutedUserID'
+	// - name: body
+	//   in: body
+	//   schema:
+	//     $ref: "#/definitions/DeleteResourceAccessRequest"
+	// - name: label
+	//   in: path
+	//   description: Namespace label
+	// responses:
+	//	'200':
+	//	  description: access deleted
+	//	default:
+	//	  description: error
+	r.engine.DELETE("/namespaces/:label/access", handlers.deleteNamespaceAccessHandler)
+
+	// swagger:operation DELETE /volumes/{label}/access DeleteVolumeAccess
+	//
+	// Delete volume permission to user.
+	//
+	// ---
+	// parameters:
+	// - $ref: '#/parameters/UserIDHeader'
+	// - $ref: '#/parameters/UserRoleHeader'
+	// - $ref: '#/parameters/SubstitutedUserID'
+	// - name: body
+	//   in: body
+	//   schema:
+	//     $ref: "#/definitions/DeleteResourceAccessRequest"
+	// - name: label
+	//   in: path
+	//   description: Namespace label
+	// responses:
+	//	'200':
+	//	  description: access deleted
+	//	default:
+	//	  description: error
+	r.engine.DELETE("/volumes/:label/accesses", handlers.deleteVolumeAccessHandler)
 }

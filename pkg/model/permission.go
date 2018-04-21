@@ -82,11 +82,19 @@ type SetUserAccessesRequest struct {
 	Access AccessLevel `json:"access"`
 }
 
-// SetUserAccessRequest is a request object to set access to resource for user
+// SetUserAccessRequest is a request object for setting access to resource for user
 //
 // swagger:model SetResourceAccessRequest
 type SetUserAccessRequest struct {
 	// swagger:strfmt email
 	UserName string      `json:"username"`
 	Access   AccessLevel `json:"access"`
+}
+
+// DeleteUserAccessRequest is a request object for deleting access to resource for user
+//
+// swagger:model DeleteResourceAccessRequest
+type DeleteUserAccessRequest struct {
+	// swagger: strfmt email
+	UserName string `json:"username"`
 }

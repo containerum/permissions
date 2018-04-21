@@ -79,6 +79,33 @@
             "in": "path"
           }
         ]
+      },
+      "delete": {
+        "summary": "Delete namespace permission to user.",
+        "operationId": "DeleteNamespaceAccess",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/DeleteResourceAccessRequest"
+            }
+          },
+          {
+            "description": "Namespace label",
+            "name": "label",
+            "in": "path"
+          }
+        ]
       }
     },
     "/volumes/{label}/access": {
@@ -104,6 +131,33 @@
           },
           {
             "description": "Volume label",
+            "name": "label",
+            "in": "path"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete volume permission to user.",
+        "operationId": "DeleteVolumeAccess",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/DeleteResourceAccessRequest"
+            }
+          },
+          {
+            "description": "Namespace label",
             "name": "label",
             "in": "path"
           }
@@ -137,6 +191,19 @@
         }
       }
     },
+    "DeleteResourceAccessRequest": {
+      "description": "DeleteUserAccessRequest is a request object for deleting access to resource for user",
+      "type": "object",
+      "properties": {
+        "username": {
+          "description": "swagger: strfmt email",
+          "type": "string",
+          "x-go-name": "UserName"
+        }
+      },
+      "x-go-name": "DeleteUserAccessRequest",
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
     "ResourceAccesses": {
       "type": "object",
       "properties": {
@@ -155,7 +222,7 @@
       }
     },
     "SetResourceAccessRequest": {
-      "description": "SetUserAccessRequest is a request object to set access to resource for user",
+      "description": "SetUserAccessRequest is a request object for setting access to resource for user",
       "type": "object",
       "properties": {
         "access": {
