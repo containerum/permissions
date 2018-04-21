@@ -58,18 +58,18 @@ type transactional interface {
 
 func (dao *DAO) Transactional(fn func(tx *DAO) error) error {
 	entry := cherrylog.NewLogrusAdapter(dao.log.WithField("transaction_id", uuid.NewUUID()))
-	return dao.db.(transactional).RunInTransaction(func(tx *pg.Tx) error {
-		err := fn(&DAO{db: tx, log: entry})
-
-		if err == nil {
-			return nil
-		}
-
-		switch err.(type) {
-		case *cherry.Err:
-			return err
-		default:
-			return errors.ErrDatabase().Log(err, entry)
-		}
+	err := dao.db.(transactional).RunInTransaction(func(tx *pg.Tx) error {
+		return fn(&DAO{db: tx, log: entry})
 	})
+
+	if err == nil {
+		return nil
+	}
+
+	switch err.(type) {
+	case *cherry.Err:
+		return err
+	default:
+		return errors.ErrDatabase().Log(err, entry)
+	}
 }
