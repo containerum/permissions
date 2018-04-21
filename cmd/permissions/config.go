@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -54,10 +53,6 @@ func setupDB(ctx *cli.Context) (*pg.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	pgLog := log.Logger{}
-	pgLog.SetOutput(logrus.WithField("component", "db").WriterLevel(logrus.DebugLevel))
-	pg.SetLogger(&pgLog)
 
 	db := pg.Connect(options)
 
