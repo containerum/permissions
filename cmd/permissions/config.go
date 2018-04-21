@@ -10,8 +10,6 @@ import (
 	"github.com/go-playground/universal-translator"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v2"
-
-	_ "git.containerum.net/ch/permissions/pkg/migrations" // to run migrations
 )
 
 type operationMode int

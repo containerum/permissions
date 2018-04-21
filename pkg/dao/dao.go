@@ -11,6 +11,8 @@ import (
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"github.com/sirupsen/logrus"
+
+	_ "git.containerum.net/ch/permissions/pkg/migrations" // to run migrations
 )
 
 type DAO struct {
