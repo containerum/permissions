@@ -13,7 +13,7 @@
   "paths": {
     "/access": {
       "get": {
-        "description": "Returns user accesses to resources",
+        "summary": "Returns user accesses to resources.",
         "operationId": "GetResourcesAccesses",
         "parameters": [
           {
@@ -48,6 +48,64 @@
             "schema": {
               "$ref": "#/definitions/SetResourcesAccessesRequest"
             }
+          }
+        ]
+      }
+    },
+    "/namespaces/{label}/access": {
+      "put": {
+        "summary": "Grant namespace permission to user.",
+        "operationId": "SetNamespaceAccess",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SetResourceAccessRequest"
+            }
+          },
+          {
+            "description": "Namespace label",
+            "name": "label",
+            "in": "path"
+          }
+        ]
+      }
+    },
+    "/volumes/{label}/access": {
+      "put": {
+        "summary": "Grant volume permission to user.",
+        "operationId": "SetVolumeAccess",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SetResourceAccessRequest"
+            }
+          },
+          {
+            "description": "Volume label",
+            "name": "label",
+            "in": "path"
           }
         ]
       }
@@ -95,6 +153,22 @@
           }
         }
       }
+    },
+    "SetResourceAccessRequest": {
+      "description": "SetUserAccessRequest is a request object to set access to resource for user",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/AccessLevel"
+        },
+        "username": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "UserName"
+        }
+      },
+      "x-go-name": "SetUserAccessRequest",
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "SetResourcesAccessesRequest": {
       "description": "SetUserAccessRequest is a request object for setting user accesses",

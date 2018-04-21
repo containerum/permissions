@@ -98,6 +98,30 @@ func ErrResourceNotExists(params ...func(*cherry.Err)) *cherry.Err {
 	}
 	return err
 }
+
+func ErrSetOwnerAccess(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Owner can`t set access to its resource", StatusHTTP: 400, ID: cherry.ErrID{SID: 0x9, Kind: 0x8}, Details: []string(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
+
+func ErrResourceNotOwned(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Resource not owned by user", StatusHTTP: 400, ID: cherry.ErrID{SID: 0x9, Kind: 0x9}, Details: []string(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
 func renderTemplate(templText string) string {
 	buf := &bytes.Buffer{}
 	templ, err := template.New("").Parse(templText)

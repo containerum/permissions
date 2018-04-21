@@ -7,11 +7,14 @@ import (
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	"github.com/sirupsen/logrus"
 )
 
 type AccessActions interface {
 	GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error)
 	SetUserAccesses(ctx context.Context, userID string, accessLevel model.AccessLevel) error
+	SetNamespaceAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error
+	SetVolumeAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error
 }
 
 func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error) {
@@ -33,9 +36,9 @@ func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto
 			Label:  permission.Label,
 		}
 		switch permission.ResourceKind {
-		case model.ResourceNamespace:
+		case "Namespace":
 			ret.Namespace = append(ret.Namespace, obj)
-		case model.ResourceVolume:
+		case "Volume":
 			ret.Volume = append(ret.Volume, obj)
 		}
 	}
@@ -56,9 +59,69 @@ func (s *Server) SetUserAccesses(ctx context.Context, userID string, access mode
 		return nil
 	})
 
-	if err != nil {
-		return errors.ErrDatabase().Log(err, s.log)
-	}
+	return err
+}
 
-	return nil
+func (s *Server) SetNamespaceAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error {
+	s.log.WithFields(logrus.Fields{
+		"owner_id":     ownerID,
+		"target_user":  targetUser,
+		"label":        label,
+		"access_level": accessLevel,
+	}).Debugf("set namespace access")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		targetUserID := targetUser // TODO: get from user manager
+
+		ns, getErr := tx.NamespaceByLabel(ctx, ownerID, label)
+		if getErr != nil {
+			return getErr
+		}
+
+		if ns.OwnerUserID != ownerID {
+			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", label)
+		}
+
+		if setErr := tx.SetNamespaceAccess(ctx, ns, accessLevel, targetUserID); setErr != nil {
+			return setErr
+		}
+
+		// TODO: update auth
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *Server) SetVolumeAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error {
+	s.log.WithFields(logrus.Fields{
+		"owner_id":     ownerID,
+		"target_user":  targetUser,
+		"label":        label,
+		"access_level": accessLevel,
+	}).Debugf("set volume access")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		targetUserID := targetUser // TODO: get from user manager
+
+		vol, getErr := tx.VolumeByLabel(ctx, ownerID, label)
+		if getErr != nil {
+			return getErr
+		}
+
+		if vol.OwnerUserID != ownerID {
+			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", label)
+		}
+
+		if setErr := tx.SetVolumeAccess(ctx, vol, accessLevel, targetUserID); setErr != nil {
+			return setErr
+		}
+
+		// TODO: update auth
+
+		return nil
+	})
+
+	return err
 }

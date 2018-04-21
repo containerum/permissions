@@ -47,3 +47,15 @@ SID = 9
     StatusHTTP = 404
     Message = "Resource not exists"
     Kind = 7
+
+[[error]]
+    Name = "ErrSetOwnerAccess"
+    StatusHTTP = 400
+    Message = "Owner can`t set access to its resource"
+    Kind = 8
+
+[[error]]
+    Name = "ErrResourceNotOwned"
+    StatusHTTP = 400
+    Message = "Resource not owned by user"
+    Kind = 9

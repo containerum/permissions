@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
@@ -17,6 +18,18 @@ const (
 	AccessWrite      AccessLevel = "write"
 	AccessOwner      AccessLevel = "owner"
 )
+
+func (al *AccessLevel) UnmarshalJSON(b []byte) error {
+	str := AccessLevel(b)
+	switch str {
+	case AccessNone, AccessRead, AccessReadDelete, AccessWrite, AccessOwner:
+		*al = str
+	default:
+		return fmt.Errorf("invalid acess level %s", b)
+	}
+
+	return nil
+}
 
 // swagger:ignore
 type Permission struct {
@@ -67,4 +80,13 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 // swagger:model SetResourcesAccessesRequest
 type SetUserAccessesRequest struct {
 	Access AccessLevel `json:"access"`
+}
+
+// SetUserAccessRequest is a request object to set access to resource for user
+//
+// swagger:model SetResourceAccessRequest
+type SetUserAccessRequest struct {
+	// swagger:strfmt email
+	UserName string      `json:"username"`
+	Access   AccessLevel `json:"access"`
 }
