@@ -87,3 +87,26 @@ func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLev
 		CurrentAccessLevel: accessLevel,
 	})
 }
+
+func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resource, kind string, userID string) error {
+	_, err := dao.db.Model((*model.Permission)(nil)).
+		Where("user_id = ?", userID).
+		Where("resource_kind = ?", kind).
+		Where("resource_id = ?", resource.ID).
+		Where("initial_access_level < ?", "owner"). // do not delete owner permission
+		Delete()
+
+	return err
+}
+
+func (dao *DAO) DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error {
+	dao.log.WithField("ns_id", ns.ID).Debugf("delete namespace access to user %s", userID)
+
+	return dao.deleteResourceAccess(ctx, ns.Resource, "Namespace", userID)
+}
+
+func (dao *DAO) DeleteVolumeAccess(ctx context.Context, vol model.Volume, userID string) error {
+	dao.log.WithField("vol_id", vol.ID).Debugf("delete volume access to user %s", userID)
+
+	return dao.deleteResourceAccess(ctx, vol.Resource, "Volume", userID)
+}
