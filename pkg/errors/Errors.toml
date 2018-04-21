@@ -41,3 +41,9 @@ SID = 9
     StatusHTTP = 500
     Message = "Database error"
     Kind = 6
+
+[[error]]
+    Name = "ErrResourceNotExists"
+    StatusHTTP = 404
+    Message = "Resource not exists"
+    Kind = 7

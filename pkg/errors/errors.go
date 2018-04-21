@@ -86,6 +86,18 @@ func ErrDatabase(params ...func(*cherry.Err)) *cherry.Err {
 	}
 	return err
 }
+
+func ErrResourceNotExists(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Resource not exists", StatusHTTP: 404, ID: cherry.ErrID{SID: 0x9, Kind: 0x7}, Details: []string(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
 func renderTemplate(templText string) string {
 	buf := &bytes.Buffer{}
 	templ, err := template.New("").Parse(templText)
