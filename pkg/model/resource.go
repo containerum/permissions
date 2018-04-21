@@ -16,6 +16,8 @@ type Resource struct {
 	TariffID    string     `sql:"tariff_id,type:uuid,notnull"`
 	OwnerUserID string     `sql:"owner_user_id,type:uuid,notnull,unique:unique_owner_label"`
 	Label       string     `sql:"label,notnull,unique:unique_owner_label"`
+
+	Permissions []Permission `pg:"polymorphic:resource_" sql:"-"`
 }
 
 func (r *Resource) BeforeDelete(db orm.DB) error {
