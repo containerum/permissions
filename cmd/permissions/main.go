@@ -24,6 +24,8 @@ import (
 	"gopkg.in/urfave/cli.v2"
 )
 
+//go:generate swagger generate spec -i ../../swagger-basic.yml -o ../../swagger.json
+
 func exitOnError(err error) {
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
