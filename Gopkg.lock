@@ -19,8 +19,7 @@
     "pkg/cherry",
     "pkg/cherry/adaptors/cherrygrpc",
     "pkg/cherry/adaptors/cherrylog",
-    "pkg/cherry/adaptors/gonic",
-    "pkg/cherry/resource-service"
+    "pkg/cherry/adaptors/gonic"
   ]
   revision = "7ccb027698fdd902e09da3586337afaf4cc3bad9"
   version = "v0.9.4"
@@ -294,6 +293,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7a0de663ca4ec08b0df4dab179a42c3a6904c78073bb21eee7dcd92f53f8e142"
+  inputs-digest = "07a7220913e943393ae0a3aee2412f371d2651453c224edeed9f115f42d4439d"
   solver-name = "gps-cdcl"
   solver-version = 1
