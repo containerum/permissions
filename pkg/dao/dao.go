@@ -51,7 +51,7 @@ func SetupDAO(dbURL string) (*DAO, error) {
 	return &DAO{
 		db:  db,
 		log: cherrylog.NewLogrusAdapter(entry),
-	}, nil
+	}, err
 }
 
 type transactional interface {

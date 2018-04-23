@@ -2,8 +2,13 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"net/url"
+	"reflect"
 
+	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/dao"
+	"git.containerum.net/ch/permissions/pkg/server"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/en_US"
@@ -54,4 +59,53 @@ func getListenAddr(ctx *cli.Context) (string, error) {
 
 func setupTranslator() *ut.UniversalTranslator {
 	return ut.New(en.New(), en.New(), en_US.New())
+}
+
+func setupAuthClient(addr string) (clients.AuthSvc, error) {
+	switch {
+	case opMode == modeDebug && addr == "":
+		return clients.NewDummyAuthSvc(), nil
+	case addr != "":
+		return clients.NewAuthSvcGRPC(addr)
+	default:
+		return nil, errors.New("missing configuration for auth service")
+	}
+}
+
+func setupUserClient(addr string) (clients.UserManagerClient, error) {
+	switch {
+	case opMode == modeDebug && addr == "":
+		return clients.NewUserManagerStub(), nil
+	case addr != "":
+		return clients.NewHTTPUserManagerClient(&url.URL{Scheme: "http", Host: addr}), nil
+	default:
+		return nil, errors.New("missing configuration for user-manager service")
+	}
+}
+
+func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
+	var errs []error
+	var clients server.Clients
+	var err error
+
+	if clients.Auth, err = setupAuthClient(ctx.String(AuthAddrFlag.Name)); err != nil {
+		errs = append(errs, err)
+	}
+	if clients.User, err = setupUserClient(ctx.String(UserAddrFlag.Name)); err != nil {
+		errs = append(errs, err)
+	}
+
+	if len(errs) > 0 {
+		return nil, fmt.Errorf("clients setup errors: %v", errs)
+	}
+
+	v := reflect.ValueOf(clients)
+	for i := 0; i < reflect.TypeOf(clients).NumField(); i++ {
+		f := v.Field(i)
+		if str, ok := f.Interface().(fmt.Stringer); ok {
+			logrus.Infof("%s", str)
+		}
+	}
+
+	return &clients, nil
 }

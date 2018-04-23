@@ -29,4 +29,16 @@ var (
 		EnvVars: []string{"LISTEN_ADDR"},
 		Value:   ":8080",
 	}
+
+	AuthAddrFlag = cli.StringFlag{
+		Name:    "auth_addr",
+		EnvVars: []string{"AUTH_ADDR"},
+		Value:   "localhost:8888",
+	}
+
+	UserAddrFlag = cli.StringFlag{
+		Name:    "user_addr",
+		EnvVars: []string{"USER_ADDR"},
+		Value:   "localhost:8111",
+	}
 )

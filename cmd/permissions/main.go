@@ -84,7 +84,12 @@ func main() {
 				return err
 			}
 
-			srv := server.NewServer(db)
+			clients, err := setupServiceClients(ctx)
+			if err != nil {
+				return err
+			}
+
+			srv := server.NewServer(db, clients)
 
 			g := gin.New()
 			g.Use(gonic.Recovery(errors.ErrInternal, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin_recovery"))))
