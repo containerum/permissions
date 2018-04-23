@@ -1,0 +1,24 @@
+replicaCount: 1
+strategy:
+  type: RollingUpdate
+  maxSurge: 1
+  maxUnavailable: 1
+
+
+name: permissions
+
+image:
+  secret: gitlab-registry
+  repository: registry.containerum.net/ch/permissions
+  tag: staging
+  pullPolicy: Always
+
+environment: develop
+
+service:
+  name: permissions
+  externalPort: 6543
+  externalIP: 192.168.88.210
+  internalPort: 6543
+
+resources: {}
