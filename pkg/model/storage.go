@@ -1,16 +1,23 @@
 package model
 
-// swagger:ignore
+// Storage describes volumes storage
+//
+// swagger:model
 type Storage struct {
 	tableName struct{} `sql:"storages"`
 
-	ID       string   `sql:"id,pk,type:uuid,default:uuid_generate_v4()"`
-	Name     string   `sql:"name,notnull,unique"`
-	Size     int      `sql:"size,notnull"`
-	Used     int      `sql:"used,notnull"`
-	Replicas int      `sql:"replicas,notnull"`
-	IPs      []string `sql:"ips,notnull,type:inet[],array"`
+	// swagger:strfmt uuid
+	ID string `sql:"id,pk,type:uuid,default:uuid_generate_v4()" json:"id,omitempty"`
 
-	Volumes     []*Volume     `pg:"fk:storage_id" sql:"-"`
-	Permissions []*Permission `pg:"polymorphic:resource_" sql:"-"`
+	Name string `sql:"name,notnull,unique" json:"name"`
+
+	Size int `sql:"size,notnull" json:"size"`
+
+	Used int `sql:"used,notnull" json:"used"`
+
+	Replicas int `sql:"replicas,notnull" json:"replicas"`
+
+	IPs []string `sql:"ips,notnull,type:inet[],array" json:"ips"`
+
+	Volumes []*Volume `pg:"fk:storage_id" sql:"-" json:"volumes"`
 }

@@ -31,18 +31,32 @@ func (al *AccessLevel) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// swagger:ignore
+// Permission represents information about user permission to resource
+//
+// swagger:model
 type Permission struct {
 	tableName struct{} `sql:"permissions"`
 
-	ID                    string      `sql:"id,pk,type:uuid,default:uuid_generate_v4()"`
-	ResourceKind          string      `sql:"resource_type,notnull,unique:unique_user_access"` // WARN: custom type here, do not forget create it
-	ResourceID            string      `sql:"resource_id,type:UUID,notnull,unique:unique_user_access"`
-	CreateTime            time.Time   `sql:"create_time,default:now(),notnull"`
-	UserID                string      `sql:"user_id,type:uuid,notnull,unique:unique_user_access"`
-	InitialAccessLevel    AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull"` // WARN: custom type here, do not forget create it
-	CurrentAccessLevel    AccessLevel `sql:"current_access_level,type:ACCESS_LEVEL,notnull"` // WARN: custom type here, do not forget create it
-	AccessLevelChangeTime time.Time   `sql:"access_level_change_time,default:now(),notnull"`
+	// swagger:strfmt uuid
+	ID string `sql:"id,pk,type:uuid,default:uuid_generate_v4()" json:"perm_id,omitempty"`
+
+	ResourceKind string `sql:"resource_type,notnull,unique:unique_user_access" json:"kind,omitempty"` // WARN: custom type here, do not forget create it
+	// swagger:strfmt uuid
+	ResourceID string `sql:"resource_id,type:UUID,notnull,unique:unique_user_access" json:"resource_id,omitempty"`
+
+	CreateTime *time.Time `sql:"create_time,default:now(),notnull" json:"create_time,omitempty"`
+	// swagger:strfmt uuid
+
+	UserID string `sql:"user_id,type:uuid,notnull,unique:unique_user_access" json:"user_id,omitempty"`
+	// swagger:strfmt email
+
+	UserLogin string `sql:"-" json:"login,omitempty"`
+
+	InitialAccessLevel AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull" json:"access,omitempty"` // WARN: custom type here, do not forget create it
+
+	CurrentAccessLevel AccessLevel `sql:"current_access_level,type:ACCESS_LEVEL,notnull" json:"new_access_level,omitempty"` // WARN: custom type here, do not forget create it
+
+	AccessLevelChangeTime *time.Time `sql:"access_level_change_time,default:now(),notnull" json:"access_level_change_time,omitempty"`
 }
 
 func (p *Permission) BeforeInsert(db orm.DB) error {
@@ -75,6 +89,17 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 	return nil
 }
 
+func (p *Permission) Mask() {
+	p.ID = ""
+	p.ResourceKind = "" // will be already known though
+	p.ResourceID = ""
+	p.CreateTime = nil
+	p.UserID = ""
+	p.InitialAccessLevel = p.CurrentAccessLevel
+	p.AccessLevelChangeTime = nil
+	p.CurrentAccessLevel = ""
+}
+
 // SetUserAccessRequest is a request object for setting user accesses
 //
 // swagger:model SetResourcesAccessesRequest
@@ -95,6 +120,6 @@ type SetUserAccessRequest struct {
 //
 // swagger:model DeleteResourceAccessRequest
 type DeleteUserAccessRequest struct {
-	// swagger: strfmt email
+	// swagger:strfmt email
 	UserName string `json:"username"`
 }
