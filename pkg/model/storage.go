@@ -1,5 +1,6 @@
 package model
 
+// swagger:ignore
 type Storage struct {
 	tableName struct{} `sql:"storages"`
 
@@ -10,5 +11,6 @@ type Storage struct {
 	Replicas int      `sql:"replicas,notnull"`
 	IPs      []string `sql:"ips,notnull,type:inet[],array"`
 
-	Volumes []*Volume `pg:"fk:storage_id" sql:"-"`
+	Volumes     []*Volume     `pg:"fk:storage_id" sql:"-"`
+	Permissions []*Permission `pg:"polymorphic:resource_" sql:"-"`
 }

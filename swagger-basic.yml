@@ -1,0 +1,52 @@
+swagger: "2.0"
+definitions:
+  AccessLevel:
+    type: string
+    enum:
+      - none
+      - read
+      - readdelete
+      - write
+      - owner
+  AccessObject:
+    type: object
+    properties:
+      access:
+        $ref: '#/definitions/AccessLevel'
+      id:
+        type: string
+        format: uuid
+      label:
+        type: string
+  ResourceAccesses:
+    type: object
+    properties:
+      namespace:
+        type: array
+        items:
+          $ref: '#/definitions/AccessObject'
+      volume:
+        type: array
+        items:
+          $ref: '#/definitions/AccessObject'
+parameters:
+  SubstitutedUserID:
+    name: user-id
+    in: query
+    type: string
+    format: uuid
+    description: "User ID to run actions for admin"
+  UserIDHeader:
+    name: X-User-ID
+    in: header
+    type: string
+    format: uuid
+    required: true
+  UserRoleHeader:
+    name: X-User-Role
+    in: header
+    type: string
+    enum:
+      - "user"
+      - "admin"
+    required: true

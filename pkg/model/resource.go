@@ -1,12 +1,13 @@
 package model
 
 import (
+	"errors"
 	"time"
 
 	"github.com/go-pg/pg/orm"
-	"github.com/pkg/errors"
 )
 
+// swagger:ignore
 type Resource struct {
 	ID          string     `sql:"id,pk,type:uuid,default:uuid_generate_v4()"`
 	CreateTime  time.Time  `sql:"create_time,default:now(),notnull"`
@@ -15,6 +16,8 @@ type Resource struct {
 	TariffID    string     `sql:"tariff_id,type:uuid,notnull"`
 	OwnerUserID string     `sql:"owner_user_id,type:uuid,notnull,unique:unique_owner_label"`
 	Label       string     `sql:"label,notnull,unique:unique_owner_label"`
+
+	Permissions []Permission `pg:"polymorphic:resource_" sql:"-"`
 }
 
 func (r *Resource) BeforeDelete(db orm.DB) error {

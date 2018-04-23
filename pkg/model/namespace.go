@@ -1,5 +1,8 @@
 package model
 
+import "github.com/go-pg/pg/orm"
+
+// swagger:ignore
 type Namespace struct {
 	tableName struct{} `sql:"namespaces"`
 
@@ -12,4 +15,14 @@ type Namespace struct {
 	MaxTraffic     int `sql:"max_traffic,notnull"`
 
 	Volumes []*Volume `pg:"fk:ns_id" sql:"-"`
+}
+
+func (ns *Namespace) AfterInsert(db orm.DB) error {
+	return db.Insert(&Permission{
+		ResourceID:         ns.ID,
+		UserID:             ns.OwnerUserID,
+		ResourceKind:       "Namespace",
+		InitialAccessLevel: AccessOwner,
+		CurrentAccessLevel: AccessOwner,
+	})
 }

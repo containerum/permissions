@@ -1,0 +1,61 @@
+# File for noice errors generation
+
+Name = "errors"
+SID = 9
+
+[[error]]
+    Name = "ErrAdminRequired"
+    StatusHTTP = 403
+    Message = "Admin access required"
+    Comment = "User is not admin and has no permissions"
+    Kind = 1
+
+[[error]]
+    Name = "ErrRequiredHeadersNotProvided"
+    StatusHTTP = 400
+    Message = "Required headers not provided"
+    Kind = 2
+
+[[error]]
+    Name = "ErrRequestValidationFailed"
+    StatusHTTP = 400
+    Message = "Request validation failed"
+    Comment = "Validation error when parsing request"
+    Kind = 3
+
+[[error]]
+    Name = "ErrInternal"
+    StatusHTTP = 500
+    Message = "Internal error"
+    Kind = 4
+
+[[error]]
+    Name = "ErrOwnerAlreadyExists"
+    StatusHTTP = 400
+    Message = "Owner for resource already exists"
+    Comment = "Resource can have only one owner"
+    Kind = 5
+
+[[error]]
+    Name = "ErrDatabase"
+    StatusHTTP = 500
+    Message = "Database error"
+    Kind = 6
+
+[[error]]
+    Name = "ErrResourceNotExists"
+    StatusHTTP = 404
+    Message = "Resource not exists"
+    Kind = 7
+
+[[error]]
+    Name = "ErrSetOwnerAccess"
+    StatusHTTP = 400
+    Message = "Owner can`t set access to its resource"
+    Kind = 8
+
+[[error]]
+    Name = "ErrResourceNotOwned"
+    StatusHTTP = 400
+    Message = "Resource not owned by user"
+    Kind = 9
