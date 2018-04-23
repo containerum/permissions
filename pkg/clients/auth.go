@@ -8,7 +8,7 @@ import (
 
 	"git.containerum.net/ch/auth/proto"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrygrpc"
-	"git.containerum.net/ch/kube-client/pkg/cherry/resource-service"
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/json-iterator/go"
@@ -46,7 +46,7 @@ func NewAuthSvcGRPC(addr string) (as AuthSvc, err error) {
 	ret.conn, err = grpc.Dial(addr,
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(
-			cherrygrpc.UnaryClientInterceptor(rserrors.ErrInternal),
+			cherrygrpc.UnaryClientInterceptor(errors.ErrInternal),
 			grpc_logrus.UnaryClientInterceptor(ret.log),
 		)),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{

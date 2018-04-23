@@ -48,6 +48,15 @@ func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto
 	return ret, nil
 }
 
+func (s *Server) updateUserAccesses(ctx context.Context, userID string) error {
+	accesses, err := s.GetUserAccesses(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	return s.clients.Auth.UpdateUserAccess(ctx, userID, accesses)
+}
+
 func (s *Server) SetUserAccesses(ctx context.Context, userID string, access model.AccessLevel) error {
 	s.log.WithField("user_id", userID).Infof("Set user accesses to %s", access)
 
@@ -56,7 +65,9 @@ func (s *Server) SetUserAccesses(ctx context.Context, userID string, access mode
 			return err
 		}
 
-		// TODO: update accesses on auth
+		if err := s.updateUserAccesses(ctx, userID); err != nil {
+			return err
+		}
 
 		return nil
 	})
@@ -73,7 +84,10 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, ownerID, label, targetU
 	}).Debugf("set namespace access")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		targetUserID := targetUser // TODO: get from user manager
+		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
+		if err != nil {
+			return err
+		}
 
 		ns, getErr := tx.NamespaceByLabel(ctx, ownerID, label)
 		if getErr != nil {
@@ -84,11 +98,13 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, ownerID, label, targetU
 			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", label)
 		}
 
-		if setErr := tx.SetNamespaceAccess(ctx, ns, accessLevel, targetUserID); setErr != nil {
+		if setErr := tx.SetNamespaceAccess(ctx, ns, accessLevel, targetUserInfo.ID); setErr != nil {
 			return setErr
 		}
 
-		// TODO: update auth
+		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+			return updErr
+		}
 
 		return nil
 	})
@@ -105,7 +121,10 @@ func (s *Server) SetVolumeAccess(ctx context.Context, ownerID, label, targetUser
 	}).Debugf("set volume access")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		targetUserID := targetUser // TODO: get from user manager
+		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
+		if err != nil {
+			return err
+		}
 
 		vol, getErr := tx.VolumeByLabel(ctx, ownerID, label)
 		if getErr != nil {
@@ -116,11 +135,13 @@ func (s *Server) SetVolumeAccess(ctx context.Context, ownerID, label, targetUser
 			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", label)
 		}
 
-		if setErr := tx.SetVolumeAccess(ctx, vol, accessLevel, targetUserID); setErr != nil {
+		if setErr := tx.SetVolumeAccess(ctx, vol, accessLevel, targetUserInfo.ID); setErr != nil {
 			return setErr
 		}
 
-		// TODO: update auth
+		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+			return updErr
+		}
 
 		return nil
 	})
@@ -136,7 +157,10 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, ownerID, label strin
 	}).Debugf("delete namespace access")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		targetUserID := targetUser // TODO: get from user manager
+		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
+		if err != nil {
+			return err
+		}
 
 		ns, getErr := tx.NamespaceByLabel(ctx, ownerID, label)
 		if getErr != nil {
@@ -147,11 +171,14 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, ownerID, label strin
 			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", label)
 		}
 
-		if delErr := tx.DeleteNamespaceAccess(ctx, ns, targetUserID); delErr != nil {
+		if delErr := tx.DeleteNamespaceAccess(ctx, ns, targetUserInfo.ID); delErr != nil {
 			return delErr
 		}
 
-		// TODO: update auth
+		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+			return updErr
+		}
+
 		return nil
 	})
 
@@ -166,7 +193,10 @@ func (s *Server) DeleteVolumeAccess(ctx context.Context, ownerID, label string, 
 	}).Debugf("delete volume access")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		targetUserID := targetUser // TODO: get from user manager
+		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
+		if err != nil {
+			return err
+		}
 
 		vol, getErr := tx.VolumeByLabel(ctx, ownerID, label)
 		if getErr != nil {
@@ -177,11 +207,14 @@ func (s *Server) DeleteVolumeAccess(ctx context.Context, ownerID, label string, 
 			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", label)
 		}
 
-		if delErr := tx.DeleteVolumeAccess(ctx, vol, targetUserID); delErr != nil {
+		if delErr := tx.DeleteVolumeAccess(ctx, vol, targetUserInfo.ID); delErr != nil {
 			return delErr
 		}
 
-		// TODO: update auth
+		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+			return updErr
+		}
+
 		return nil
 	})
 
