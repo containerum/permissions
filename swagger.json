@@ -5,7 +5,7 @@
   "produces": [
     "application/json"
   ],
-  "swagger": "2.0",
+  "swagger": "3.0",
   "info": {
     "description": "Permissions service stores user resources and allows to manage access to resources",
     "title": "Permissions API"

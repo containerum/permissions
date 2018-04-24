@@ -10,5 +10,3 @@
 //
 // swagger:meta
 package router
-
-//go:generate swagger generate spec -i ../../swagger.json -o ../../swagger.json

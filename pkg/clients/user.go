@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/url"
 
-	umtypes "git.containerum.net/ch/json-types/user-manager"
 	"git.containerum.net/ch/kube-client/pkg/cherry"
+	umtypes "git.containerum.net/ch/user-manager/pkg/models"
 	"git.containerum.net/ch/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/satori/go.uuid"
