@@ -37,16 +37,6 @@ parameters:
     format: uuid
     description: "User ID to run actions for admin"
   UserIDHeader:
-    name: X-User-ID
-    in: header
-    type: string
-    format: uuid
-    required: true
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
   UserRoleHeader:
-    name: X-User-Role
-    in: header
-    type: string
-    enum:
-      - "user"
-      - "admin"
-    required: true
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"

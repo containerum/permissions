@@ -5,7 +5,7 @@
   branch = "develop"
   name = "git.containerum.net/ch/api-gateway"
   packages = ["pkg/utils/headers"]
-  revision = "55ced2a80678bc484a30e802acc4450905b7f968"
+  revision = "9931a691e28739d6e732d22e9e6d668f55c58fc2"
 
 [[projects]]
   branch = "develop"
