@@ -61,12 +61,12 @@ func setupTranslator() *ut.UniversalTranslator {
 	return ut.New(en.New(), en.New(), en_US.New())
 }
 
-func setupAuthClient(addr string) (clients.AuthSvc, error) {
+func setupAuthClient(addr string) (clients.AuthClient, error) {
 	switch {
 	case opMode == modeDebug && addr == "":
-		return clients.NewDummyAuthSvc(), nil
+		return clients.NewAuthDummyClient(), nil
 	case addr != "":
-		return clients.NewAuthSvcGRPC(addr)
+		return clients.NewAuthGRPCClient(addr)
 	default:
 		return nil, errors.New("missing configuration for auth service")
 	}
@@ -77,7 +77,7 @@ func setupUserClient(addr string) (clients.UserManagerClient, error) {
 	case opMode == modeDebug && addr == "":
 		return clients.NewUserManagerStub(), nil
 	case addr != "":
-		return clients.NewHTTPUserManagerClient(&url.URL{Scheme: "http", Host: addr}), nil
+		return clients.NewUserManagerHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
 	default:
 		return nil, errors.New("missing configuration for user-manager service")
 	}

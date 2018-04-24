@@ -12,7 +12,7 @@ import (
 )
 
 type Clients struct {
-	Auth clients.AuthSvc
+	Auth clients.AuthClient
 	User clients.UserManagerClient
 }
 

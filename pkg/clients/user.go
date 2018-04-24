@@ -20,13 +20,13 @@ type UserManagerClient interface {
 	UserLoginIDList(ctx context.Context) (map[string]string, error)
 }
 
-type httpUserManagerClient struct {
+type UserManagerHTTPClient struct {
 	log    *logrus.Entry
 	client *resty.Client
 }
 
-// NewHTTPUserManagerClient returns rest-client to user-manager service
-func NewHTTPUserManagerClient(url *url.URL) UserManagerClient {
+// NewUserManagerHTTPClient returns rest-client to user-manager service
+func NewUserManagerHTTPClient(url *url.URL) *UserManagerHTTPClient {
 	log := logrus.WithField("component", "user_manager_client")
 	client := resty.New().
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
@@ -37,13 +37,13 @@ func NewHTTPUserManagerClient(url *url.URL) UserManagerClient {
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
-	return &httpUserManagerClient{
+	return &UserManagerHTTPClient{
 		log:    log,
 		client: client,
 	}
 }
 
-func (u *httpUserManagerClient) UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error) {
+func (u *UserManagerHTTPClient) UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error) {
 	u.log.WithField("login", login).Info("get user info by login")
 	resp, err := u.client.R().
 		SetContext(ctx).
@@ -59,7 +59,7 @@ func (u *httpUserManagerClient) UserInfoByLogin(ctx context.Context, login strin
 	return resp.Result().(*umtypes.User), nil
 }
 
-func (u *httpUserManagerClient) UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error) {
+func (u *UserManagerHTTPClient) UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error) {
 	u.log.WithField("id", userID).Info("get user info by id")
 	resp, err := u.client.R().
 		SetContext(ctx).
@@ -75,7 +75,7 @@ func (u *httpUserManagerClient) UserInfoByID(ctx context.Context, userID string)
 	return resp.Result().(*umtypes.User), nil
 }
 
-func (u *httpUserManagerClient) UserLoginIDList(ctx context.Context) (map[string]string, error) {
+func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context) (map[string]string, error) {
 	u.log.Info("get users list")
 	resp, err := u.client.R().
 		SetContext(ctx).
@@ -94,19 +94,19 @@ func (u *httpUserManagerClient) UserLoginIDList(ctx context.Context) (map[string
 	return *ret, nil
 }
 
-type userManagerStub struct {
+type UserManagerDummyClient struct {
 	log         *logrus.Entry
 	givenLogins map[string]umtypes.User
 }
 
-func NewUserManagerStub() UserManagerClient {
-	return &userManagerStub{
+func NewUserManagerStub() *UserManagerDummyClient {
+	return &UserManagerDummyClient{
 		log:         logrus.WithField("component", "user_manager_stub"),
 		givenLogins: make(map[string]umtypes.User),
 	}
 }
 
-func (u *userManagerStub) UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error) {
+func (u *UserManagerDummyClient) UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error) {
 	u.log.WithField("id", login).Info("get user info by login")
 	resp, ok := u.givenLogins[login]
 	if !ok {
@@ -127,7 +127,7 @@ func (u *userManagerStub) UserInfoByLogin(ctx context.Context, login string) (*u
 	return &resp, nil
 }
 
-func (u *userManagerStub) UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error) {
+func (u *UserManagerDummyClient) UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error) {
 	u.log.WithField("id", userID).Info("get user info by id")
 	return &umtypes.User{
 		UserLogin: &umtypes.UserLogin{
@@ -143,7 +143,7 @@ func (u *userManagerStub) UserInfoByID(ctx context.Context, userID string) (*umt
 	}, nil
 }
 
-func (u *userManagerStub) UserLoginIDList(ctx context.Context) (map[string]string, error) {
+func (u *UserManagerDummyClient) UserLoginIDList(ctx context.Context) (map[string]string, error) {
 	u.log.Info("get user info by id")
 	id := uuid.NewV4().String()
 	return map[string]string{id: "fake-" + id + "@test.com"}, nil

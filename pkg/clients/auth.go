@@ -17,24 +17,24 @@ import (
 	"google.golang.org/grpc/keepalive"
 )
 
-// AuthSvc is an interface to auth service
-type AuthSvc interface {
+// AuthClient is an interface to auth service
+type AuthClient interface {
 	UpdateUserAccess(ctx context.Context, userID string, access *authProto.ResourcesAccess) error
 
 	// for connections closing
 	io.Closer
 }
 
-type authSvcGRPC struct {
+type AuthGRPCClient struct {
 	client authProto.AuthClient
 	addr   string
 	log    *logrus.Entry
 	conn   *grpc.ClientConn
 }
 
-// NewAuthSvcGRPC creates grpc client to auth service. It does nothing but logs actions.
-func NewAuthSvcGRPC(addr string) (as AuthSvc, err error) {
-	ret := authSvcGRPC{
+// NewAuthGRPCClient creates grpc client to auth service. It does nothing but logs actions.
+func NewAuthGRPCClient(addr string) (as *AuthGRPCClient, err error) {
+	ret := AuthGRPCClient{
 		log:  logrus.WithField("component", "auth_client"),
 		addr: addr,
 	}
@@ -59,10 +59,10 @@ func NewAuthSvcGRPC(addr string) (as AuthSvc, err error) {
 	}
 	ret.client = authProto.NewAuthClient(ret.conn)
 
-	return ret, nil
+	return &ret, nil
 }
 
-func (as authSvcGRPC) UpdateUserAccess(ctx context.Context, userID string, access *authProto.ResourcesAccess) error {
+func (as AuthGRPCClient) UpdateUserAccess(ctx context.Context, userID string, access *authProto.ResourcesAccess) error {
 	as.log.WithField("user_id", userID).Infoln("update user access")
 	_, err := as.client.UpdateAccess(ctx, &authProto.UpdateAccessRequest{
 		Users: []*authProto.UpdateAccessRequestElement{
@@ -72,34 +72,34 @@ func (as authSvcGRPC) UpdateUserAccess(ctx context.Context, userID string, acces
 	return err
 }
 
-func (as authSvcGRPC) String() string {
+func (as AuthGRPCClient) String() string {
 	return fmt.Sprintf("auth grpc client: addr=%v", as.addr)
 }
 
-func (as authSvcGRPC) Close() error {
+func (as AuthGRPCClient) Close() error {
 	return as.conn.Close()
 }
 
-type authSvcDummy struct {
+type AuthDummyClient struct {
 	log *logrus.Entry
 }
 
-// NewDummyAuthSvc creates dummy auth client
-func NewDummyAuthSvc() AuthSvc {
-	return authSvcDummy{
+// NewAuthDummyClient creates dummy auth client
+func NewAuthDummyClient() AuthClient {
+	return AuthDummyClient{
 		log: logrus.WithField("component", "auth_stub"),
 	}
 }
 
-func (as authSvcDummy) UpdateUserAccess(ctx context.Context, userID string, access *authProto.ResourcesAccess) error {
+func (as AuthDummyClient) UpdateUserAccess(ctx context.Context, userID string, access *authProto.ResourcesAccess) error {
 	as.log.WithField("user_id", userID).Infoln("update user access to %+v", access)
 	return nil
 }
 
-func (authSvcDummy) String() string {
+func (AuthDummyClient) String() string {
 	return "ch-auth client dummy"
 }
 
-func (authSvcDummy) Close() error {
+func (AuthDummyClient) Close() error {
 	return nil
 }
