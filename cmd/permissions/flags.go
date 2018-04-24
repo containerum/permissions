@@ -27,7 +27,7 @@ var (
 	ListenAddrFlag = cli.StringFlag{
 		Name:    "listen_addr",
 		EnvVars: []string{"LISTEN_ADDR"},
-		Value:   ":8080",
+		Value:   ":4242",
 	}
 
 	AuthAddrFlag = cli.StringFlag{
