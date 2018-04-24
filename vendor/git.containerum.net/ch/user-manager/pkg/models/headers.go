@@ -1,4 +1,4 @@
-package user
+package models
 
 const (
 	UserIDHeader      = "X-User-Id"

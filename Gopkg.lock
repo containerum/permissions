@@ -3,15 +3,15 @@
 
 [[projects]]
   branch = "develop"
+  name = "git.containerum.net/ch/api-gateway"
+  packages = ["pkg/utils/headers"]
+  revision = "55ced2a80678bc484a30e802acc4450905b7f968"
+
+[[projects]]
+  branch = "develop"
   name = "git.containerum.net/ch/auth"
   packages = ["proto"]
   revision = "ce57074b314d5b7340d70bd936ee564be8847836"
-
-[[projects]]
-  branch = "master"
-  name = "git.containerum.net/ch/json-types"
-  packages = ["user-manager"]
-  revision = "041a989c67953d829255c2fb10985b9bc1b25e51"
 
 [[projects]]
   name = "git.containerum.net/ch/kube-client"
@@ -25,13 +25,19 @@
   version = "v0.9.4"
 
 [[projects]]
+  branch = "develop"
+  name = "git.containerum.net/ch/user-manager"
+  packages = ["pkg/models"]
+  revision = "fbaa2ef5bc00b25a4dc47eb6dacac55ee656e9c2"
+
+[[projects]]
   branch = "master"
   name = "git.containerum.net/ch/utils"
   packages = [
     "httputil",
     "uuid"
   ]
-  revision = "0c31c414efa017dc1932f5e663dba8f00b3dcfe9"
+  revision = "70aa71366d3fabbf10492c003fedaf3980cf33f1"
 
 [[projects]]
   branch = "master"
@@ -42,7 +48,10 @@
 [[projects]]
   branch = "master"
   name = "github.com/gin-gonic/contrib"
-  packages = ["ginrus"]
+  packages = [
+    "cors",
+    "ginrus"
+  ]
   revision = "9b830a15f6abcf9e160f47ee01fc00691cc1981a"
 
 [[projects]]
@@ -293,6 +302,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "07a7220913e943393ae0a3aee2412f371d2651453c224edeed9f115f42d4439d"
+  inputs-digest = "1c497822167be4b6e7ea7f28cbb1e3223c74dce37140a32b1590b7f98cae64e5"
   solver-name = "gps-cdcl"
   solver-version = 1
