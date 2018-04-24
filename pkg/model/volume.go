@@ -37,7 +37,7 @@ func (v *Volume) BeforeUpdate(db orm.DB) error {
 			Set("used = used - ?", v.Capacity).
 			Update()
 	} else {
-		oldCapacityQuery := db.Model(v).Column("capacity").Where("id = ?", v.ID)
+		oldCapacityQuery := db.Model(v).Column("capacity").WherePK()
 		_, err = db.Model(&Storage{}).
 			Set("used = used - (?) + ?", oldCapacityQuery, v.Capacity).
 			Update(v)
