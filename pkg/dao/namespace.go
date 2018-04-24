@@ -49,3 +49,22 @@ func (dao *DAO) NamespaceByLabel(ctx context.Context, userID, label string) (ret
 
 	return
 }
+
+func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace) error {
+	dao.log.Debugf("create namespace %+v", namespace)
+
+	_, err := dao.db.Model(namespace).
+		OnConflict("(owner_user_id, label) DO UPDATE").
+		Set("ram = ?ram").
+		Set("cpu = ?cpu").
+		Set("max_external_services = ?max_external_services").
+		Set("max_internal_services = ?max_internal_services").
+		Set("max_traffic = ?max_traffic").
+		Returning("*").
+		Insert()
+	if err != nil {
+		err = errors.ErrDatabase().Log(err, dao.log)
+	}
+
+	return err
+}

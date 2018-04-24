@@ -28,3 +28,15 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 		CurrentAccessLevel: AccessOwner,
 	})
 }
+
+// NamespaceAdminCreateRequest contains parameters for creating namespace without billing
+//
+// swagger:model
+type NamespaceAdminCreateRequest struct {
+	Label          string `json:"label" binding:"required"`
+	CPU            int    `json:"cpu" binding:"required"`
+	Memory         int    `json:"memory" binding:"required"`
+	MaxExtServices int    `json:"max_ext_services" binding:"required"`
+	MaxIntServices int    `json:"max_int_services" binding:"required"`
+	MaxTraffic     int    `json:"max_traffic" binding:"required"`
+}

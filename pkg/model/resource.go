@@ -40,6 +40,7 @@ func (r *Resource) BeforeUpdate(db orm.DB) error {
 	if r.Deleted {
 		now := time.Now()
 		r.DeleteTime = &now
+		// TODO: delete permissions
 	}
 	return nil
 }
