@@ -45,11 +45,45 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/SetResourcesAccessesRequest"
             }
           }
         ]
+      }
+    },
+    "/admin/namespaces": {
+      "post": {
+        "summary": "Create namespace without billing.",
+        "operationId": "AdminCreateNamespace",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NamespaceAdminCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "namespace created"
+          },
+          "default": {
+            "description": "error"
+          }
+        }
       }
     },
     "/namespaces/{label}/access": {
@@ -69,6 +103,7 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/SetResourceAccessRequest"
             }
@@ -76,7 +111,8 @@
           {
             "description": "Namespace label",
             "name": "label",
-            "in": "path"
+            "in": "path",
+            "required": true
           }
         ]
       },
@@ -96,6 +132,7 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/DeleteResourceAccessRequest"
             }
@@ -103,7 +140,8 @@
           {
             "description": "Namespace label",
             "name": "label",
-            "in": "path"
+            "in": "path",
+            "required": true
           }
         ]
       }
@@ -125,6 +163,7 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/SetResourceAccessRequest"
             }
@@ -132,7 +171,8 @@
           {
             "description": "Volume label",
             "name": "label",
-            "in": "path"
+            "in": "path",
+            "required": true
           }
         ]
       },
@@ -152,6 +192,7 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "$ref": "#/definitions/DeleteResourceAccessRequest"
             }
@@ -159,7 +200,8 @@
           {
             "description": "Namespace label",
             "name": "label",
-            "in": "path"
+            "in": "path",
+            "required": true
           }
         ]
       }
@@ -279,6 +321,42 @@
             "$ref": "#/definitions/Volume"
           },
           "x-go-name": "Volumes"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "NamespaceAdminCreateRequest": {
+      "description": "NamespaceAdminCreateRequest contains parameters for creating namespace without billing",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
+        },
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "max_ext_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxExtServices"
+        },
+        "max_int_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxIntServices"
+        },
+        "max_traffic": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxTraffic"
+        },
+        "memory": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Memory"
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
