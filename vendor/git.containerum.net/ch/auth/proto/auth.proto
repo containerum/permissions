@@ -28,7 +28,7 @@ message CreateTokenRequest {
     string user_role = 5;
     bool rw_access = 6;
     ResourcesAccess access = 7;
-    // @inject_tag: binding:"uuid"
+    // @inject_tag: binding:"omitempty,uuid"
     string part_token_id = 8;
 }
 
@@ -57,7 +57,7 @@ message CheckTokenResponse {
     string user_role = 3;
     // @inject_tag: binding:"uuid"
     string token_id = 4;
-    // @inject_tag: binding:"uuid"
+    // @inject_tag: binding:"omitempty,uuid"
     string part_token_id = 5;
 }
 

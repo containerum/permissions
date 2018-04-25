@@ -35,8 +35,8 @@ type StoredToken struct {
 	// @inject_tag: binding:"ip"
 	UserIp string `protobuf:"bytes,10,opt,name=user_ip,json=userIp" json:"user_ip,omitempty" binding:"ip"`
 	// swagger:strfmt uuid
-	// @inject_tag: binding:"uuid"
-	PartTokenId     string                     `protobuf:"bytes,11,opt,name=part_token_id,json=partTokenId" json:"part_token_id,omitempty" binding:"uuid"`
+	// @inject_tag: binding:"omitempty,uuid"
+	PartTokenId     string                     `protobuf:"bytes,11,opt,name=part_token_id,json=partTokenId" json:"part_token_id,omitempty" binding:"omitempty,uuid"`
 	CreatedAt       *google_protobuf.Timestamp `protobuf:"bytes,12,opt,name=created_at,json=createdAt" json:"created_at,omitempty"`
 	LifeTime        *google_protobuf1.Duration `protobuf:"bytes,13,opt,name=life_time,json=lifeTime" json:"life_time,omitempty"`
 	RawRefreshToken string                     `protobuf:"bytes,14,opt,name=raw_refresh_token,json=rawRefreshToken" json:"raw_refresh_token,omitempty"`

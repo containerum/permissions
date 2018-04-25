@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"git.containerum.net/ch/api-gateway/pkg/utils/headers"
-	"git.containerum.net/ch/kube-client/pkg/cherry"
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
+	"git.containerum.net/ch/cherry"
+	"git.containerum.net/ch/cherry/adaptors/gonic"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/universal-translator"
 	"gopkg.in/go-playground/validator.v9"

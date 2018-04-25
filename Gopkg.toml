@@ -19,6 +19,10 @@ required = [
     name = "git.containerum.net/ch/auth"
     non-go = false
 
+  [[prune.project]]
+    name = "git.containerum.net/ch/cherry"
+    non-go = false
+
 [[constraint]]
   name = "github.com/go-pg/migrations"
   version = "~6.2.0"
@@ -42,10 +46,6 @@ required = [
 [[constraint]]
   name = "github.com/go-playground/universal-translator"
   version = "~0.16.0"
-
-[[constraint]]
-  name = "git.containerum.net/ch/kube-client"
-  version = "~0.9.0"
 
 [[constraint]]
   branch = "master"
@@ -82,3 +82,8 @@ required = [
 [[constraint]]
   branch = "develop"
   name = "git.containerum.net/ch/auth"
+
+[[constraint]]
+  name = "git.containerum.net/ch/cherry"
+  version = "~1.0.1-rc2"
+

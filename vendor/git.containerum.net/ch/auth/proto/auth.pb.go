@@ -62,8 +62,8 @@ type CreateTokenRequest struct {
 	UserRole string           `protobuf:"bytes,5,opt,name=user_role,json=userRole" json:"user_role,omitempty"`
 	RwAccess bool             `protobuf:"varint,6,opt,name=rw_access,json=rwAccess" json:"rw_access,omitempty"`
 	Access   *ResourcesAccess `protobuf:"bytes,7,opt,name=access" json:"access,omitempty"`
-	// @inject_tag: binding:"uuid"
-	PartTokenId string `protobuf:"bytes,8,opt,name=part_token_id,json=partTokenId" json:"part_token_id,omitempty" binding:"uuid"`
+	// @inject_tag: binding:"omitempty,uuid"
+	PartTokenId string `protobuf:"bytes,8,opt,name=part_token_id,json=partTokenId" json:"part_token_id,omitempty" binding:"omitempty,uuid"`
 }
 
 func (m *CreateTokenRequest) Reset()                    { *m = CreateTokenRequest{} }
@@ -204,8 +204,8 @@ type CheckTokenResponse struct {
 	UserRole string `protobuf:"bytes,3,opt,name=user_role,json=userRole" json:"user_role,omitempty"`
 	// @inject_tag: binding:"uuid"
 	TokenId string `protobuf:"bytes,4,opt,name=token_id,json=tokenId" json:"token_id,omitempty" binding:"uuid"`
-	// @inject_tag: binding:"uuid"
-	PartTokenId string `protobuf:"bytes,5,opt,name=part_token_id,json=partTokenId" json:"part_token_id,omitempty" binding:"uuid"`
+	// @inject_tag: binding:"omitempty,uuid"
+	PartTokenId string `protobuf:"bytes,5,opt,name=part_token_id,json=partTokenId" json:"part_token_id,omitempty" binding:"omitempty,uuid"`
 }
 
 func (m *CheckTokenResponse) Reset()                    { *m = CheckTokenResponse{} }

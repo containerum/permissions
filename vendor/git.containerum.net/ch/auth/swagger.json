@@ -29,7 +29,7 @@
             "description": "accesses updated"
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         },
         "x-method-visibility": "private"
@@ -59,7 +59,7 @@
             }
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -81,7 +81,7 @@
             }
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         },
         "x-authorization-required": true,
@@ -105,6 +105,19 @@
           },
           {
             "$ref": "#/parameters/ClientIPHeader"
+          },
+          {
+            "name": "resources_accesses",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access": {
+                  "$ref": "#/definitions/ResourcesAccess"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -115,7 +128,7 @@
             }
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         },
         "x-method-visibility": "private"
@@ -155,7 +168,7 @@
             }
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         },
         "x-method-visibility": "private"
@@ -185,7 +198,7 @@
             }
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         },
         "x-authorization-required": false,
@@ -213,7 +226,7 @@
             "description": "token deleted"
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         },
         "x-authorization-required": true,
@@ -238,7 +251,7 @@
             "description": "tokens deleted"
           },
           "default": {
-            "description": "error"
+            "$ref": "#/responses/error"
           }
         },
         "x-method-visibility": "private"
@@ -320,6 +333,59 @@
       },
       "x-go-package": "git.containerum.net/ch/auth/vendor/github.com/golang/protobuf/ptypes/duration"
     },
+    "Err": {
+      "description": "Err -- standard serializable API error\nMessage -- constant error message:\n+ \"invalid username\"\n+ \"quota exceeded\"\n+ \"validation error\"\n...etc...\nID -- unique error identification code\nDetails -- optional context error messages kinda\n+ \"field 'Replicas' must be non-zero value\"\n+ \"not enough tights to feed gopher\"\n+ \"resource 'God' does't exist\"\nFields -- optional set of key-value pairs",
+      "type": "object",
+      "properties": {
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Details"
+        },
+        "fields": {
+          "$ref": "#/definitions/Fields"
+        },
+        "id": {
+          "$ref": "#/definitions/ErrID"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "status_http": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StatusHTTP"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+    },
+    "ErrID": {
+      "description": "ErrID -- represents unique error ID",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/ErrKind"
+        },
+        "sid": {
+          "$ref": "#/definitions/ErrSID"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+    },
+    "ErrKind": {
+      "description": "ErrKind -- represents kind of error",
+      "type": "integer",
+      "format": "uint64",
+      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+    },
+    "ErrSID": {
+      "description": "ErrSID -- represents service ID of error",
+      "type": "string",
+      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+    },
     "ExtendTokenResponse": {
       "description": "ExtendTokenResponse contains new access and refresh tokens",
       "type": "object",
@@ -334,6 +400,14 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/auth/proto"
+    },
+    "Fields": {
+      "description": "Fields -- represents additional key-value fields of error",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
     },
     "GetUserTokensResponse": {
       "description": "GetUserTokensResponse contains user tokens",
@@ -531,6 +605,14 @@
     },
     "UserRoleHeader": {
       "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
+    }
+  },
+  "responses": {
+    "error": {
+      "description": "cherry error",
+      "schema": {
+        "$ref": "vendor/git.containerum.net/ch/cherry/swagger.json#/definitions/Err"
+      }
     }
   }
 }

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry"
+	"git.containerum.net/ch/cherry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

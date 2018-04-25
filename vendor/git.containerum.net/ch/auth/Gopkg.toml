@@ -7,6 +7,14 @@
     name = "git.containerum.net/ch/api-gateway"
     non-go = false
 
+  [[prune.project]]
+    name = "git.containerum.net/ch/utils"
+    non-go = false
+
+  [[prune.project]]
+      name = "git.containerum.net/ch/cherry"
+      non-go = false
+
 [[constraint]]
   branch = "master"
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -33,11 +41,7 @@
 
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "~1.8.0"
-
-[[constraint]]
-  version = "~0.7.0"
-  name = "git.containerum.net/ch/kube-client"
+  version = "~1.11.0"
 
 [[constraint]]
   branch = "master"
@@ -62,3 +66,7 @@
 [[constraint]]
   branch = "develop"
   name = "git.containerum.net/ch/api-gateway"
+
+[[constraint]]
+  name = "git.containerum.net/ch/cherry"
+  version = "~1.0.1-rc2"
