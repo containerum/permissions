@@ -5,7 +5,7 @@
   branch = "develop"
   name = "git.containerum.net/ch/api-gateway"
   packages = ["pkg/utils/headers"]
-  revision = "9931a691e28739d6e732d22e9e6d668f55c58fc2"
+  revision = "25814d45e36ce93606bac69f89a92c9f9f1eecf9"
 
 [[projects]]
   branch = "develop"
@@ -44,10 +44,7 @@
 [[projects]]
   branch = "master"
   name = "git.containerum.net/ch/utils"
-  packages = [
-    "httputil",
-    "uuid"
-  ]
+  packages = ["httputil"]
   revision = "cbd19a6d99ae7a7d1d0a94d55538b294deefa5e4"
 
 [[projects]]
@@ -72,6 +69,12 @@
   version = "v2.6.1"
 
 [[projects]]
+  name = "github.com/gin-contrib/cors"
+  packages = ["."]
+  revision = "cf4846e6a636a76237a28d9286f163c132e841bc"
+  version = "v1.2"
+
+[[projects]]
   branch = "master"
   name = "github.com/gin-contrib/sse"
   packages = ["."]
@@ -80,10 +83,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/gin-gonic/contrib"
-  packages = [
-    "cors",
-    "ginrus"
-  ]
+  packages = ["ginrus"]
   revision = "9b830a15f6abcf9e160f47ee01fc00691cc1981a"
 
 [[projects]]
@@ -458,6 +458,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "617e23039c81a0a9191e25dee3c9420ae006a1f4950209e84ff9f1f6030cf45a"
+  inputs-digest = "192cc0b740e2dd06fb66c2d6c104f79384dc501428857f552b6c8588387b3f68"
   solver-name = "gps-cdcl"
   solver-version = 1
