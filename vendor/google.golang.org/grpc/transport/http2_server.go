@@ -228,12 +228,6 @@ func newHTTP2Server(conn net.Conn, config *ServerConfig) (_ ServerTransport, err
 	}
 	t.framer.writer.Flush()
 
-	defer func() {
-		if err != nil {
-			t.Close()
-		}
-	}()
-
 	// Check the validity of client preface.
 	preface := make([]byte, len(clientPreface))
 	if _, err := io.ReadFull(t.conn, preface); err != nil {
@@ -245,7 +239,8 @@ func newHTTP2Server(conn net.Conn, config *ServerConfig) (_ ServerTransport, err
 
 	frame, err := t.framer.fr.ReadFrame()
 	if err == io.EOF || err == io.ErrUnexpectedEOF {
-		return nil, err
+		t.Close()
+		return
 	}
 	if err != nil {
 		return nil, connectionErrorf(false, err, "transport: http2Server.HandleStreams failed to read initial settings frame: %v", err)
@@ -259,7 +254,7 @@ func newHTTP2Server(conn net.Conn, config *ServerConfig) (_ ServerTransport, err
 
 	go func() {
 		loopyWriter(t.ctx, t.controlBuf, t.itemHandler)
-		t.conn.Close()
+		t.Close()
 	}()
 	go t.keepalive()
 	return t, nil
@@ -281,13 +276,12 @@ func (t *http2Server) operateHeaders(frame *http2.MetaHeadersFrame, handle func(
 
 	buf := newRecvBuffer()
 	s := &Stream{
-		id:             streamID,
-		st:             t,
-		buf:            buf,
-		fc:             &inFlow{limit: uint32(t.initialWindowSize)},
-		recvCompress:   state.encoding,
-		method:         state.method,
-		contentSubtype: state.contentSubtype,
+		id:           streamID,
+		st:           t,
+		buf:          buf,
+		fc:           &inFlow{limit: uint32(t.initialWindowSize)},
+		recvCompress: state.encoding,
+		method:       state.method,
 	}
 
 	if frame.StreamEnded() {
@@ -307,6 +301,10 @@ func (t *http2Server) operateHeaders(frame *http2.MetaHeadersFrame, handle func(
 		pr.AuthInfo = t.authInfo
 	}
 	s.ctx = peer.NewContext(s.ctx, pr)
+	// Cache the current stream to the context so that the server application
+	// can find out. Required when the server wants to send some metadata
+	// back to the client (unary call only).
+	s.ctx = newContextWithStream(s.ctx, s)
 	// Attach the received metadata to the context.
 	if len(state.mdata) > 0 {
 		s.ctx = metadata.NewIncomingContext(s.ctx, state.mdata)
@@ -727,7 +725,7 @@ func (t *http2Server) WriteHeader(s *Stream, md metadata.MD) error {
 	// first and create a slice of that exact size.
 	headerFields := make([]hpack.HeaderField, 0, 2) // at least :status, content-type will be there if none else.
 	headerFields = append(headerFields, hpack.HeaderField{Name: ":status", Value: "200"})
-	headerFields = append(headerFields, hpack.HeaderField{Name: "content-type", Value: contentType(s.contentSubtype)})
+	headerFields = append(headerFields, hpack.HeaderField{Name: "content-type", Value: "application/grpc"})
 	if s.sendCompress != "" {
 		headerFields = append(headerFields, hpack.HeaderField{Name: "grpc-encoding", Value: s.sendCompress})
 	}
@@ -746,9 +744,9 @@ func (t *http2Server) WriteHeader(s *Stream, md metadata.MD) error {
 		endStream: false,
 	})
 	if t.stats != nil {
-		// Note: WireLength is not set in outHeader.
-		// TODO(mmukhi): Revisit this later, if needed.
-		outHeader := &stats.OutHeader{}
+		outHeader := &stats.OutHeader{
+		//WireLength: // TODO(mmukhi): Revisit this later, if needed.
+		}
 		t.stats.HandleRPC(s.Context(), outHeader)
 	}
 	return nil
@@ -789,7 +787,7 @@ func (t *http2Server) WriteStatus(s *Stream, st *status.Status) error {
 	headerFields := make([]hpack.HeaderField, 0, 2) // grpc-status and grpc-message will be there if none else.
 	if !headersSent {
 		headerFields = append(headerFields, hpack.HeaderField{Name: ":status", Value: "200"})
-		headerFields = append(headerFields, hpack.HeaderField{Name: "content-type", Value: contentType(s.contentSubtype)})
+		headerFields = append(headerFields, hpack.HeaderField{Name: "content-type", Value: "application/grpc"})
 	}
 	headerFields = append(headerFields, hpack.HeaderField{Name: "grpc-status", Value: strconv.Itoa(int(st.Code()))})
 	headerFields = append(headerFields, hpack.HeaderField{Name: "grpc-message", Value: encodeGrpcMessage(st.Message())})
@@ -839,6 +837,10 @@ func (t *http2Server) Write(s *Stream, hdr []byte, data []byte, opts *Options) e
 
 	var writeHeaderFrame bool
 	s.mu.Lock()
+	if s.state == streamDone {
+		s.mu.Unlock()
+		return streamErrorf(codes.Unknown, "the stream has been done")
+	}
 	if !s.headerOk {
 		writeHeaderFrame = true
 	}
@@ -884,14 +886,15 @@ func (t *http2Server) Write(s *Stream, hdr []byte, data []byte, opts *Options) e
 			}
 			ltq, _, err := t.localSendQuota.get(size, s.waiters)
 			if err != nil {
-				// Add the acquired quota back to transport.
-				t.sendQuotaPool.add(tq)
 				return err
 			}
 			// even if ltq is smaller than size we don't adjust size since,
 			// ltq is only a soft limit.
 			streamQuota -= size
 			p := r[:size]
+			// Reset ping strikes when sending data since this might cause
+			// the peer to send ping.
+			atomic.StoreUint32(&t.resetPingStrikes, 1)
 			success := func() {
 				ltq := ltq
 				t.controlBuf.put(&dataFrame{streamID: s.id, endStream: false, d: p, f: func() {
@@ -1006,9 +1009,6 @@ var goAwayPing = &ping{data: [8]byte{1, 6, 1, 8, 0, 3, 3, 9}}
 func (t *http2Server) itemHandler(i item) error {
 	switch i := i.(type) {
 	case *dataFrame:
-		// Reset ping strikes when sending data since this might cause
-		// the peer to send ping.
-		atomic.StoreUint32(&t.resetPingStrikes, 1)
 		if err := t.framer.fr.WriteData(i.streamID, i.endStream, i.d); err != nil {
 			return err
 		}
@@ -1069,9 +1069,6 @@ func (t *http2Server) itemHandler(i item) error {
 		if !i.headsUp {
 			// Stop accepting more streams now.
 			t.state = draining
-			if len(t.activeStreams) == 0 {
-				i.closeConn = true
-			}
 			t.mu.Unlock()
 			if err := t.framer.fr.WriteGoAway(sid, i.code, i.debugData); err != nil {
 				return err
@@ -1079,7 +1076,8 @@ func (t *http2Server) itemHandler(i item) error {
 			if i.closeConn {
 				// Abruptly close the connection following the GoAway (via
 				// loopywriter).  But flush out what's inside the buffer first.
-				t.controlBuf.put(&flushIO{closeTr: true})
+				t.framer.writer.Flush()
+				return fmt.Errorf("transport: Connection closing")
 			}
 			return nil
 		}
@@ -1109,13 +1107,7 @@ func (t *http2Server) itemHandler(i item) error {
 		}()
 		return nil
 	case *flushIO:
-		if err := t.framer.writer.Flush(); err != nil {
-			return err
-		}
-		if i.closeTr {
-			return ErrConnClosing
-		}
-		return nil
+		return t.framer.writer.Flush()
 	case *ping:
 		if !i.ack {
 			t.bdpEst.timesnap(i.data)
@@ -1163,7 +1155,7 @@ func (t *http2Server) closeStream(s *Stream) {
 		t.idle = time.Now()
 	}
 	if t.state == draining && len(t.activeStreams) == 0 {
-		defer t.controlBuf.put(&flushIO{closeTr: true})
+		defer t.Close()
 	}
 	t.mu.Unlock()
 	// In case stream sending and receiving are invoked in separate

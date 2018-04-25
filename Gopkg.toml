@@ -1,3 +1,7 @@
+required = [
+  "git.containerum.net/ch/auth"
+]
+
 [prune]
   go-tests = true
   unused-packages = true
@@ -9,6 +13,10 @@
 
   [[prune.project]]
     name = "git.containerum.net/ch/utils"
+    non-go = false
+
+  [[prune.project]]
+    name = "git.containerum.net/ch/auth"
     non-go = false
 
 [[constraint]]
@@ -48,10 +56,6 @@
   version = "~0.12.1"
 
 [[constraint]]
-  branch = "develop"
-  name = "git.containerum.net/ch/auth"
-
-[[constraint]]
   branch = "v2"
   name = "gopkg.in/urfave/cli.v2"
 
@@ -74,3 +78,7 @@
 [[constraint]]
   branch = "develop"
   name = "git.containerum.net/ch/kube-api"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/auth"

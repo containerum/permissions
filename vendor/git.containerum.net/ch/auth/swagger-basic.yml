@@ -1,0 +1,12 @@
+swagger: "3.0"
+parameters:
+  UserIDHeader:
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
+  FingerprintHeader:
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserClientHeader"
+  UserAgentHeader:
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserAgentHeader"
+  ClientIPHeader:
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/ClientIPHeader"
+  UserRoleHeader:
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
