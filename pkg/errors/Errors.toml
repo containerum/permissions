@@ -1,7 +1,7 @@
 # File for noice errors generation
 
 Name = "errors"
-SID = 9
+SID = "permissions"
 
 [[error]]
     Name = "ErrAdminRequired"
