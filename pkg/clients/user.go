@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry"
+	"git.containerum.net/ch/cherry"
 	umtypes "git.containerum.net/ch/user-manager/pkg/models"
 	"git.containerum.net/ch/utils/httputil"
 	"github.com/json-iterator/go"

@@ -4,7 +4,7 @@ import (
 	"net/textproto"
 
 	"git.containerum.net/ch/api-gateway/pkg/utils/headers"
-	"git.containerum.net/ch/kube-client/pkg/cherry"
+	"git.containerum.net/ch/cherry"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/static"
 	"git.containerum.net/ch/utils/httputil"
@@ -80,7 +80,7 @@ func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 	corsCfg.AllowAllOrigins = true
 	corsCfg.AddAllowHeaders(
 		headers.UserIDXHeader,
-		headers.UserAgentXHeader,
+		headers.UserRoleXHeader,
 	)
 	engine.Use(cors.New(corsCfg))
 	engine.StaticFS("/static", static.HTTP)

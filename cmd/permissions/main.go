@@ -9,8 +9,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrylog"
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
+	"git.containerum.net/ch/cherry/adaptors/cherrylog"
+	"git.containerum.net/ch/cherry/adaptors/gonic"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/router"
 	"git.containerum.net/ch/permissions/pkg/server"
@@ -97,6 +97,7 @@ func main() {
 
 			r := router.NewRouter(g, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
 			r.SetupAccessRoutes(srv)
+			r.SetupNamespaceRoutes(srv)
 
 			// for graceful shutdown
 			httpsrv := &http.Server{
