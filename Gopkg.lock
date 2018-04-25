@@ -45,7 +45,7 @@
     "httputil",
     "uuid"
   ]
-  revision = "70aa71366d3fabbf10492c003fedaf3980cf33f1"
+  revision = "cbd19a6d99ae7a7d1d0a94d55538b294deefa5e4"
 
 [[projects]]
   name = "github.com/PuerkitoBio/purell"

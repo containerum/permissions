@@ -89,6 +89,7 @@ custom:
   - files:
     - "../swagger.json"
     - "../vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json"
+    - "../vendor/git.containerum.net/ch/utils/httputil/swagger.json"
 
     # base is the path that will be removed from all files' path
     # type: string

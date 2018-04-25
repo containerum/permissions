@@ -31,11 +31,7 @@ definitions:
           $ref: '#/definitions/AccessObject'
 parameters:
   SubstitutedUserID:
-    name: user-id
-    in: query
-    type: string
-    format: uuid
-    description: "User ID to run actions for admin"
+    $ref: "vendor/git.containerum.net/ch/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
   UserIDHeader:
     $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
   UserRoleHeader:
