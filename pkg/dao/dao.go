@@ -2,11 +2,11 @@ package dao
 
 import (
 	"strings"
+	"time"
 
 	"git.containerum.net/ch/kube-client/pkg/cherry"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrylog"
 	"git.containerum.net/ch/permissions/pkg/errors"
-	"git.containerum.net/ch/utils/uuid"
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -59,7 +59,7 @@ type transactional interface {
 }
 
 func (dao *DAO) Transactional(fn func(tx *DAO) error) error {
-	entry := cherrylog.NewLogrusAdapter(dao.log.WithField("transaction_id", uuid.NewUUID()))
+	entry := cherrylog.NewLogrusAdapter(dao.log.WithField("transaction_id", time.Now().UTC().Unix()))
 	err := dao.db.(transactional).RunInTransaction(func(tx *pg.Tx) error {
 		return fn(&DAO{db: tx, log: entry})
 	})
