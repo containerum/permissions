@@ -115,14 +115,16 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//
 	// ---
 	// parameters:
-	//	- $ref: '#/parameters/UserIDHeader'
-	//	- $ref: '#/parameters/UserRoleHeader'
-	//	- $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
 	// responses:
-	//	'200':
-	//	  description: accesses response
-	//	default:
-	//	  description: error
+	//	 '200':
+	//     description: user accesses to resources
+	//     schema:
+	//       $ref: '#/definitions/ResourcesAccesses'
+	//	 default:
+	//	   description: error
 	r.engine.GET("/access", handlers.getUserAccessesHandler)
 
 	// swagger:operation PUT /admin/accesses SetResourcesAccesses
@@ -131,14 +133,14 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//
 	// ---
 	// parameters:
-	// - $ref: '#/parameters/UserIDHeader'
-	// - $ref: '#/parameters/UserRoleHeader'
-	// - $ref: '#/parameters/SubstitutedUserID'
-	// - name: body
-	//   in: body
-	//   required: true
-	//   schema:
-	//     $ref: "#/definitions/SetResourcesAccessesRequest"
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: "#/definitions/SetResourcesAccessesRequest"
 	// responses:
 	//	'200':
 	//	  description: access set
@@ -152,18 +154,18 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//
 	// ---
 	// parameters:
-	// - $ref: '#/parameters/UserIDHeader'
-	// - $ref: '#/parameters/UserRoleHeader'
-	// - $ref: '#/parameters/SubstitutedUserID'
-	// - name: body
-	//   in: body
-	//   required: true
-	//   schema:
-	//     $ref: "#/definitions/SetResourceAccessRequest"
-	// - name: label
-	//   in: path
-	//   required: true
-	//   description: Namespace label
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: "#/definitions/SetResourceAccessRequest"
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    description: Namespace label
 	// responses:
 	//	'200':
 	//	  description: access set
@@ -177,18 +179,18 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//
 	// ---
 	// parameters:
-	// - $ref: '#/parameters/UserIDHeader'
-	// - $ref: '#/parameters/UserRoleHeader'
-	// - $ref: '#/parameters/SubstitutedUserID'
-	// - name: body
-	//   in: body
-	//   required: true
-	//   schema:
-	//     $ref: "#/definitions/SetResourceAccessRequest"
-	// - name: label
-	//   in: path
-	//   required: true
-	//   description: Volume label
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: "#/definitions/SetResourceAccessRequest"
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    description: Volume label
 	// responses:
 	//	'200':
 	//	  description: access set
@@ -202,18 +204,18 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//
 	// ---
 	// parameters:
-	// - $ref: '#/parameters/UserIDHeader'
-	// - $ref: '#/parameters/UserRoleHeader'
-	// - $ref: '#/parameters/SubstitutedUserID'
-	// - name: body
-	//   in: body
-	//   required: true
-	//   schema:
-	//     $ref: "#/definitions/DeleteResourceAccessRequest"
-	// - name: label
-	//   in: path
-	//   required: true
-	//   description: Namespace label
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: "#/definitions/DeleteResourceAccessRequest"
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    description: Namespace label
 	// responses:
 	//	'200':
 	//	  description: access deleted
@@ -227,18 +229,18 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//
 	// ---
 	// parameters:
-	// - $ref: '#/parameters/UserIDHeader'
-	// - $ref: '#/parameters/UserRoleHeader'
-	// - $ref: '#/parameters/SubstitutedUserID'
-	// - name: body
-	//   in: body
-	//   required: true
-	//   schema:
-	//     $ref: "#/definitions/DeleteResourceAccessRequest"
-	// - name: label
-	//   in: path
-	//   required: true
-	//   description: Namespace label
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: "#/definitions/DeleteResourceAccessRequest"
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    description: Namespace label
 	// responses:
 	//	'200':
 	//	  description: access deleted

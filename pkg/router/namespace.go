@@ -41,14 +41,14 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//
 	// ---
 	// parameters:
-	// - $ref: '#/parameters/UserIDHeader'
-	// - $ref: '#/parameters/UserRoleHeader'
-	// - $ref: '#/parameters/SubstitutedUserID'
-	// - name: body
-	//   in: body
-	//   required: true
-	//   schema:
-	//     $ref: '#/definitions/NamespaceAdminCreateRequest'
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/NamespaceAdminCreateRequest'
 	// responses:
 	//  '201':
 	//    description: namespace created

@@ -1,34 +1,9 @@
 swagger: "3.0"
 definitions:
   AccessLevel:
-    type: string
-    enum:
-      - none
-      - read
-      - readdelete
-      - write
-      - owner
-  AccessObject:
-    type: object
-    properties:
-      access:
-        $ref: '#/definitions/AccessLevel'
-      id:
-        type: string
-        format: uuid
-      label:
-        type: string
-  ResourceAccesses:
-    type: object
-    properties:
-      namespace:
-        type: array
-        items:
-          $ref: '#/definitions/AccessObject'
-      volume:
-        type: array
-        items:
-          $ref: '#/definitions/AccessObject'
+    $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/AccessLevel"
+  ResourcesAccesses:
+    $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/ResourcesAccess"
 parameters:
   SubstitutedUserID:
     $ref: "vendor/git.containerum.net/ch/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
