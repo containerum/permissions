@@ -106,6 +106,48 @@
         }
       }
     },
+    "/admin/namespaces/{label}": {
+      "put": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Resize namespace without billing.",
+        "operationId": "AdminResizeNamespace",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NamespaceAdminResizeRequest"
+            }
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace resized"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
+    },
     "/namespaces/{label}/access": {
       "put": {
         "tags": [
@@ -957,6 +999,38 @@
         "label": {
           "type": "string",
           "x-go-name": "Label"
+        },
+        "max_ext_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxExtServices"
+        },
+        "max_int_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxIntServices"
+        },
+        "max_traffic": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxTraffic"
+        },
+        "memory": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Memory"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "NamespaceAdminResizeRequest": {
+      "description": "NamespaceAdminResizeRequest contains parameter for resizing namespace without billing",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
         },
         "max_ext_services": {
           "type": "integer",
