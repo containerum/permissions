@@ -1,6 +1,9 @@
 package model
 
-import "github.com/go-pg/pg/orm"
+import (
+	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/go-pg/pg/orm"
+)
 
 // Namespace describes namespace
 //
@@ -17,6 +20,23 @@ type Namespace struct {
 	MaxTraffic     int `sql:"max_traffic,notnull" json:"max_traffic"`
 
 	Volumes []*Volume `pg:"fk:ns_id" sql:"-" json:"volumes,omitempty"`
+}
+
+func (ns *Namespace) BeforeInsert(db orm.DB) error {
+	cnt, err := db.Model(ns).
+		Where("owner_user_id = ?owner_user_id").
+		Where("label = ?label").
+		Where("NOT deleted").
+		Count()
+	if err != nil {
+		return err
+	}
+
+	if cnt > 0 {
+		return errors.ErrResourceAlreadyExists().AddDetailF("namespace %s already exists", ns.Label)
+	}
+
+	return nil
 }
 
 func (ns *Namespace) AfterInsert(db orm.DB) error {

@@ -59,3 +59,9 @@ SID = "permissions"
     StatusHTTP = 400
     Message = "Resource not owned by user"
     Kind = 9
+
+[[error]]
+    Name = "ErrResourceAlreadyExists"
+    StatusHTTP = 400
+    Message = "Resource already exists"
+    Kind = 10

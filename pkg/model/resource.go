@@ -1,10 +1,11 @@
 package model
 
 import (
-	"errors"
 	"time"
 
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/pg/orm"
+	"github.com/sirupsen/logrus"
 )
 
 // Resource represents common resource information.
@@ -33,7 +34,8 @@ type Resource struct {
 
 func (r *Resource) BeforeDelete(db orm.DB) error {
 	// do not allow delete from app
-	return errors.New("record delete not allowed, use update set deleted = true")
+	logrus.Error("record delete not allowed, use update set deleted = true")
+	return errors.ErrInternal()
 }
 
 func (r *Resource) BeforeUpdate(db orm.DB) error {
