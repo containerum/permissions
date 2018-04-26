@@ -2,7 +2,10 @@ package server
 
 import (
 	"context"
+	"time"
 
+	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
+	kubeClientModel "git.containerum.net/ch/kube-client/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"git.containerum.net/ch/utils/httputil"
@@ -34,7 +37,33 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 			return createErr
 		}
 
-		// TODO: create in kube
+		createdAt := ns.CreateTime.Format(time.RFC3339)
+		maxExtServices := uint(ns.MaxExtServices)
+		maxIntServices := uint(ns.MaxIntServices)
+		maxTraffic := uint(ns.MaxTraffic)
+		nsKube := kubeAPIModel.NamespaceWithOwner{
+			Namespace: kubeClientModel.Namespace{
+				CreatedAt:     &createdAt,
+				Label:         ns.Label,
+				Access:        string(model.AccessOwner),
+				MaxExtService: &maxExtServices,
+				MaxIntService: &maxIntServices,
+				MaxTraffic:    &maxTraffic,
+				Resources: kubeClientModel.Resources{
+					Hard: kubeClientModel.Resource{
+						CPU:    uint(ns.CPU),
+						Memory: uint(ns.RAM),
+					},
+				},
+			},
+			Name:   ns.ID,
+			Owner:  ns.OwnerUserID,
+			Access: string(model.AccessOwner),
+		}
+
+		if createErr := s.clients.Kube.CreateNamespace(ctx, nsKube); createErr != nil {
+			return createErr
+		}
 
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, userID); updErr != nil {
 			return updErr
