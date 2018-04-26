@@ -14,6 +14,7 @@ import (
 type Clients struct {
 	Auth clients.AuthClient
 	User clients.UserManagerClient
+	Kube clients.KubeAPIClient
 }
 
 func (c *Clients) Close() error {

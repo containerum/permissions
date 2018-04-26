@@ -99,7 +99,7 @@ type UserManagerDummyClient struct {
 	givenLogins map[string]umtypes.User
 }
 
-func NewUserManagerStub() *UserManagerDummyClient {
+func NewUserManagerDummyClient() *UserManagerDummyClient {
 	return &UserManagerDummyClient{
 		log:         logrus.WithField("component", "user_manager_stub"),
 		givenLogins: make(map[string]umtypes.User),

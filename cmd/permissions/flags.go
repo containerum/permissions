@@ -41,4 +41,10 @@ var (
 		EnvVars: []string{"USER_ADDR"},
 		Value:   "localhost:8111",
 	}
+
+	KubeAPIAddrFlag = cli.StringFlag{
+		Name:    "kube_api_addr",
+		EnvVars: []string{"KUBE_API_ADDR"},
+		Value:   "localhost:1212",
+	}
 )
