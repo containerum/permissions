@@ -16,6 +16,7 @@ import (
 
 type KubeAPIClient interface {
 	CreateNamespace(ctx context.Context, req model.NamespaceWithOwner) error
+	SetNamespaceQuota(ctx context.Context, ns model.NamespaceWithOwner) error
 }
 
 type KubeAPIHTTPClient struct {
@@ -63,6 +64,27 @@ func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.Names
 	return nil
 }
 
+func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.NamespaceWithOwner) error {
+	k.log.WithFields(logrus.Fields{
+		"cpu":    ns.Resources.Hard.CPU,
+		"memory": ns.Resources.Hard.Memory,
+		"label":  ns.Label,
+	}).Debug("set namespace quota")
+
+	resp, err := k.client.R().
+		SetBody(ns).
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		Put("/namespaces/" + url.PathEscape(ns.Label))
+	if err != nil {
+		return errors.ErrInternal().Log(err, k.log)
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+	return nil
+}
+
 type KubeAPIDummyClient struct {
 	log *logrus.Entry
 }
@@ -80,6 +102,16 @@ func (k *KubeAPIDummyClient) CreateNamespace(ctx context.Context, req model.Name
 		"name":   req.Label,
 		"access": req.Access,
 	}).Debug("create namespace")
+
+	return nil
+}
+
+func (k *KubeAPIDummyClient) SetNamespaceQuota(ctx context.Context, ns model.NamespaceWithOwner) error {
+	k.log.WithFields(logrus.Fields{
+		"cpu":    ns.Resources.Hard.CPU,
+		"memory": ns.Resources.Hard.Memory,
+		"label":  ns.Label,
+	}).Debug("set namespace quota")
 
 	return nil
 }

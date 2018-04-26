@@ -35,7 +35,7 @@ func SetupDAO(dbURL string) (*DAO, error) {
 			entry = entry.WithError(err)
 		}
 		query = strings.Join(strings.Fields(query), " ") // drop "\n", "\t" and exceeded spaces
-		entry.WithField("query", query).Debugf("Args: %+v", event.Params)
+		entry.WithField("query", query).Debugf("DB Query")
 	})
 
 	entry.WithField("addr", options.Addr).Info("run migrations")

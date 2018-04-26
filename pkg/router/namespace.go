@@ -32,6 +32,22 @@ func (nh *namespaceHandlers) adminCreateNamespace(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
+func (nh *namespaceHandlers) adminResizeNamespace(ctx *gin.Context) {
+	var req model.NamespaceAdminResizeRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := nh.acts.AdminResizeNamespace(ctx.Request.Context(), ctx.Param("label"), req); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
@@ -55,4 +71,29 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  default:
 	//    $ref: '#/responses/error'
 	r.engine.POST("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminCreateNamespace)
+
+	// swagger:operation PUT /admin/namespaces/{label} Namespaces AdminResizeNamespace
+	//
+	// Resize namespace without billing.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/NamespaceAdminResizeRequest'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//  '200':
+	//    description: namespace resized
+	//  default:
+	//    $ref: '#/responses/error'
+	r.engine.PUT("/admin/namespaces/:label", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespace)
 }
