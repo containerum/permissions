@@ -36,7 +36,7 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 
 		// TODO: create in kube
 
-		if updErr := s.WithDB(tx).updateUserAccesses(ctx, userID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, userID); updErr != nil {
 			return updErr
 		}
 

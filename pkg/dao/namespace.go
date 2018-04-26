@@ -57,8 +57,8 @@ func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace)
 		OnConflict("(owner_user_id, label) DO UPDATE").
 		Set("ram = ?ram").
 		Set("cpu = ?cpu").
-		Set("max_external_services = ?max_external_services").
-		Set("max_internal_services = ?max_internal_services").
+		Set("max_ext_services = ?max_ext_services").
+		Set("max_int_services = ?max_int_services").
 		Set("max_traffic = ?max_traffic").
 		Returning("*").
 		Insert()

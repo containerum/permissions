@@ -5,6 +5,7 @@ import (
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	"github.com/go-pg/pg/orm"
 )
 
 type AccessWithLabel struct {
@@ -18,12 +19,16 @@ func (dao *DAO) GetUserAccesses(ctx context.Context, userID string) ([]AccessWit
 
 	var ret []AccessWithLabel
 	err := dao.db.Model(&ret).
-		Column("permissions.*").
+		ColumnExpr("?TableAlias.*").
 		ColumnExpr("coalesce(ns.label, vol.label) AS label").
-		Join("LEFT JOIN namespaces AS ns").JoinOn("permissions.resource_id = ns.id").JoinOn("permissions.resource_kind = 'namespace'").
-		Join("LEFT JOIN volumes AS vol").JoinOn("permissions.resource_id = vol.id").JoinOn("permissions.resource_kind = 'volume'").
-		Where("permissions.user_id = ?", userID).
-		Where("label IS NOT NULL").
+		Join("LEFT JOIN namespaces AS ns").JoinOn("?TableAlias.resource_id = ns.id").JoinOn("?TableAlias.resource_type = ?", "Namespace").
+		Join("LEFT JOIN volumes AS vol").JoinOn("?TableAlias.resource_id = vol.id").JoinOn("?TableAlias.resource_type = ?", "Volume").
+		Where("?TableAlias.user_id = ?", userID).
+		WhereGroup(func(query *orm.Query) (*orm.Query, error) {
+			return query.
+				Where("ns.label IS NOT NULL").
+				WhereOr("vol.label IS NOT NULL"), nil
+		}).
 		Select()
 	if err != nil {
 		return nil, errors.ErrDatabase().Log(err, dao.log)
@@ -95,9 +100,9 @@ func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLev
 func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resource, kind string, userID string) error {
 	_, err := dao.db.Model(&model.Permission{UserID: userID, ResourceID: resource.ID, ResourceKind: kind}).
 		Where("user_id = ?user_id").
-		Where("resource_kind = ?resource_kind").
+		Where("resource_type = ?resource_type").
 		Where("resource_id = ?resource_id").
-		Where("initial_access_level < ?", "owner"). // do not delete owner permission
+		Where("initial_access_level < ?", model.AccessOwner). // do not delete owner permission
 		Delete()
 
 	if err != nil {

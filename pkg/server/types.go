@@ -50,11 +50,3 @@ func NewServer(db *dao.DAO, clients *Clients) *Server {
 func (s *Server) Close() error {
 	return s.clients.Close()
 }
-
-func (s *Server) WithDB(db *dao.DAO) *Server {
-	return &Server{
-		db:      db,
-		log:     s.log,
-		clients: s.clients,
-	}
-}
