@@ -1,6 +1,9 @@
 package model
 
-import "github.com/go-pg/pg/orm"
+import (
+	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/go-pg/pg/orm"
+)
 
 // Volume describes volume
 //
@@ -23,6 +26,19 @@ type Volume struct {
 
 	// swagger:strfmt uuid
 	StorageID string `sql:"storage_id,type:UUID,notnull" json:"storage_id,omitempty"`
+}
+
+func (v *Volume) BeforeInsert(db orm.DB) error {
+	cnt, err := db.Model(v).WherePK().Where("NOT deleted").Count()
+	if err != nil {
+		return err
+	}
+
+	if cnt > 0 {
+		return errors.ErrResourceAlreadyExists().AddDetailF("namespace %s already exists", v.Label)
+	}
+
+	return nil
 }
 
 func (v *Volume) BeforeUpdate(db orm.DB) error {

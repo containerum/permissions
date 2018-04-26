@@ -1,7 +1,7 @@
 # File for noice errors generation
 
 Name = "errors"
-SID = 9
+SID = "permissions"
 
 [[error]]
     Name = "ErrAdminRequired"
@@ -59,3 +59,9 @@ SID = 9
     StatusHTTP = 400
     Message = "Resource not owned by user"
     Kind = 9
+
+[[error]]
+    Name = "ErrResourceAlreadyExists"
+    StatusHTTP = 400
+    Message = "Resource already exists"
+    Kind = 10

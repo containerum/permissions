@@ -9,14 +9,13 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrylog"
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
+	"git.containerum.net/ch/cherry/adaptors/cherrylog"
+	"git.containerum.net/ch/cherry/adaptors/gonic"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/router"
 	"git.containerum.net/ch/permissions/pkg/server"
 	"git.containerum.net/ch/permissions/pkg/utils/validation"
 	"git.containerum.net/ch/permissions/pkg/utils/version"
-	"git.containerum.net/ch/permissions/static"
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -24,7 +23,7 @@ import (
 	"gopkg.in/urfave/cli.v2"
 )
 
-//go:generate swagger generate spec -i ../../swagger-basic.yml -o ../../swagger.json
+//go:generate swagger generate spec -m -i ../../swagger-basic.yml -o ../../swagger.json
 
 func exitOnError(err error) {
 	if err != nil {
@@ -96,10 +95,9 @@ func main() {
 			g.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true))
 			binding.Validator = &validation.GinValidatorV9{Validate: validate} // gin has no local validator
 
-			g.StaticFS("/static", static.HTTP)
-
 			r := router.NewRouter(g, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
 			r.SetupAccessRoutes(srv)
+			r.SetupNamespaceRoutes(srv)
 
 			// for graceful shutdown
 			httpsrv := &http.Server{

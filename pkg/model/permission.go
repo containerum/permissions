@@ -41,15 +41,16 @@ type Permission struct {
 	ID string `sql:"id,pk,type:uuid,default:uuid_generate_v4()" json:"perm_id,omitempty"`
 
 	ResourceKind string `sql:"resource_type,notnull,unique:unique_user_access" json:"kind,omitempty"` // WARN: custom type here, do not forget create it
+
 	// swagger:strfmt uuid
 	ResourceID string `sql:"resource_id,type:UUID,notnull,unique:unique_user_access" json:"resource_id,omitempty"`
 
 	CreateTime *time.Time `sql:"create_time,default:now(),notnull" json:"create_time,omitempty"`
+
 	// swagger:strfmt uuid
-
 	UserID string `sql:"user_id,type:uuid,notnull,unique:unique_user_access" json:"user_id,omitempty"`
-	// swagger:strfmt email
 
+	// swagger:strfmt email
 	UserLogin string `sql:"-" json:"login,omitempty"`
 
 	InitialAccessLevel AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull" json:"access,omitempty"` // WARN: custom type here, do not forget create it
@@ -64,7 +65,7 @@ func (p *Permission) BeforeInsert(db orm.DB) error {
 		cnt, err := db.Model((*Permission)(nil)).
 			Column("id").
 			Where("resource_id = ?", p.ResourceID).
-			Where("resource_kind = ?", p.ResourceKind).
+			Where("resource_type = ?", p.ResourceKind).
 			Where("initial_access_level = ?", AccessOwner).
 			Count()
 		if err != nil {

@@ -1,52 +1,18 @@
-swagger: "2.0"
+swagger: "3.0"
 definitions:
   AccessLevel:
-    type: string
-    enum:
-      - none
-      - read
-      - readdelete
-      - write
-      - owner
-  AccessObject:
-    type: object
-    properties:
-      access:
-        $ref: '#/definitions/AccessLevel'
-      id:
-        type: string
-        format: uuid
-      label:
-        type: string
-  ResourceAccesses:
-    type: object
-    properties:
-      namespace:
-        type: array
-        items:
-          $ref: '#/definitions/AccessObject'
-      volume:
-        type: array
-        items:
-          $ref: '#/definitions/AccessObject'
+    $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/AccessLevel"
+  ResourcesAccesses:
+    $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/ResourcesAccess"
 parameters:
   SubstitutedUserID:
-    name: user-id
-    in: query
-    type: string
-    format: uuid
-    description: "User ID to run actions for admin"
+    $ref: "vendor/git.containerum.net/ch/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
   UserIDHeader:
-    name: X-User-ID
-    in: header
-    type: string
-    format: uuid
-    required: true
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
   UserRoleHeader:
-    name: X-User-Role
-    in: header
-    type: string
-    enum:
-      - "user"
-      - "admin"
-    required: true
+    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
+responses:
+  error:
+    description: cherry error
+    schema:
+      $ref: "vendor/git.containerum.net/ch/cherry/swagger.json#/definitions/Err"

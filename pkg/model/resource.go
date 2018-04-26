@@ -1,10 +1,11 @@
 package model
 
 import (
-	"errors"
 	"time"
 
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/pg/orm"
+	"github.com/sirupsen/logrus"
 )
 
 // Resource represents common resource information.
@@ -21,7 +22,7 @@ type Resource struct {
 	DeleteTime *time.Time `sql:"delete_time" json:"delete_time,omitempty"`
 
 	// swagger:strfmt uuid
-	TariffID string `sql:"tariff_id,type:uuid,notnull" json:"tariff_id,omitempty"`
+	TariffID *string `sql:"tariff_id,type:uuid" json:"tariff_id,omitempty"`
 
 	// swagger:strfmt uuid
 	OwnerUserID string `sql:"owner_user_id,type:uuid,notnull,unique:unique_owner_label" json:"owner_user_id,omitempty"`
@@ -33,13 +34,15 @@ type Resource struct {
 
 func (r *Resource) BeforeDelete(db orm.DB) error {
 	// do not allow delete from app
-	return errors.New("record delete not allowed, use update set deleted = true")
+	logrus.Error("record delete not allowed, use update set deleted = true")
+	return errors.ErrInternal()
 }
 
 func (r *Resource) BeforeUpdate(db orm.DB) error {
 	if r.Deleted {
 		now := time.Now()
 		r.DeleteTime = &now
+		// TODO: delete permissions
 	}
 	return nil
 }
@@ -48,7 +51,7 @@ func (r *Resource) Mask() {
 	r.ID = ""
 	r.CreateTime = nil
 	r.DeleteTime = nil
-	r.TariffID = ""
+	r.TariffID = nil
 	r.OwnerUserID = ""
 	r.Label = ""
 }

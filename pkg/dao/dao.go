@@ -2,11 +2,10 @@ package dao
 
 import (
 	"strings"
+	"time"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry"
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrylog"
-	"git.containerum.net/ch/permissions/pkg/errors"
-	"git.containerum.net/ch/utils/uuid"
+	"git.containerum.net/ch/cherry"
+	"git.containerum.net/ch/cherry/adaptors/cherrylog"
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -36,7 +35,7 @@ func SetupDAO(dbURL string) (*DAO, error) {
 			entry = entry.WithError(err)
 		}
 		query = strings.Join(strings.Fields(query), " ") // drop "\n", "\t" and exceeded spaces
-		entry.WithField("query", query).Debugf("Args: %v", event.Params)
+		entry.WithField("query", query).Debugf("Args: %+v", event.Params)
 	})
 
 	entry.WithField("addr", options.Addr).Info("run migrations")
@@ -58,12 +57,7 @@ type transactional interface {
 	RunInTransaction(fn func(*pg.Tx) error) error
 }
 
-func (dao *DAO) Transactional(fn func(tx *DAO) error) error {
-	entry := cherrylog.NewLogrusAdapter(dao.log.WithField("transaction_id", uuid.NewUUID()))
-	err := dao.db.(transactional).RunInTransaction(func(tx *pg.Tx) error {
-		return fn(&DAO{db: tx, log: entry})
-	})
-
+func (dao *DAO) handleError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -72,6 +66,17 @@ func (dao *DAO) Transactional(fn func(tx *DAO) error) error {
 	case *cherry.Err:
 		return err
 	default:
-		return errors.ErrDatabase().Log(err, entry)
+		return dao.handleError(err)
 	}
+}
+
+func (dao *DAO) Transactional(fn func(tx *DAO) error) error {
+	entry := cherrylog.NewLogrusAdapter(dao.log.WithField("transaction_id", time.Now().UTC().Unix()))
+	dtx := &DAO{log: entry}
+	err := dao.db.(transactional).RunInTransaction(func(tx *pg.Tx) error {
+		dtx.db = tx
+		return fn(dtx)
+	})
+
+	return dtx.handleError(err)
 }

@@ -61,12 +61,12 @@ func setupTranslator() *ut.UniversalTranslator {
 	return ut.New(en.New(), en.New(), en_US.New())
 }
 
-func setupAuthClient(addr string) (clients.AuthSvc, error) {
+func setupAuthClient(addr string) (clients.AuthClient, error) {
 	switch {
 	case opMode == modeDebug && addr == "":
-		return clients.NewDummyAuthSvc(), nil
+		return clients.NewAuthDummyClient(), nil
 	case addr != "":
-		return clients.NewAuthSvcGRPC(addr)
+		return clients.NewAuthGRPCClient(addr)
 	default:
 		return nil, errors.New("missing configuration for auth service")
 	}
@@ -75,11 +75,22 @@ func setupAuthClient(addr string) (clients.AuthSvc, error) {
 func setupUserClient(addr string) (clients.UserManagerClient, error) {
 	switch {
 	case opMode == modeDebug && addr == "":
-		return clients.NewUserManagerStub(), nil
+		return clients.NewUserManagerDummyClient(), nil
 	case addr != "":
-		return clients.NewHTTPUserManagerClient(&url.URL{Scheme: "http", Host: addr}), nil
+		return clients.NewUserManagerHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
 	default:
 		return nil, errors.New("missing configuration for user-manager service")
+	}
+}
+
+func setupKubeClient(addr string) (clients.KubeAPIClient, error) {
+	switch {
+	case opMode == modeDebug && addr == "":
+		return clients.NewKubeAPIDummyClient(), nil
+	case addr != "":
+		return clients.NewKubeAPIHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
+	default:
+		return nil, errors.New("missing configuration for kube-api service")
 	}
 }
 
@@ -92,6 +103,10 @@ func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
 		errs = append(errs, err)
 	}
 	if clients.User, err = setupUserClient(ctx.String(UserAddrFlag.Name)); err != nil {
+		errs = append(errs, err)
+	}
+
+	if clients.Kube, err = setupKubeClient(ctx.String(KubeAPIAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
 	}
 

@@ -5,15 +5,16 @@ import (
 	"io"
 	"reflect"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrylog"
+	"git.containerum.net/ch/cherry/adaptors/cherrylog"
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"github.com/sirupsen/logrus"
 )
 
 type Clients struct {
-	Auth clients.AuthSvc
+	Auth clients.AuthClient
 	User clients.UserManagerClient
+	Kube clients.KubeAPIClient
 }
 
 func (c *Clients) Close() error {

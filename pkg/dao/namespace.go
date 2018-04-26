@@ -19,7 +19,7 @@ func (dao *DAO) NamespaceByID(ctx context.Context, id string) (ret model.Namespa
 	case pg.ErrNoRows:
 		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s no exists", id)
 	default:
-		err = errors.ErrDatabase().Log(err, dao.log)
+		err = dao.handleError(err)
 
 	}
 
@@ -44,8 +44,27 @@ func (dao *DAO) NamespaceByLabel(ctx context.Context, userID, label string) (ret
 	case pg.ErrNoRows:
 		err = errors.ErrResourceNotExists().AddDetailF("namespace %s not exists for user", label)
 	default:
-		err = errors.ErrDatabase().Log(err, dao.log)
+		err = dao.handleError(err)
 	}
 
 	return
+}
+
+func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace) error {
+	dao.log.Debugf("create namespace %+v", namespace)
+
+	_, err := dao.db.Model(namespace).
+		OnConflict("(owner_user_id, label) DO UPDATE").
+		Set("ram = ?ram").
+		Set("cpu = ?cpu").
+		Set("max_ext_services = ?max_ext_services").
+		Set("max_int_services = ?max_int_services").
+		Set("max_traffic = ?max_traffic").
+		Returning("*").
+		Insert()
+	if err != nil {
+		err = dao.handleError(err)
+	}
+
+	return err
 }

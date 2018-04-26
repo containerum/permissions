@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"git.containerum.net/ch/auth/proto"
+	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -19,10 +20,8 @@ type AccessActions interface {
 	DeleteVolumeAccess(ctx context.Context, ownerID, label string, targetUser string) error
 }
 
-func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error) {
-	s.log.WithField("user_id", userID).Info("get user resource accesses")
-
-	userPermissions, err := s.db.GetUserAccesses(ctx, userID)
+func extractAccessesFromDB(ctx context.Context, db *dao.DAO, userID string) (*authProto.ResourcesAccess, error) {
+	userPermissions, err := db.GetUserAccesses(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +47,19 @@ func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto
 	return ret, nil
 }
 
-func (s *Server) updateUserAccesses(ctx context.Context, userID string) error {
-	accesses, err := s.GetUserAccesses(ctx, userID)
+func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error) {
+	s.log.WithField("user_id", userID).Info("get user resource accesses")
+
+	return extractAccessesFromDB(ctx, s.db, userID)
+}
+
+func updateUserAccesses(ctx context.Context, auth clients.AuthClient, db *dao.DAO, userID string) error {
+	accesses, err := extractAccessesFromDB(ctx, db, userID)
 	if err != nil {
 		return err
 	}
 
-	return s.clients.Auth.UpdateUserAccess(ctx, userID, accesses)
+	return auth.UpdateUserAccess(ctx, userID, accesses)
 }
 
 func (s *Server) SetUserAccesses(ctx context.Context, userID string, access model.AccessLevel) error {
@@ -65,7 +70,7 @@ func (s *Server) SetUserAccesses(ctx context.Context, userID string, access mode
 			return err
 		}
 
-		if err := s.updateUserAccesses(ctx, userID); err != nil {
+		if err := updateUserAccesses(ctx, s.clients.Auth, s.db, userID); err != nil {
 			return err
 		}
 
@@ -102,7 +107,7 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, ownerID, label, targetU
 			return setErr
 		}
 
-		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
@@ -139,7 +144,7 @@ func (s *Server) SetVolumeAccess(ctx context.Context, ownerID, label, targetUser
 			return setErr
 		}
 
-		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
@@ -175,7 +180,7 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, ownerID, label strin
 			return delErr
 		}
 
-		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
@@ -211,7 +216,7 @@ func (s *Server) DeleteVolumeAccess(ctx context.Context, ownerID, label string, 
 			return delErr
 		}
 
-		if updErr := s.updateUserAccesses(ctx, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
