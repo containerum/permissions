@@ -3,7 +3,6 @@ package dao
 import (
 	"context"
 
-	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/go-pg/pg/orm"
 )
@@ -31,7 +30,7 @@ func (dao *DAO) GetUserAccesses(ctx context.Context, userID string) ([]AccessWit
 		}).
 		Select()
 	if err != nil {
-		return nil, errors.ErrDatabase().Log(err, dao.log)
+		return nil, dao.handleError(err)
 	}
 
 	return ret, nil
@@ -51,7 +50,7 @@ func (dao *DAO) SetUserAccesses(ctx context.Context, userID string, level model.
 											ELSE initial_access_level`, level).
 		Update()
 	if err != nil {
-		return err
+		return dao.handleError(err)
 	}
 
 	// TODO: user not found error
@@ -67,7 +66,7 @@ func (dao *DAO) setResourceAccess(ctx context.Context, permission model.Permissi
 		Insert()
 
 	if err != nil {
-		return errors.ErrDatabase().Log(err, dao.log)
+		return dao.handleError(err)
 	}
 
 	return nil
@@ -106,7 +105,7 @@ func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resourc
 		Delete()
 
 	if err != nil {
-		return errors.ErrDatabase().Log(err, dao.log)
+		return dao.handleError(err)
 	}
 
 	return nil

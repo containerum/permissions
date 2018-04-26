@@ -19,7 +19,7 @@ func (dao *DAO) VolumeByID(ctx context.Context, id string) (ret model.Volume, er
 	case pg.ErrNoRows:
 		err = errors.ErrResourceNotExists().AddDetailF("volume with id %s no exists", id)
 	default:
-		err = errors.ErrDatabase().Log(err, dao.log)
+		err = dao.handleError(err)
 
 	}
 
@@ -44,7 +44,7 @@ func (dao *DAO) VolumeByLabel(ctx context.Context, userID, label string) (ret mo
 	case pg.ErrNoRows:
 		err = errors.ErrResourceNotExists().AddDetailF("namespace %s not exists for user", label)
 	default:
-		err = errors.ErrDatabase().Log(err, dao.log)
+		err = dao.handleError(err)
 	}
 
 	return
