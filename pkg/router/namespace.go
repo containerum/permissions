@@ -35,7 +35,7 @@ func (nh *namespaceHandlers) adminCreateNamespace(ctx *gin.Context) {
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
-	// swagger:operation POST /admin/namespaces AdminCreateNamespace
+	// swagger:operation POST /admin/namespaces Namespaces AdminCreateNamespace
 	//
 	// Create namespace without billing.
 	//
@@ -53,6 +53,6 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  '201':
 	//    description: namespace created
 	//  default:
-	//    description: error
+	//    $ref: '#/responses/error'
 	r.engine.POST("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminCreateNamespace)
 }

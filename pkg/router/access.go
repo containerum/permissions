@@ -109,7 +109,7 @@ func (ah *accessHandlers) deleteVolumeAccessHandler(ctx *gin.Context) {
 func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	handlers := &accessHandlers{acts: acts, tv: r.tv}
 
-	// swagger:operation GET /access GetResourcesAccesses
+	// swagger:operation GET /access Permissions GetResourcesAccesses
 	//
 	// Returns user accesses to resources.
 	//
@@ -124,10 +124,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//     schema:
 	//       $ref: '#/definitions/ResourcesAccesses'
 	//	 default:
-	//	   description: error
+	//	   $ref: '#/responses/error'
 	r.engine.GET("/access", handlers.getUserAccessesHandler)
 
-	// swagger:operation PUT /admin/accesses SetResourcesAccesses
+	// swagger:operation PUT /admin/accesses Permissions SetResourcesAccesses
 	//
 	// Assign access level for all user resources. Used for billing purposes.
 	//
@@ -145,10 +145,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	'200':
 	//	  description: access set
 	//	default:
-	//	  description: error
+	//	  $ref: '#/responses/error'
 	r.engine.PUT("/admin/accesses", handlers.setUserAccessesHandler)
 
-	// swagger:operation PUT /namespaces/{label}/access SetNamespaceAccess
+	// swagger:operation PUT /namespaces/{label}/access Permissions SetNamespaceAccess
 	//
 	// Grant namespace permission to user.
 	//
@@ -170,10 +170,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	'200':
 	//	  description: access set
 	//	default:
-	//	  description: error
+	//	  $ref: '#/responses/error'
 	r.engine.PUT("/namespaces/:label/access", handlers.setNamespaceAccessHandler)
 
-	// swagger:operation PUT /volumes/{label}/access SetVolumeAccess
+	// swagger:operation PUT /volumes/{label}/access Permissions SetVolumeAccess
 	//
 	// Grant volume permission to user.
 	//
@@ -195,10 +195,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	'200':
 	//	  description: access set
 	//	default:
-	//	  description: error
+	//	  $ref: '#/responses/error'
 	r.engine.PUT("/volumes/:label/access", handlers.setVolumeAccessHandler)
 
-	// swagger:operation DELETE /namespaces/{label}/access DeleteNamespaceAccess
+	// swagger:operation DELETE /namespaces/{label}/access Permissions DeleteNamespaceAccess
 	//
 	// Delete namespace permission to user.
 	//
@@ -220,10 +220,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	'200':
 	//	  description: access deleted
 	//	default:
-	//	  description: error
+	//	  $ref: '#/responses/error'
 	r.engine.DELETE("/namespaces/:label/access", handlers.deleteNamespaceAccessHandler)
 
-	// swagger:operation DELETE /volumes/{label}/access DeleteVolumeAccess
+	// swagger:operation DELETE /volumes/{label}/access Permissions DeleteVolumeAccess
 	//
 	// Delete volume permission to user.
 	//
@@ -245,6 +245,6 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	'200':
 	//	  description: access deleted
 	//	default:
-	//	  description: error
+	//	  $ref: '#/responses/error'
 	r.engine.DELETE("/volumes/:label/accesses", handlers.deleteVolumeAccessHandler)
 }
