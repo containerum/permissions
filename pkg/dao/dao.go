@@ -6,6 +6,7 @@ import (
 
 	"git.containerum.net/ch/cherry"
 	"git.containerum.net/ch/cherry/adaptors/cherrylog"
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -66,7 +67,7 @@ func (dao *DAO) handleError(err error) error {
 	case *cherry.Err:
 		return err
 	default:
-		return dao.handleError(err)
+		return errors.ErrInternal().Log(err, dao.log)
 	}
 }
 

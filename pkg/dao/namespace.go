@@ -36,7 +36,7 @@ func (dao *DAO) NamespaceByLabel(ctx context.Context, userID, label string) (ret
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
 		Join("JOIN permissions").
-		JoinOn("permissions.kind = ?", "Namespace").
+		JoinOn("permissions.resource_type = ?", "Namespace").
 		JoinOn("permissions.resource_id = ?TableAlias.id").
 		Where("permissions.user_id = ?", userID).
 		Where("?TableAlias.label = ?", label).
