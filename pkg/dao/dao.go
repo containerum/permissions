@@ -6,6 +6,7 @@ import (
 
 	"git.containerum.net/ch/cherry"
 	"git.containerum.net/ch/cherry/adaptors/cherrylog"
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -35,7 +36,7 @@ func SetupDAO(dbURL string) (*DAO, error) {
 			entry = entry.WithError(err)
 		}
 		query = strings.Join(strings.Fields(query), " ") // drop "\n", "\t" and exceeded spaces
-		entry.WithField("query", query).Debugf("Args: %+v", event.Params)
+		entry.WithField("query", query).Debugf("DB Query")
 	})
 
 	entry.WithField("addr", options.Addr).Info("run migrations")
@@ -66,7 +67,7 @@ func (dao *DAO) handleError(err error) error {
 	case *cherry.Err:
 		return err
 	default:
-		return dao.handleError(err)
+		return errors.ErrInternal().Log(err, dao.log)
 	}
 }
 

@@ -68,6 +68,12 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
+  name = "github.com/containerum/cherry"
+  packages = ["."]
+  revision = "3076e36aee79538b125d060e5b671649cbb2db4e"
+  version = "v1.0.1-rc2"
+
+[[projects]]
   name = "github.com/emicklei/go-restful"
   packages = [
     ".",
@@ -468,6 +474,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2573dec013243bc1be46bb7854743bcbb5774d5505d13c0ffc780f86e8c42670"
+  inputs-digest = "d5c084abc66fb4e54a80517a27f4ae242ff9c08f64cdc341c8719894bd9803e1"
   solver-name = "gps-cdcl"
   solver-version = 1

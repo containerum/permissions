@@ -60,3 +60,14 @@ type NamespaceAdminCreateRequest struct {
 	MaxIntServices int    `json:"max_int_services" binding:"required"`
 	MaxTraffic     int    `json:"max_traffic" binding:"required"`
 }
+
+// NamespaceAdminResizeRequest contains parameter for resizing namespace without billing
+//
+// swagger:model
+type NamespaceAdminResizeRequest struct {
+	CPU            *int `json:"cpu"`
+	Memory         *int `json:"memory"`
+	MaxExtServices *int `json:"max_ext_services"`
+	MaxIntServices *int `json:"max_int_services"`
+	MaxTraffic     *int `json:"max_traffic"`
+}

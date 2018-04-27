@@ -13,12 +13,15 @@ import (
 
 type NamespaceActions interface {
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
+	AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error
 }
 
 func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 
-	s.log.WithField("user_id", userID).Infof("admin create namespace %+v", req)
+	s.log.
+		WithField("user_id", userID).
+		Infof("admin create namespace %+v", req)
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
 		ns := model.Namespace{
@@ -67,6 +70,62 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, userID); updErr != nil {
 			return updErr
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *Server) AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error {
+	userID := httputil.MustGetUserID(ctx)
+
+	s.log.
+		WithField("user_id", userID).
+		WithField("label", label).
+		Infof("admin resize namespace %+v", req)
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		ns, getErr := tx.NamespaceByLabel(ctx, userID, label)
+		if getErr != nil {
+			return getErr
+		}
+
+		if req.CPU != nil {
+			ns.CPU = *req.CPU
+		}
+		if req.Memory != nil {
+			ns.RAM = *req.Memory
+		}
+		if req.MaxExtServices != nil {
+			ns.MaxExtServices = *req.MaxExtServices
+		}
+		if req.MaxIntServices != nil {
+			ns.MaxIntServices = *req.MaxIntServices
+		}
+		if req.MaxTraffic != nil {
+			ns.MaxTraffic = *req.MaxTraffic
+		}
+
+		if setErr := tx.ResizeNamespace(ctx, ns); setErr != nil {
+			return setErr
+		}
+
+		kubeNS := kubeAPIModel.NamespaceWithOwner{
+			Namespace: kubeClientModel.Namespace{
+				Resources: kubeClientModel.Resources{
+					Hard: kubeClientModel.Resource{
+						CPU:    uint(ns.CPU),
+						Memory: uint(ns.RAM),
+					},
+				},
+			},
+			Name:  ns.ID,
+			Owner: ns.OwnerUserID,
+		}
+		if setErr := s.clients.Kube.SetNamespaceQuota(ctx, kubeNS); setErr != nil {
+			return setErr
 		}
 
 		return nil
