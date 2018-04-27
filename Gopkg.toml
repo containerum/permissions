@@ -8,11 +8,7 @@ required = [
   non-go = true
 
   [[prune.project]]
-    name = "git.containerum.net/ch/api-gateway"
-    non-go = false
-
-  [[prune.project]]
-    name = "git.containerum.net/ch/utils"
+    name = "github.com/containerum/utils"
     non-go = false
 
   [[prune.project]]
@@ -20,7 +16,7 @@ required = [
     non-go = false
 
   [[prune.project]]
-    name = "git.containerum.net/ch/cherry"
+    name = "github.com/containerum/cherry"
     non-go = false
 
 [[constraint]]
@@ -48,8 +44,8 @@ required = [
   version = "~0.16.0"
 
 [[constraint]]
-  branch = "master"
-  name = "git.containerum.net/ch/utils"
+  name = "github.com/containerum/utils"
+  version = "~1.0.0"
 
 [[constraint]]
   name = "github.com/go-playground/locales"
@@ -68,10 +64,6 @@ required = [
   version = "~1.2.0"
 
 [[constraint]]
-  branch = "develop"
-  name = "git.containerum.net/ch/api-gateway"
-
-[[constraint]]
   name = "github.com/gin-contrib/cors"
   version = "~1.2.0"
 
@@ -84,6 +76,6 @@ required = [
   name = "git.containerum.net/ch/auth"
 
 [[constraint]]
-  name = "git.containerum.net/ch/cherry"
+  name = "github.com/containerum/cherry"
   version = "~1.0.1-rc2"
 
