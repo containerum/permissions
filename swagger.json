@@ -2153,10 +2153,10 @@
       "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
     },
     "UserIDHeader": {
-      "$ref": "vendor/github.com/containerum/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserIDHeader"
     },
     "UserRoleHeader": {
-      "$ref": "vendor/github.com/containerum/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserRoleHeader"
     }
   },
   "responses": {
