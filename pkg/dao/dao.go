@@ -4,9 +4,9 @@ import (
 	"strings"
 	"time"
 
-	"git.containerum.net/ch/cherry"
-	"git.containerum.net/ch/cherry/adaptors/cherrylog"
 	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/containerum/cherry"
+	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/go-pg/migrations"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"

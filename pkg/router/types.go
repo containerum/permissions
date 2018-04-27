@@ -3,11 +3,10 @@ package router
 import (
 	"net/textproto"
 
-	"git.containerum.net/ch/api-gateway/pkg/utils/headers"
-	"git.containerum.net/ch/cherry"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/static"
-	"git.containerum.net/ch/utils/httputil"
+	"github.com/containerum/cherry"
+	"github.com/containerum/utils/httputil"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/universal-translator"
@@ -79,8 +78,8 @@ func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 	corsCfg := cors.DefaultConfig()
 	corsCfg.AllowAllOrigins = true
 	corsCfg.AddAllowHeaders(
-		headers.UserIDXHeader,
-		headers.UserRoleXHeader,
+		httputil.UserIDXHeader,
+		httputil.UserRoleXHeader,
 	)
 	engine.Use(cors.New(corsCfg))
 	engine.StaticFS("/static", static.HTTP)
@@ -91,10 +90,10 @@ func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 	}
 	ret.engine.Use(httputil.SaveHeaders)
 	ret.engine.Use(httputil.PrepareContext)
-	ret.engine.Use(httputil.RequireHeaders(errors.ErrRequiredHeadersNotProvided, headers.UserIDXHeader, headers.UserRoleXHeader))
+	ret.engine.Use(httputil.RequireHeaders(errors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader))
 	ret.engine.Use(tv.ValidateHeaders(map[string]string{
-		headers.UserIDXHeader:   "uuid",
-		headers.UserRoleXHeader: "eq=admin|eq=user",
+		httputil.UserIDXHeader:   "uuid",
+		httputil.UserRoleXHeader: "eq=admin|eq=user",
 	}))
 	ret.engine.Use(httputil.SubstituteUserMiddleware(tv.Validate, tv.UniversalTranslator, errors.ErrRequestValidationFailed))
 	return ret

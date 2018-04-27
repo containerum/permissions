@@ -8,7 +8,7 @@ import (
 	kubeClientModel "git.containerum.net/ch/kube-client/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/model"
-	"git.containerum.net/ch/utils/httputil"
+	"github.com/containerum/utils/httputil"
 )
 
 type NamespaceActions interface {

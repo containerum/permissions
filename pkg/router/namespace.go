@@ -6,7 +6,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/server"
-	"git.containerum.net/ch/utils/httputil"
+	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )

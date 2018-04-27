@@ -12,13 +12,13 @@ definitions:
     $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/ResourcesAccess"
 parameters:
   SubstitutedUserID:
-    $ref: "vendor/git.containerum.net/ch/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
+    $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
   UserIDHeader:
-    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
+    $ref: "vendor/github.com/containerum/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
   UserRoleHeader:
-    $ref: "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
+    $ref: "vendor/github.com/containerum/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
 responses:
   error:
     description: cherry error
     schema:
-      $ref: "vendor/git.containerum.net/ch/cherry/swagger.json#/definitions/Err"
+      $ref: "vendor/github.com/containerum/cherry/swagger.json#/definitions/Err"
