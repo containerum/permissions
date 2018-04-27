@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"git.containerum.net/ch/auth/proto"
-	"git.containerum.net/ch/cherry/adaptors/cherrygrpc"
 	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/containerum/cherry/adaptors/cherrygrpc"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/json-iterator/go"

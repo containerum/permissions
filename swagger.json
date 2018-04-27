@@ -849,7 +849,7 @@
           "x-go-name": "StatusHTTP"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/cherry"
     },
     "ErrID": {
       "description": "ErrID -- represents unique error ID",
@@ -862,18 +862,18 @@
           "$ref": "#/definitions/ErrSID"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/cherry"
     },
     "ErrKind": {
       "description": "ErrKind -- represents kind of error",
       "type": "integer",
       "format": "uint64",
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/cherry"
     },
     "ErrSID": {
       "description": "ErrSID -- represents service ID of error",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/cherry"
     },
     "ExtendTokenResponse": {
       "description": "ExtendTokenResponse contains new access and refresh tokens",
@@ -896,7 +896,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/cherry"
     },
     "GetUserTokensResponse": {
       "description": "GetUserTokensResponse contains user tokens",
@@ -2150,20 +2150,20 @@
   },
   "parameters": {
     "SubstitutedUserID": {
-      "$ref": "vendor/git.containerum.net/ch/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
     },
     "UserIDHeader": {
-      "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserIDHeader"
     },
     "UserRoleHeader": {
-      "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserRoleHeader"
     }
   },
   "responses": {
     "error": {
       "description": "cherry error",
       "schema": {
-        "$ref": "vendor/git.containerum.net/ch/cherry/swagger.json#/definitions/Err"
+        "$ref": "vendor/github.com/containerum/cherry/swagger.json#/definitions/Err"
       }
     }
   }

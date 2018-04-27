@@ -29,7 +29,7 @@
           "x-go-name": "StatusHTTP"
         }
       },
-      "x-go-package": "git.containerum.net/ch/cherry"
+      "x-go-package": "github.com/containerum/cherry"
     },
     "ErrID": {
       "description": "ErrID -- represents unique error ID",
@@ -42,18 +42,18 @@
           "$ref": "#/definitions/ErrSID"
         }
       },
-      "x-go-package": "git.containerum.net/ch/cherry"
+      "x-go-package": "github.com/containerum/cherry"
     },
     "ErrKind": {
       "description": "ErrKind -- represents kind of error",
       "type": "integer",
       "format": "uint64",
-      "x-go-package": "git.containerum.net/ch/cherry"
+      "x-go-package": "github.com/containerum/cherry"
     },
     "ErrSID": {
       "description": "ErrSID -- represents service ID of error",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/cherry"
+      "x-go-package": "github.com/containerum/cherry"
     },
     "Fields": {
       "description": "Fields -- represents additional key-value fields of error",
@@ -61,7 +61,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "x-go-package": "git.containerum.net/ch/cherry"
+      "x-go-package": "github.com/containerum/cherry"
     }
   }
 }

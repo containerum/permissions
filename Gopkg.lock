@@ -3,29 +3,12 @@
 
 [[projects]]
   branch = "develop"
-  name = "git.containerum.net/ch/api-gateway"
-  packages = ["pkg/utils/headers"]
-  revision = "25814d45e36ce93606bac69f89a92c9f9f1eecf9"
-
-[[projects]]
-  branch = "develop"
   name = "git.containerum.net/ch/auth"
   packages = [
     ".",
     "proto"
   ]
   revision = "4c10cb2261e42b159fb7c120382414e82aec1d90"
-
-[[projects]]
-  name = "git.containerum.net/ch/cherry"
-  packages = [
-    ".",
-    "adaptors/cherrygrpc",
-    "adaptors/cherrylog",
-    "adaptors/gonic"
-  ]
-  revision = "82e4d22be24efe6d9e6925376119a24f789bddc7"
-  version = "v1.0.1-rc2"
 
 [[projects]]
   branch = "develop"
@@ -50,12 +33,6 @@
   revision = "fbaa2ef5bc00b25a4dc47eb6dacac55ee656e9c2"
 
 [[projects]]
-  branch = "master"
-  name = "git.containerum.net/ch/utils"
-  packages = ["httputil"]
-  revision = "47fc480749a3e137a621f1b95263f61cc5febcf8"
-
-[[projects]]
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
   revision = "0bcb03f4b4d0a9428594752bd2a3b9aa0a9d4bd4"
@@ -69,9 +46,20 @@
 
 [[projects]]
   name = "github.com/containerum/cherry"
-  packages = ["."]
+  packages = [
+    ".",
+    "adaptors/cherrygrpc",
+    "adaptors/cherrylog",
+    "adaptors/gonic"
+  ]
   revision = "3076e36aee79538b125d060e5b671649cbb2db4e"
   version = "v1.0.1-rc2"
+
+[[projects]]
+  name = "github.com/containerum/utils"
+  packages = ["httputil"]
+  revision = "5e922affb542eaeb55ab395ff3c7161179df54b3"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/emicklei/go-restful"
@@ -474,6 +462,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d5c084abc66fb4e54a80517a27f4ae242ff9c08f64cdc341c8719894bd9803e1"
+  inputs-digest = "3ea1f6bdb6e8722aa636f32972b6cbf2ba4367d1feac62a5e4e8b89515c52b05"
   solver-name = "gps-cdcl"
   solver-version = 1

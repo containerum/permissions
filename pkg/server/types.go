@@ -5,9 +5,9 @@ import (
 	"io"
 	"reflect"
 
-	"git.containerum.net/ch/cherry/adaptors/cherrylog"
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/dao"
+	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/sirupsen/logrus"
 )
 
