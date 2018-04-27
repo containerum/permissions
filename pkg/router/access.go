@@ -142,10 +142,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    schema:
 	//      $ref: "#/definitions/SetResourcesAccessesRequest"
 	// responses:
-	//	'200':
-	//	  description: access set
-	//	default:
-	//	  $ref: '#/responses/error'
+	//	 '200':
+	//	   description: access set
+	//	 default:
+	//	   $ref: '#/responses/error'
 	r.engine.PUT("/admin/accesses", handlers.setUserAccessesHandler)
 
 	// swagger:operation PUT /namespaces/{label}/access Permissions SetNamespaceAccess
@@ -167,10 +167,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    description: Namespace label
 	// responses:
-	//	'200':
-	//	  description: access set
-	//	default:
-	//	  $ref: '#/responses/error'
+	//	 '200':
+	//	   description: access set
+	//	 default:
+	//	   $ref: '#/responses/error'
 	r.engine.PUT("/namespaces/:label/access", handlers.setNamespaceAccessHandler)
 
 	// swagger:operation PUT /volumes/{label}/access Permissions SetVolumeAccess
@@ -192,10 +192,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    description: Volume label
 	// responses:
-	//	'200':
-	//	  description: access set
-	//	default:
-	//	  $ref: '#/responses/error'
+	//	 '200':
+	//	   description: access set
+	//	 default:
+	//	   $ref: '#/responses/error'
 	r.engine.PUT("/volumes/:label/access", handlers.setVolumeAccessHandler)
 
 	// swagger:operation DELETE /namespaces/{label}/access Permissions DeleteNamespaceAccess
@@ -217,10 +217,10 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    description: Namespace label
 	// responses:
-	//	'200':
-	//	  description: access deleted
-	//	default:
-	//	  $ref: '#/responses/error'
+	//	 '200':
+	//	   description: access deleted
+	//	 default:
+	//	   $ref: '#/responses/error'
 	r.engine.DELETE("/namespaces/:label/access", handlers.deleteNamespaceAccessHandler)
 
 	// swagger:operation DELETE /volumes/{label}/access Permissions DeleteVolumeAccess
@@ -242,9 +242,9 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    description: Namespace label
 	// responses:
-	//	'200':
-	//	  description: access deleted
-	//	default:
-	//	  $ref: '#/responses/error'
+	//	 '200':
+	//	   description: access deleted
+	//	 default:
+	//	   $ref: '#/responses/error'
 	r.engine.DELETE("/volumes/:label/accesses", handlers.deleteVolumeAccessHandler)
 }

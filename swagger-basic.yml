@@ -1,7 +1,13 @@
 swagger: "3.0"
 definitions:
   AccessLevel:
-    $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/AccessLevel"
+    type: string
+    enum:
+      - none
+      - read
+      - readdelete
+      - write
+      - owner
   ResourcesAccesses:
     $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/ResourcesAccess"
 parameters:

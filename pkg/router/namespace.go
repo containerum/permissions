@@ -66,10 +66,10 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    schema:
 	//      $ref: '#/definitions/NamespaceAdminCreateRequest'
 	// responses:
-	//  '201':
-	//    description: namespace created
-	//  default:
-	//    $ref: '#/responses/error'
+	//   '201':
+	//     description: namespace created
+	//   default:
+	//     $ref: '#/responses/error'
 	r.engine.POST("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminCreateNamespace)
 
 	// swagger:operation PUT /admin/namespaces/{label} Namespaces AdminResizeNamespace
@@ -91,9 +91,9 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    type: string
 	// responses:
-	//  '200':
-	//    description: namespace resized
-	//  default:
-	//    $ref: '#/responses/error'
+	//   '200':
+	//     description: namespace resized
+	//   default:
+	//     $ref: '#/responses/error'
 	r.engine.PUT("/admin/namespaces/:label", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespace)
 }

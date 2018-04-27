@@ -67,7 +67,15 @@
               "$ref": "#/definitions/SetResourcesAccessesRequest"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "access set"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
       }
     },
     "/admin/namespaces": {
@@ -179,7 +187,15 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "access set"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
       },
       "delete": {
         "tags": [
@@ -211,7 +227,15 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "access deleted"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
       }
     },
     "/volumes/{label}/access": {
@@ -245,7 +269,15 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "access set"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
       },
       "delete": {
         "tags": [
@@ -277,13 +309,28 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "access deleted"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
       }
     }
   },
   "definitions": {
     "AccessLevel": {
-      "$ref": "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/AccessLevel"
+      "type": "string",
+      "enum": [
+        "none",
+        "read",
+        "readdelete",
+        "write",
+        "owner"
+      ]
     },
     "AccessObject": {
       "description": "AccessObject represents user access to resource",
@@ -939,43 +986,77 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Namespace": {
-      "description": "Namespace -- namespace representation provided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
+      "description": "Namespace describes namespace",
       "type": "object",
       "required": [
         "resources"
       ],
       "properties": {
-        "access": {
-          "type": "string",
-          "x-go-name": "Access"
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
         },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
+        "create_time": {
           "type": "string",
-          "x-go-name": "CreatedAt"
+          "format": "date-time",
+          "x-go-name": "CreateTime"
+        },
+        "delete_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
+        },
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
         },
         "label": {
           "description": "user-visible label for the namespace",
           "type": "string",
           "x-go-name": "Label"
         },
-        "max_ext_service": {
+        "max_external_services": {
           "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxExtService"
+          "format": "int64",
+          "x-go-name": "MaxExtServices"
         },
-        "max_int_service": {
+        "max_internal_services": {
           "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxIntService"
+          "format": "int64",
+          "x-go-name": "MaxIntServices"
         },
         "max_traffic": {
           "type": "integer",
-          "format": "uint64",
+          "format": "int64",
           "x-go-name": "MaxTraffic"
         },
-        "resources": {
-          "$ref": "#/definitions/Resources"
+        "owner_user_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "OwnerUserID"
+        },
+        "ram": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RAM"
+        },
+        "tariff_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "TariffID"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Permission"
+          },
+          "x-go-name": "Permissions"
         },
         "volumes": {
           "type": "array",
@@ -985,7 +1066,7 @@
           "x-go-name": "Volumes"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "NamespaceAdminCreateRequest": {
       "description": "NamespaceAdminCreateRequest contains parameters for creating namespace without billing",
@@ -1988,39 +2069,79 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
     },
     "Volume": {
-      "description": "Volume -- volume representation\nprovided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
+      "description": "Volume describes volume",
       "type": "object",
       "properties": {
-        "access": {
-          "type": "string",
-          "x-go-name": "Access"
+        "active": {
+          "type": "boolean",
+          "x-go-name": "Active"
         },
-        "access_change_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "AccessChangeTime"
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
         },
         "create_time": {
           "type": "string",
           "format": "date-time",
           "x-go-name": "CreateTime"
         },
+        "delete_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
+        },
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
+        },
+        "gluster_name": {
+          "type": "string",
+          "x-go-name": "GlusterName"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
         "label": {
           "type": "string",
           "x-go-name": "Label"
+        },
+        "namespace_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "NamespaceID"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "OwnerUserID"
         },
         "replicas": {
           "type": "integer",
           "format": "int64",
           "x-go-name": "Replicas"
         },
-        "storage": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Storage"
+        "storage_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "StorageID"
+        },
+        "tariff_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "TariffID"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Permission"
+          },
+          "x-go-name": "Permissions"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "authClient": {
       "type": "object",
