@@ -38,11 +38,14 @@ func (r *Resource) BeforeDelete(db orm.DB) error {
 	return errors.ErrInternal()
 }
 
-func (r *Resource) BeforeUpdate(db orm.DB) error {
+func (r *Resource) AfterUpdate(db orm.DB) error {
 	if r.Deleted {
 		now := time.Now()
 		r.DeleteTime = &now
-		// TODO: delete permissions
+		_, err := db.Model(&Permission{ResourceID: r.ID}).
+			Where("resource_id = ?resource_id").
+			Delete()
+		return err
 	}
 	return nil
 }

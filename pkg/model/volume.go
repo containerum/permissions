@@ -41,8 +41,8 @@ func (v *Volume) BeforeInsert(db orm.DB) error {
 	return nil
 }
 
-func (v *Volume) BeforeUpdate(db orm.DB) error {
-	if err := v.Resource.BeforeUpdate(db); err != nil {
+func (v *Volume) AfterUpdate(db orm.DB) error {
+	if err := v.Resource.AfterUpdate(db); err != nil {
 		return err
 	}
 

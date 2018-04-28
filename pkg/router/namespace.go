@@ -48,6 +48,24 @@ func (nh *namespaceHandlers) adminResizeNamespace(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (nh *namespaceHandlers) deleteNamespaceHandler(ctx *gin.Context) {
+	if err := nh.acts.DeleteNamespace(ctx.Request.Context(), ctx.Param("label")); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (nh *namespaceHandlers) deleteAllUserNamespacesHandler(ctx *gin.Context) {
+	if err := nh.acts.DeleteAllUserNamespaces(ctx.Request.Context()); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
@@ -96,4 +114,40 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.PUT("/admin/namespaces/:label", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespace)
+
+	// swagger:operation DELETE /namespaces/{label} Namespaces DeleteNamespace
+	//
+	// Delete namespace.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: namespace deleted
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.DELETE("/namespaces/:label", handlers.deleteNamespaceHandler)
+
+	// swagger:operation DELETE /admin/namespaces Namespaces DeleteAllUserNamespaces
+	//
+	// Delete all user namespaces.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	// responses:
+	//   '200':
+	//     description: namespaces deleted
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.DELETE("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserNamespacesHandler)
 }
