@@ -2,10 +2,13 @@ package router
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/server"
+	"github.com/containerum/cherry/adaptors/gonic"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -66,12 +69,53 @@ func (nh *namespaceHandlers) deleteAllUserNamespacesHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (nh *namespaceHandlers) getNamespaceHandler(ctx *gin.Context) {
+	ret, err := nh.acts.GetNamespace(ctx.Request.Context(), ctx.Param("label"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+	httputil.MaskForNonAdmin(ctx, &ret)
+	ctx.JSON(http.StatusOK, ret)
+}
+
+func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
+	ret, err := nh.acts.GetUserNamespaces(ctx.Request.Context(), strings.Split(ctx.Query("filter"), ",")...)
+	if err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+	for i := range ret {
+		httputil.MaskForNonAdmin(ctx, &ret[i])
+	}
+	ctx.JSON(http.StatusOK, ret)
+}
+
+func (nh *namespaceHandlers) getAllNamespacesHandler(ctx *gin.Context) {
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil {
+		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailF("page number not integer"), ctx)
+		return
+	}
+	perPage, err := strconv.Atoi(ctx.Query("per_page"))
+	if err != nil {
+		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailF("per page limit not integer"), ctx)
+		return
+	}
+	ret, err := nh.acts.GetAllNamespaces(ctx.Request.Context(), page, perPage, strings.Split("filter", ",")...)
+	if err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, ret)
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
 	// swagger:operation POST /admin/namespaces Namespaces AdminCreateNamespace
 	//
-	// Create namespace without billing.
+	// Create namespace without billing (admin only).
 	//
 	// ---
 	// parameters:
@@ -92,7 +136,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 
 	// swagger:operation PUT /admin/namespaces/{label} Namespaces AdminResizeNamespace
 	//
-	// Resize namespace without billing.
+	// Resize namespace without billing (admin only).
 	//
 	// ---
 	// parameters:
@@ -137,7 +181,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 
 	// swagger:operation DELETE /admin/namespaces Namespaces DeleteAllUserNamespaces
 	//
-	// Delete all user namespaces.
+	// Delete all user namespaces (admin only).
 	//
 	// ---
 	// parameters:
@@ -150,4 +194,74 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.DELETE("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserNamespacesHandler)
+
+	// swagger:operation GET /namespaces/{label} Namespaces GetNamespace
+	//
+	// Get namespace.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: namespace response
+	//     schema:
+	//       $ref: '#/definitions/NamespaceWithPermissions'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/namespaces/:namespace", handlers.getNamespaceHandler)
+
+	// swagger:operation GET /namespaces Namespaces GetUserNamespaces
+	//
+	// Get user namespaces.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: namespaces response
+	//     schema:
+	//       type: array
+	//       items:
+	//         $ref: '#/definitions/NamespaceWithPermissions'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/namespaces", handlers.getUserNamespacesHandler)
+
+	// swagger:operation GET /admin/namespaces Namespaces GetAllNamespaces
+	//
+	// Get all namespaces (admin only).
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: namespaces response
+	//     schema:
+	//       type: array
+	//       items:
+	//         $ref: '#/definitions/NamespaceWithPermissions'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllNamespacesHandler)
 }

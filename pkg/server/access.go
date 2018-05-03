@@ -8,20 +8,22 @@ import (
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
 
 type AccessActions interface {
-	GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error)
-	SetUserAccesses(ctx context.Context, userID string, accessLevel model.AccessLevel) error
-	SetNamespaceAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error
-	SetVolumeAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error
-	DeleteNamespaceAccess(ctx context.Context, ownerID, label string, targetUser string) error
-	DeleteVolumeAccess(ctx context.Context, ownerID, label string, targetUser string) error
+	GetUserAccesses(ctx context.Context) (*authProto.ResourcesAccess, error)
+	SetUserAccesses(ctx context.Context, accessLevel model.AccessLevel) error
+	GetNamespaceAccess(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
+	SetNamespaceAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error
+	SetVolumeAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error
+	DeleteNamespaceAccess(ctx context.Context, label string, targetUser string) error
+	DeleteVolumeAccess(ctx context.Context, label string, targetUser string) error
 }
 
 func extractAccessesFromDB(ctx context.Context, db *dao.DAO, userID string) (*authProto.ResourcesAccess, error) {
-	userPermissions, err := db.GetUserAccesses(ctx, userID)
+	userPermissions, err := db.UserAccesses(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +49,8 @@ func extractAccessesFromDB(ctx context.Context, db *dao.DAO, userID string) (*au
 	return ret, nil
 }
 
-func (s *Server) GetUserAccesses(ctx context.Context, userID string) (*authProto.ResourcesAccess, error) {
+func (s *Server) GetUserAccesses(ctx context.Context) (*authProto.ResourcesAccess, error) {
+	userID := httputil.MustGetUserID(ctx)
 	s.log.WithField("user_id", userID).Info("get user resource accesses")
 
 	return extractAccessesFromDB(ctx, s.db, userID)
@@ -62,7 +65,8 @@ func updateUserAccesses(ctx context.Context, auth clients.AuthClient, db *dao.DA
 	return auth.UpdateUserAccess(ctx, userID, accesses)
 }
 
-func (s *Server) SetUserAccesses(ctx context.Context, userID string, access model.AccessLevel) error {
+func (s *Server) SetUserAccesses(ctx context.Context, access model.AccessLevel) error {
+	userID := httputil.MustGetUserID(ctx)
 	s.log.WithField("user_id", userID).Infof("Set user accesses to %s", access)
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
@@ -80,7 +84,8 @@ func (s *Server) SetUserAccesses(ctx context.Context, userID string, access mode
 	return err
 }
 
-func (s *Server) SetNamespaceAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error {
+func (s *Server) SetNamespaceAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error {
+	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,
 		"target_user":  targetUser,
@@ -117,7 +122,34 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, ownerID, label, targetU
 	return err
 }
 
-func (s *Server) SetVolumeAccess(ctx context.Context, ownerID, label, targetUser string, accessLevel model.AccessLevel) error {
+func (s *Server) GetNamespaceAccess(ctx context.Context, label string) (model.NamespaceWithPermissions, error) {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"label":   label,
+	}).Infof("get namespace access")
+
+	ns, err := s.db.NamespaceByLabel(ctx, userID, label)
+	if err != nil {
+		return model.NamespaceWithPermissions{}, err
+	}
+	err = s.db.NamespacePermissions(ctx, &ns)
+
+	// TODO: maybe better method for get user login list by id list
+	for i, perm := range ns.Permissions {
+		info, err := s.clients.User.UserInfoByID(ctx, perm.UserID)
+		if err != nil {
+			return model.NamespaceWithPermissions{}, err
+		}
+
+		ns.Permissions[i].UserLogin = info.Login
+	}
+
+	return ns, err
+}
+
+func (s *Server) SetVolumeAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error {
+	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,
 		"target_user":  targetUser,
@@ -154,7 +186,8 @@ func (s *Server) SetVolumeAccess(ctx context.Context, ownerID, label, targetUser
 	return err
 }
 
-func (s *Server) DeleteNamespaceAccess(ctx context.Context, ownerID, label string, targetUser string) error {
+func (s *Server) DeleteNamespaceAccess(ctx context.Context, label string, targetUser string) error {
+	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":    ownerID,
 		"label":       label,
@@ -190,7 +223,8 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, ownerID, label strin
 	return err
 }
 
-func (s *Server) DeleteVolumeAccess(ctx context.Context, ownerID, label string, targetUser string) error {
+func (s *Server) DeleteVolumeAccess(ctx context.Context, label string, targetUser string) error {
+	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":    ownerID,
 		"label":       label,

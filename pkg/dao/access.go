@@ -13,7 +13,7 @@ type AccessWithLabel struct {
 	Label string `sql:"label"`
 }
 
-func (dao *DAO) GetUserAccesses(ctx context.Context, userID string) ([]AccessWithLabel, error) {
+func (dao *DAO) UserAccesses(ctx context.Context, userID string) ([]AccessWithLabel, error) {
 	dao.log.WithField("user_id", userID).Debugf("get accesses")
 
 	var ret []AccessWithLabel
