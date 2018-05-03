@@ -19,7 +19,7 @@ type Namespace struct {
 	MaxIntServices int `sql:"max_int_services,notnull" json:"max_internal_services"`
 	MaxTraffic     int `sql:"max_traffic,notnull" json:"max_traffic"`
 
-	Volumes []*Volume `pg:"fk:ns_id" sql:"-" json:"volumes,omitempty"`
+	Volumes []*VolumeWithPermissions `pg:"fk:ns_id" sql:"-" json:"volumes,omitempty"`
 }
 
 func (ns *Namespace) BeforeInsert(db orm.DB) error {
@@ -47,6 +47,25 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})
+}
+
+// NamespaceWithPermissions is a response object for get requests
+//
+// swagger:model
+type NamespaceWithPermissions struct {
+	Namespace `pg:",override"`
+
+	Permission
+
+	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
+}
+
+func (np *NamespaceWithPermissions) Mask() {
+	np.Namespace.Mask()
+	np.Permission.Mask()
+	if np.Namespace.OwnerUserID != np.Permission.UserID {
+		np.Permissions = nil
+	}
 }
 
 // NamespaceAdminCreateRequest contains parameters for creating namespace without billing

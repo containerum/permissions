@@ -16,8 +16,7 @@ type accessHandlers struct {
 }
 
 func (ah *accessHandlers) getUserAccessesHandler(ctx *gin.Context) {
-	userID := httputil.MustGetUserID(ctx.Request.Context())
-	ret, err := ah.acts.GetUserAccesses(ctx.Request.Context(), userID)
+	ret, err := ah.acts.GetUserAccesses(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
@@ -27,14 +26,13 @@ func (ah *accessHandlers) getUserAccessesHandler(ctx *gin.Context) {
 }
 
 func (ah *accessHandlers) setUserAccessesHandler(ctx *gin.Context) {
-	userID := httputil.MustGetUserID(ctx.Request.Context())
 	var req model.SetUserAccessesRequest
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
 		return
 	}
 
-	if err := ah.acts.SetUserAccesses(ctx.Request.Context(), userID, req.Access); err != nil {
+	if err := ah.acts.SetUserAccesses(ctx.Request.Context(), req.Access); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -43,14 +41,13 @@ func (ah *accessHandlers) setUserAccessesHandler(ctx *gin.Context) {
 }
 
 func (ah *accessHandlers) setNamespaceAccessHandler(ctx *gin.Context) {
-	userID := httputil.MustGetUserID(ctx.Request.Context())
 	var req model.SetUserAccessRequest
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
 		return
 	}
 
-	if err := ah.acts.SetNamespaceAccess(ctx, userID, ctx.Param("label"), req.UserName, req.Access); err != nil {
+	if err := ah.acts.SetNamespaceAccess(ctx.Request.Context(), ctx.Param("label"), req.UserName, req.Access); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -59,14 +56,13 @@ func (ah *accessHandlers) setNamespaceAccessHandler(ctx *gin.Context) {
 }
 
 func (ah *accessHandlers) setVolumeAccessHandler(ctx *gin.Context) {
-	userID := httputil.MustGetUserID(ctx.Request.Context())
 	var req model.SetUserAccessRequest
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
 		return
 	}
 
-	if err := ah.acts.SetVolumeAccess(ctx, userID, ctx.Param("label"), req.UserName, req.Access); err != nil {
+	if err := ah.acts.SetVolumeAccess(ctx.Request.Context(), ctx.Param("label"), req.UserName, req.Access); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -75,14 +71,13 @@ func (ah *accessHandlers) setVolumeAccessHandler(ctx *gin.Context) {
 }
 
 func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
-	userID := httputil.MustGetUserID(ctx.Request.Context())
 	var req model.DeleteUserAccessRequest
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
 		return
 	}
 
-	if err := ah.acts.DeleteNamespaceAccess(ctx, userID, ctx.Param("label"), req.UserName); err != nil {
+	if err := ah.acts.DeleteNamespaceAccess(ctx.Request.Context(), ctx.Param("label"), req.UserName); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -91,19 +86,29 @@ func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
 }
 
 func (ah *accessHandlers) deleteVolumeAccessHandler(ctx *gin.Context) {
-	userID := httputil.MustGetUserID(ctx.Request.Context())
 	var req model.DeleteUserAccessRequest
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
 		return
 	}
 
-	if err := ah.acts.DeleteVolumeAccess(ctx, userID, ctx.Param("label"), req.UserName); err != nil {
+	if err := ah.acts.DeleteVolumeAccess(ctx, ctx.Param("label"), req.UserName); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
 
 	ctx.Status(http.StatusOK)
+}
+
+func (ah *accessHandlers) getNamespaceAccessHandlers(ctx *gin.Context) {
+	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("label"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
+		return
+	}
+
+	httputil.MaskForNonAdmin(ctx, &ret)
+	ctx.JSON(http.StatusOK, ret)
 }
 
 func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
@@ -247,4 +252,26 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	 default:
 	//	   $ref: '#/responses/error'
 	r.engine.DELETE("/volumes/:label/accesses", handlers.deleteVolumeAccessHandler)
+
+	// swagger:operation GET /namespaces/{label}/accesses Permissions GetNamespaceWithPermissions
+	//
+	// Get namespace with user permissions.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: namespace response
+	//     schema:
+	//       $ref: '#/definitions/NamespaceWithPermissions'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/namespace/:label/accesses", handlers.getNamespaceAccessHandlers)
 }

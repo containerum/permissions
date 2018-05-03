@@ -13,10 +13,60 @@ import (
 )
 
 type NamespaceActions interface {
+	GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
+	GetUserNamespaces(ctx context.Context, filters ...string) ([]model.NamespaceWithPermissions, error)
+	GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error)
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
 	AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error
 	DeleteNamespace(ctx context.Context, label string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
+}
+
+var StandardNamespaceFilter = dao.NamespaceFilter{
+	NotDeleted: true,
+}
+
+func (s *Server) GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error) {
+	userID := httputil.MustGetUserID(ctx)
+
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"label":   label,
+	}).Infof("get namespace")
+
+	ns, err := s.db.NamespaceByLabel(ctx, userID, label)
+	if err != nil {
+		return model.NamespaceWithPermissions{}, err
+	}
+
+	err = s.db.NamespaceVolumes(ctx, &ns.Namespace)
+
+	return ns, err
+}
+
+func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]model.NamespaceWithPermissions, error) {
+	userID := httputil.MustGetUserID(ctx)
+
+	s.log.WithField("user_id", userID).Infof("get user namespaces")
+
+	var filter dao.NamespaceFilter
+	if httputil.MustGetUserRole(ctx) != "admin" {
+		filter = StandardNamespaceFilter
+	} else {
+		filter = dao.ParseNamespaceFilter(filters...)
+	}
+
+	return s.db.UserNamespaces(ctx, userID, filter)
+}
+
+func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error) {
+	s.log.Infof("get all namespaces")
+
+	filter := dao.ParseNamespaceFilter(filters...)
+	filter.Limit = perPage
+	filter.SetPage(page)
+
+	return s.db.AllNamespaces(ctx, filter)
 }
 
 func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error {
@@ -111,7 +161,7 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, label string, req mod
 			ns.MaxTraffic = *req.MaxTraffic
 		}
 
-		if setErr := tx.ResizeNamespace(ctx, ns); setErr != nil {
+		if setErr := tx.ResizeNamespace(ctx, ns.Namespace); setErr != nil {
 			return setErr
 		}
 

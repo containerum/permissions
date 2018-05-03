@@ -79,11 +79,49 @@
       }
     },
     "/admin/namespaces": {
+      "get": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Get all namespaces (admin only).",
+        "operationId": "GetAllNamespaces",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespaces response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NamespaceWithPermissions"
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      },
       "post": {
         "tags": [
           "Namespaces"
         ],
-        "summary": "Create namespace without billing.",
+        "summary": "Create namespace without billing (admin only).",
         "operationId": "AdminCreateNamespace",
         "parameters": [
           {
@@ -117,7 +155,7 @@
         "tags": [
           "Namespaces"
         ],
-        "summary": "Delete all user namespaces.",
+        "summary": "Delete all user namespaces (admin only).",
         "operationId": "DeleteAllUserNamespaces",
         "parameters": [
           {
@@ -145,7 +183,7 @@
         "tags": [
           "Namespaces"
         ],
-        "summary": "Resize namespace without billing.",
+        "summary": "Resize namespace without billing (admin only).",
         "operationId": "AdminResizeNamespace",
         "parameters": [
           {
@@ -182,7 +220,82 @@
         }
       }
     },
+    "/namespaces": {
+      "get": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Get user namespaces.",
+        "operationId": "GetUserNamespaces",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespaces response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NamespaceWithPermissions"
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
+    },
     "/namespaces/{label}": {
+      "get": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Get namespace.",
+        "operationId": "GetNamespace",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace response",
+            "schema": {
+              "$ref": "#/definitions/NamespaceWithPermissions"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      },
       "delete": {
         "tags": [
           "Namespaces"
@@ -291,6 +404,43 @@
         "responses": {
           "200": {
             "description": "access deleted"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
+    },
+    "/namespaces/{label}/accesses": {
+      "get": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Get namespace with user permissions.",
+        "operationId": "GetNamespaceWithPermissions",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace response",
+            "schema": {
+              "$ref": "#/definitions/NamespaceWithPermissions"
+            }
           },
           "default": {
             "$ref": "#/responses/error"
@@ -1111,17 +1261,10 @@
           "format": "uuid",
           "x-go-name": "TariffID"
         },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Permission"
-          },
-          "x-go-name": "Permissions"
-        },
         "volumes": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Volume"
+            "$ref": "#/definitions/VolumeWithPermissions"
           },
           "x-go-name": "Volumes"
         }
@@ -1254,6 +1397,120 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+    },
+    "NamespaceWithPermissions": {
+      "description": "NamespaceWithPermissions is a response object for get requests",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/AccessLevel"
+        },
+        "access_level_change_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "AccessLevelChangeTime"
+        },
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
+        },
+        "create_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreateTime"
+        },
+        "delete_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
+        },
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "type": "string",
+          "x-go-name": "ResourceKind"
+        },
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "login": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "UserLogin"
+        },
+        "max_external_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxExtServices"
+        },
+        "max_internal_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxIntServices"
+        },
+        "max_traffic": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxTraffic"
+        },
+        "new_access_level": {
+          "$ref": "#/definitions/AccessLevel"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "OwnerUserID"
+        },
+        "perm_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "ram": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RAM"
+        },
+        "resource_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ResourceID"
+        },
+        "tariff_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "TariffID"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "UserID"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Permission"
+          },
+          "x-go-name": "Permissions"
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/VolumeWithPermissions"
+          },
+          "x-go-name": "Volumes"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "NamespacesList": {
       "description": "NamespacesList -- model for namespaces list",
@@ -2192,6 +2449,109 @@
           "type": "string",
           "format": "uuid",
           "x-go-name": "TariffID"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "VolumeWithPermissions": {
+      "description": "VolumeWithPermissions is a response object for get requests",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/AccessLevel"
+        },
+        "access_level_change_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "AccessLevelChangeTime"
+        },
+        "active": {
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "capacity": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Capacity"
+        },
+        "create_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreateTime"
+        },
+        "delete_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
+        },
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
+        },
+        "gluster_name": {
+          "type": "string",
+          "x-go-name": "GlusterName"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "kind": {
+          "type": "string",
+          "x-go-name": "ResourceKind"
+        },
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "login": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "UserLogin"
+        },
+        "namespace_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "NamespaceID"
+        },
+        "new_access_level": {
+          "$ref": "#/definitions/AccessLevel"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "OwnerUserID"
+        },
+        "perm_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "replicas": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Replicas"
+        },
+        "resource_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ResourceID"
+        },
+        "storage_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "StorageID"
+        },
+        "tariff_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "TariffID"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "UserID"
         },
         "users": {
           "type": "array",

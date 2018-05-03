@@ -28,8 +28,6 @@ type Resource struct {
 	OwnerUserID string `sql:"owner_user_id,type:uuid,notnull,unique:unique_owner_label" json:"owner_user_id,omitempty"`
 
 	Label string `sql:"label,notnull,unique:unique_owner_label" json:"label"`
-
-	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
 }
 
 func (r *Resource) BeforeDelete(db orm.DB) error {
