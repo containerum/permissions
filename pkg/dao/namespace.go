@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"reflect"
 	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
@@ -10,6 +11,63 @@ import (
 	"github.com/go-pg/pg/orm"
 	"github.com/sirupsen/logrus"
 )
+
+type NamespaceFilter struct {
+	orm.Pager
+	NotDeleted bool `filter:"not_deleted"`
+	Deleted    bool `filter:"deleted"`
+	NotLimited bool `filter:"not_limited"`
+	Limited    bool `filter:"limited"`
+	Owned      bool `filter:"owner"`
+	NotOwned   bool `filter:"not_owner"`
+}
+
+var nsFilterCache = make(map[string]int)
+
+func init() {
+	t := reflect.TypeOf(NamespaceFilter{})
+	for i := 0; i < t.NumField(); i++ {
+		tag, ok := t.Field(i).Tag.Lookup("filter")
+		if !ok {
+			continue
+		}
+		nsFilterCache[tag] = i
+	}
+}
+
+func ParseNamespaceFilter(filters ...string) NamespaceFilter {
+	var ret NamespaceFilter
+	v := reflect.ValueOf(&ret)
+	for _, filter := range filters {
+		if field, ok := nsFilterCache[filter]; ok {
+			v.Field(field).SetBool(true)
+		}
+	}
+	return ret
+}
+
+func (f *NamespaceFilter) Filter(q *orm.Query) (*orm.Query, error) {
+	if f.NotDeleted {
+		q = q.Where("NOT ?TableAlias.deleted")
+	}
+	if f.Deleted {
+		q = q.Where("?TableAlias.deleted")
+	}
+	if f.NotLimited {
+		q = q.Where("permissions.initial_access_level = permissions.current_access_level")
+	}
+	if f.Limited {
+		q = q.Where("permissions.initial_access_level != permissions.initial_access_level")
+	}
+	if f.Owned {
+		q = q.Where("permissions.initial_access_level = ?", model.AccessOwner)
+	}
+	if f.NotOwned {
+		q = q.Where("permissions.initial_access_level != ?", model.AccessOwner)
+	}
+
+	return q.Apply(f.Paginate), nil
+}
 
 func (dao *DAO) NamespaceByID(ctx context.Context, id string) (ret model.Namespace, err error) {
 	dao.log.WithField("id", id).Debugf("get namespace by id")
@@ -97,6 +155,32 @@ func (dao *DAO) NamespacePermissions(ctx context.Context, ns *model.NamespaceWit
 	default:
 		return dao.handleError(err)
 	}
+}
+
+func (dao *DAO) UserNamespaces(ctx context.Context, userID string, filter NamespaceFilter) (ret []model.NamespaceWithPermissions, err error) {
+	dao.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"filters": filter,
+	}).Debugf("get user namespaces")
+
+	err = dao.db.Model(&ret).
+		ColumnExpr("?TableAlias.*").
+		Column("permissions.*", "Volumes").
+		Join("JOIN permissions").
+		JoinOn("permissions.resource_type = ?", "Namespace").
+		JoinOn("permissions.resource_id = ?TableAlias.id").
+		Where("permissions.user_id = ?", userID).
+		Apply(filter.Filter).
+		Relation("Volumes").
+		Select()
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrResourceNotExists().AddDetailF("user has no namespaces")
+	default:
+		err = dao.handleError(err)
+	}
+
+	return
 }
 
 func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace) error {

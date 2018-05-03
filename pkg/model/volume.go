@@ -29,13 +29,17 @@ type Volume struct {
 }
 
 func (v *Volume) BeforeInsert(db orm.DB) error {
-	cnt, err := db.Model(v).WherePK().Where("NOT deleted").Count()
+	cnt, err := db.Model(v).
+		Where("owner_user_id = ?owner_user_id").
+		Where("label = ?label").
+		Where("NOT deleted").
+		Count()
 	if err != nil {
 		return err
 	}
 
 	if cnt > 0 {
-		return errors.ErrResourceAlreadyExists().AddDetailF("namespace %s already exists", v.Label)
+		return errors.ErrResourceAlreadyExists().AddDetailF("volume %s already exists", v.Label)
 	}
 
 	return nil
@@ -48,13 +52,14 @@ func (v *Volume) AfterUpdate(db orm.DB) error {
 
 	var err error
 	if v.Deleted {
-		_, err = db.Model(&Storage{}).
-			Relation("Volumes").
+		_, err = db.Model(&Storage{ID: v.StorageID}).
+			WherePK().
 			Set("used = used - ?", v.Capacity).
 			Update()
 	} else {
 		oldCapacityQuery := db.Model(v).Column("capacity").WherePK()
-		_, err = db.Model(&Storage{}).
+		_, err = db.Model(&Storage{ID: v.StorageID}).
+			WherePK().
 			Set("used = used - (?) + ?", oldCapacityQuery, v.Capacity).
 			Update(v)
 	}
@@ -62,13 +67,23 @@ func (v *Volume) AfterUpdate(db orm.DB) error {
 }
 
 func (v *Volume) AfterInsert(db orm.DB) error {
-	return db.Insert(&Permission{
+	err := db.Insert(&Permission{
 		ResourceID:         v.ID,
 		UserID:             v.OwnerUserID,
 		ResourceKind:       "Volume",
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Model((*Storage)(nil)).
+		Where("id", v.StorageID).
+		Set("used = used + (?)", v.Capacity).
+		Update()
+
+	return err
 }
 
 func (v *Volume) Mask() {

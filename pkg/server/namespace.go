@@ -7,18 +7,35 @@ import (
 	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
 	kubeClientModel "git.containerum.net/ch/kube-client/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/dao"
-	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
-	"github.com/containerum/cherry"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
 
 type NamespaceActions interface {
+	GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
 	AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error
 	DeleteNamespace(ctx context.Context, label string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
+}
+
+func (s *Server) GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error) {
+	userID := httputil.MustGetUserID(ctx)
+
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"label":   label,
+	}).Infof("get namespace")
+
+	ns, err := s.db.NamespaceByLabel(ctx, userID, label)
+	if err != nil {
+		return model.NamespaceWithPermissions{}, err
+	}
+
+	err = s.db.NamespaceVolumes(ctx, &ns.Namespace)
+
+	return ns, err
 }
 
 func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error {
@@ -29,16 +46,6 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 		Infof("admin create namespace %+v", req)
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		_, err := tx.NamespaceByLabel(ctx, userID, req.Label)
-		switch {
-		case cherry.Equals(err, errors.ErrResourceNotExists()):
-			// pass
-		case err == nil:
-			return errors.ErrResourceAlreadyExists().AddDetailF("namespace %s already exists", req.Label)
-		default:
-			return err
-		}
-
 		ns := model.Namespace{
 			Resource: model.Resource{
 				OwnerUserID: userID,

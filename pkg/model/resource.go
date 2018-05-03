@@ -56,22 +56,3 @@ func (r *Resource) Mask() {
 	r.OwnerUserID = ""
 	r.Label = ""
 }
-
-// NamespaceWithPermissions is a response object for get requests
-//
-// swagger:model
-type NamespaceWithPermissions struct {
-	Namespace
-
-	Permission
-
-	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
-}
-
-func (np *NamespaceWithPermissions) Mask() {
-	np.Namespace.Mask()
-	np.Permission.Mask()
-	if np.Namespace.OwnerUserID != np.Permission.UserID {
-		np.Permissions = nil
-	}
-}
