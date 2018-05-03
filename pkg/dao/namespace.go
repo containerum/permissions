@@ -16,6 +16,7 @@ func (dao *DAO) NamespaceByID(ctx context.Context, id string) (ret model.Namespa
 
 	err = dao.db.Model(&ret).
 		Where("id = ?", id).
+		Where("NOT deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
@@ -41,6 +42,7 @@ func (dao *DAO) NamespaceByLabel(ctx context.Context, userID, label string) (ret
 		JoinOn("permissions.resource_id = ?TableAlias.id").
 		Where("permissions.user_id = ?", userID).
 		Where("?TableAlias.label = ?", label).
+		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
@@ -107,6 +109,8 @@ func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace)
 		Set("max_ext_services = ?max_ext_services").
 		Set("max_int_services = ?max_int_services").
 		Set("max_traffic = ?max_traffic").
+		Set("deleted = FALSE").
+		Set("delete_time = NULL").
 		Returning("*").
 		Insert()
 	if err != nil {
@@ -152,6 +156,7 @@ func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace)
 
 	result, err := dao.db.Model(namespace).
 		WherePK().
+		Where("NOT deleted").
 		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
 			return query.
 				Where("label = ?label").
@@ -177,6 +182,7 @@ func (dao *DAO) DeleteAllUserNamespaces(ctx context.Context, userID string) (del
 
 	result, err := dao.db.Model(&deleted).
 		Where("owner_user_id = ?", userID).
+		Where("NOT deleted").
 		Set("deleted = TRUE").
 		Set("delete_time = now()").
 		Returning("*").

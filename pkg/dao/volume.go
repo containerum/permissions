@@ -15,6 +15,7 @@ func (dao *DAO) VolumeByID(ctx context.Context, id string) (ret model.Volume, er
 
 	err = dao.db.Model(&ret).
 		Where("id = ?", id).
+		Where("NOT deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
@@ -38,9 +39,10 @@ func (dao *DAO) VolumeByLabel(ctx context.Context, userID, label string) (ret mo
 		Column("permissions.*").
 		Join("JOIN permissions").
 		JoinOn("permissions.kind = ?", "Volume").
-		JoinOn("permissions.resource_id = ?TableName.id").
+		JoinOn("permissions.resource_id = ?TableAlias.id").
 		Where("permissions.user_id = ?", userID).
-		Where("?TableName.label = ?", label).
+		Where("?TableAlias.label = ?", label).
+		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:

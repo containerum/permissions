@@ -7,7 +7,9 @@ import (
 	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
 	kubeClientModel "git.containerum.net/ch/kube-client/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/dao"
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	"github.com/containerum/cherry"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
@@ -27,6 +29,16 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 		Infof("admin create namespace %+v", req)
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
+		_, err := tx.NamespaceByLabel(ctx, userID, req.Label)
+		switch {
+		case cherry.Equals(err, errors.ErrResourceNotExists()):
+			// pass
+		case err == nil:
+			return errors.ErrResourceAlreadyExists().AddDetailF("namespace %s already exists", req.Label)
+		default:
+			return err
+		}
+
 		ns := model.Namespace{
 			Resource: model.Resource{
 				OwnerUserID: userID,
