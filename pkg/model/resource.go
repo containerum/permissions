@@ -28,8 +28,6 @@ type Resource struct {
 	OwnerUserID string `sql:"owner_user_id,type:uuid,notnull,unique:unique_owner_label" json:"owner_user_id,omitempty"`
 
 	Label string `sql:"label,notnull,unique:unique_owner_label" json:"label"`
-
-	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
 }
 
 func (r *Resource) BeforeDelete(db orm.DB) error {
@@ -57,4 +55,23 @@ func (r *Resource) Mask() {
 	r.TariffID = nil
 	r.OwnerUserID = ""
 	r.Label = ""
+}
+
+// NamespaceWithPermissions is a response object for get requests
+//
+// swagger:model
+type NamespaceWithPermissions struct {
+	Namespace
+
+	Permission
+
+	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
+}
+
+func (np *NamespaceWithPermissions) Mask() {
+	np.Namespace.Mask()
+	np.Permission.Mask()
+	if np.Namespace.OwnerUserID != np.Permission.UserID {
+		np.Permissions = nil
+	}
 }

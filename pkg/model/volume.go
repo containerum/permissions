@@ -79,3 +79,22 @@ func (v *Volume) Mask() {
 	v.GlusterName = ""
 	v.StorageID = ""
 }
+
+// VolumeWithPermissions is a response object for get requests
+//
+// swagger:model
+type VolumeWithPermissions struct {
+	Volume
+
+	Permission
+
+	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
+}
+
+func (vp *VolumeWithPermissions) Mask() {
+	vp.Volume.Mask()
+	vp.Permission.Mask()
+	if vp.OwnerUserID != vp.Permission.UserID {
+		vp.Permissions = nil
+	}
+}

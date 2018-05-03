@@ -19,7 +19,7 @@ type Namespace struct {
 	MaxIntServices int `sql:"max_int_services,notnull" json:"max_internal_services"`
 	MaxTraffic     int `sql:"max_traffic,notnull" json:"max_traffic"`
 
-	Volumes []*Volume `pg:"fk:ns_id" sql:"-" json:"volumes,omitempty"`
+	Volumes []*VolumeWithPermissions `pg:"fk:ns_id" sql:"-" json:"volumes,omitempty"`
 }
 
 func (ns *Namespace) BeforeInsert(db orm.DB) error {
