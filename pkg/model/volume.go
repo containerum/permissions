@@ -84,7 +84,7 @@ func (v *Volume) Mask() {
 //
 // swagger:model
 type VolumeWithPermissions struct {
-	Volume
+	Volume `pg:",override"`
 
 	Permission
 

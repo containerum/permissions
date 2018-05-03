@@ -111,7 +111,7 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, label string, req mod
 			ns.MaxTraffic = *req.MaxTraffic
 		}
 
-		if setErr := tx.ResizeNamespace(ctx, ns); setErr != nil {
+		if setErr := tx.ResizeNamespace(ctx, ns.Namespace); setErr != nil {
 			return setErr
 		}
 

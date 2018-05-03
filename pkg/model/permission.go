@@ -38,7 +38,7 @@ type Permission struct {
 	tableName struct{} `sql:"permissions"`
 
 	// swagger:strfmt uuid
-	ID string `sql:"id,pk,type:uuid,default:uuid_generate_v4()" json:"perm_id,omitempty"`
+	ID string `sql:"perm_id,pk,type:uuid,default:uuid_generate_v4()" json:"perm_id,omitempty"`
 
 	ResourceKind string `sql:"resource_type,notnull,unique:unique_user_access" json:"kind,omitempty"` // WARN: custom type here, do not forget create it
 

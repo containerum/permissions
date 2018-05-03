@@ -103,7 +103,7 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, ownerID, label, targetU
 			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", label)
 		}
 
-		if setErr := tx.SetNamespaceAccess(ctx, ns, accessLevel, targetUserInfo.ID); setErr != nil {
+		if setErr := tx.SetNamespaceAccess(ctx, ns.Namespace, accessLevel, targetUserInfo.ID); setErr != nil {
 			return setErr
 		}
 
@@ -140,7 +140,7 @@ func (s *Server) SetVolumeAccess(ctx context.Context, ownerID, label, targetUser
 			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", label)
 		}
 
-		if setErr := tx.SetVolumeAccess(ctx, vol, accessLevel, targetUserInfo.ID); setErr != nil {
+		if setErr := tx.SetVolumeAccess(ctx, vol.Volume, accessLevel, targetUserInfo.ID); setErr != nil {
 			return setErr
 		}
 
@@ -176,7 +176,7 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, ownerID, label strin
 			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", label)
 		}
 
-		if delErr := tx.DeleteNamespaceAccess(ctx, ns, targetUserInfo.ID); delErr != nil {
+		if delErr := tx.DeleteNamespaceAccess(ctx, ns.Namespace, targetUserInfo.ID); delErr != nil {
 			return delErr
 		}
 
@@ -212,7 +212,7 @@ func (s *Server) DeleteVolumeAccess(ctx context.Context, ownerID, label string, 
 			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", label)
 		}
 
-		if delErr := tx.DeleteVolumeAccess(ctx, vol, targetUserInfo.ID); delErr != nil {
+		if delErr := tx.DeleteVolumeAccess(ctx, vol.Volume, targetUserInfo.ID); delErr != nil {
 			return delErr
 		}
 

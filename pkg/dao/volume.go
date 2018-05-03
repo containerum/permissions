@@ -6,6 +6,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,23 +27,46 @@ func (dao *DAO) VolumeByID(ctx context.Context, id string) (ret model.Volume, er
 	return
 }
 
-func (dao *DAO) VolumeByLabel(ctx context.Context, userID, label string) (ret model.Volume, err error) {
+func (dao *DAO) VolumeByLabel(ctx context.Context, userID, label string) (ret model.VolumeWithPermissions, err error) {
 	dao.log.WithFields(logrus.Fields{
 		"user_id": userID,
 		"label":   label,
-	}).Debugf("get namespace by user id and label")
+	}).Debugf("get volume by user id and label")
 
 	err = dao.db.Model(&ret).
-		Column("\"?TableName\".*").
+		ColumnExpr("?TableAlias.*").
+		Column("permissions.*").
 		Join("JOIN permissions").
 		JoinOn("permissions.kind = ?", "Volume").
-		JoinOn("permissions.resource_id = \"?TableName\".id").
+		JoinOn("permissions.resource_id = ?TableName.id").
 		Where("permissions.user_id = ?", userID).
-		Where("\"?TableName\".label = ?", label).
+		Where("?TableName.label = ?", label).
 		Select()
 	switch err {
 	case pg.ErrNoRows:
 		err = errors.ErrResourceNotExists().AddDetailF("namespace %s not exists for user", label)
+	default:
+		err = dao.handleError(err)
+	}
+
+	return
+}
+
+func (dao *DAO) VolumePermissions(ctx context.Context, vol *model.VolumeWithPermissions) (err error) {
+	dao.log.WithFields(logrus.Fields{
+		"owner_user_id": vol.OwnerUserID,
+		"label":         vol.Label,
+	}).Debugf("get volume permissions")
+
+	err = dao.db.Model(vol).
+		Column("Permissions").
+		Relation("Permissions", func(q *orm.Query) (*orm.Query, error) {
+			return q.Where("initial_access_level != ?", model.AccessOwner), nil
+		}).
+		Select()
+	switch err {
+	case pg.ErrNoRows:
+		err = nil
 	default:
 		err = dao.handleError(err)
 	}
