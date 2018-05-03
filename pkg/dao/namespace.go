@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -95,4 +96,54 @@ func (dao *DAO) ResizeNamespace(ctx context.Context, namespace model.Namespace) 
 	}
 
 	return nil
+}
+
+func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace) error {
+	dao.log.Debugf("delete namespace %+v", namespace)
+
+	namespace.Deleted = true
+	now := time.Now().UTC()
+	namespace.DeleteTime = &now
+
+	result, err := dao.db.Model(namespace).
+		WherePK().
+		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
+			return query.
+				Where("label = ?label").
+				Where("owner_user_id = ?owner_user_id"), nil
+		}).
+		Set("deleted = ?deleted").
+		Set("delete_time = ?delete_time").
+		Returning("*").
+		Update()
+	if err != nil {
+		return dao.handleError(err)
+	}
+
+	if result.RowsAffected() <= 0 {
+		return errors.ErrResourceNotExists().AddDetailF("namespace %s not exists for user", namespace.Label)
+	}
+
+	return nil
+}
+
+func (dao *DAO) DeleteAllUserNamespaces(ctx context.Context, userID string) (deleted []model.Namespace, err error) {
+	dao.log.WithField("user_id", userID).Debugf("delete user namespaces")
+
+	result, err := dao.db.Model(&deleted).
+		Where("owner_user_id = ?", userID).
+		Set("deleted = TRUE").
+		Set("delete_time = now()").
+		Returning("*").
+		Update()
+	if err != nil {
+		err = dao.handleError(err)
+		return
+	}
+	if result.RowsAffected() <= 0 {
+		err = errors.ErrResourceNotExists().AddDetailF("user %s has no namespaces", userID)
+		return
+	}
+
+	return
 }

@@ -9,11 +9,14 @@ import (
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/containerum/utils/httputil"
+	"github.com/sirupsen/logrus"
 )
 
 type NamespaceActions interface {
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
 	AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error
+	DeleteNamespace(ctx context.Context, label string) error
+	DeleteAllUserNamespaces(ctx context.Context) error
 }
 
 func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error {
@@ -126,6 +129,61 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, label string, req mod
 		}
 		if setErr := s.clients.Kube.SetNamespaceQuota(ctx, kubeNS); setErr != nil {
 			return setErr
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *Server) DeleteNamespace(ctx context.Context, label string) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"label":   label,
+	}).Infof("delete namespace")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		ns := &model.Namespace{Resource: model.Resource{OwnerUserID: userID, Label: label}}
+
+		if delErr := tx.DeleteNamespace(ctx, ns); delErr != nil {
+			return delErr
+		}
+
+		if delErr := s.clients.Kube.DeleteNamespace(ctx, kubeAPIModel.NamespaceWithOwner{Name: ns.ID}); delErr != nil {
+			return delErr
+		}
+
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
+			return updErr
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithField("user_id", userID).Infof("delete all user namespaces")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		deletedNamespaces, delErr := tx.DeleteAllUserNamespaces(ctx, userID)
+		if delErr != nil {
+			return delErr
+		}
+
+		// kube-api don`t have method to delete list of namespaces
+		for _, ns := range deletedNamespaces {
+			if delErr := s.clients.Kube.DeleteNamespace(ctx, kubeAPIModel.NamespaceWithOwner{Name: ns.ID}); delErr != nil {
+				return delErr
+			}
+		}
+
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
+			return updErr
 		}
 
 		return nil
