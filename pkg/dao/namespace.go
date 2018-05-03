@@ -183,6 +183,28 @@ func (dao *DAO) UserNamespaces(ctx context.Context, userID string, filter Namesp
 	return
 }
 
+func (dao *DAO) AllNamespaces(ctx context.Context, filter NamespaceFilter) (ret []model.NamespaceWithPermissions, err error) {
+	dao.log.Debugf("get all namespaces")
+
+	err = dao.db.Model(&ret).
+		ColumnExpr("?TableAlias.*").
+		Column("permissions.*", "Volumes").
+		Join("JOIN permissions").
+		JoinOn("permissions.resource_type = ?", "Namespace").
+		JoinOn("permissions.resource_id = ?TableAlias.id").
+		Apply(filter.Filter).
+		Relation("Volumes").
+		Select()
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrResourceNotExists().AddDetailF("no namespaces in system")
+	default:
+		err = dao.handleError(err)
+	}
+
+	return
+}
+
 func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace) error {
 	dao.log.Debugf("create namespace %+v", namespace)
 
