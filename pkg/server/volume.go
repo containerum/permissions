@@ -17,6 +17,10 @@ type VolumeActions interface {
 	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error)
 }
 
+var StandardVolumeFilter = dao.VolumeFilter{
+	NotDeleted: true,
+}
+
 func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
@@ -99,7 +103,12 @@ func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]model
 		"filters": filters,
 	}).Infof("get user volumes")
 
-	filter := dao.ParseVolumeFilter(filters...)
+	var filter dao.VolumeFilter
+	if IsAdminRole(ctx) {
+		filter = dao.ParseVolumeFilter(filters...)
+	} else {
+		filter = StandardVolumeFilter
+	}
 
 	return s.db.UserVolumes(ctx, userID, filter)
 }
