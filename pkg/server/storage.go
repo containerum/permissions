@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 
+	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/model"
 )
 
@@ -16,7 +17,9 @@ type StorageActions interface {
 func (s *Server) CreateStorage(ctx context.Context, storage model.Storage) error {
 	s.log.Infof("create storage %+v", storage)
 
-	err := s.db.CreateStorage(ctx, &storage)
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		return tx.CreateStorage(ctx, &storage)
+	})
 	return err
 }
 
@@ -43,11 +46,15 @@ func (s *Server) UpdateStorage(ctx context.Context, name string, req model.Updat
 		storage.IPs = req.IPs
 	}
 
-	return s.db.UpdateStorage(ctx, name, storage)
+	return s.db.Transactional(func(tx *dao.DAO) error {
+		tx.UpdateStorage(ctx, name, storage)
+	})
 }
 
 func (s *Server) DeleteStorage(ctx context.Context, name string) error {
 	s.log.WithField("name", name).Infof("delete storage")
 
-	return s.db.DeleteStorage(ctx, model.Storage{Name: name})
+	return s.db.Transactional(func(tx *dao.DAO) error {
+		return tx.DeleteStorage(ctx, model.Storage{Name: name})
+	})
 }
