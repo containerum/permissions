@@ -47,7 +47,7 @@ func (s *Server) UpdateStorage(ctx context.Context, name string, req model.Updat
 	}
 
 	return s.db.Transactional(func(tx *dao.DAO) error {
-		tx.UpdateStorage(ctx, name, storage)
+		return tx.UpdateStorage(ctx, name, storage)
 	})
 }
 
