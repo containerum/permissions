@@ -9,7 +9,7 @@ var (
 	ModeFlag = cli.StringFlag{
 		Name:    "mode",
 		EnvVars: []string{"MODE"},
-		Value:   "release",
+		Value:   "debug",
 	}
 
 	LogLevelFlag = cli.IntFlag{
@@ -33,24 +33,20 @@ var (
 	AuthAddrFlag = cli.StringFlag{
 		Name:    "auth_addr",
 		EnvVars: []string{"AUTH_ADDR"},
-		Value:   "localhost:8888",
 	}
 
 	UserAddrFlag = cli.StringFlag{
 		Name:    "user_addr",
 		EnvVars: []string{"USER_ADDR"},
-		Value:   "localhost:8111",
 	}
 
 	KubeAPIAddrFlag = cli.StringFlag{
 		Name:    "kube_api_addr",
 		EnvVars: []string{"KUBE_API_ADDR"},
-		Value:   "localhost:1212",
 	}
 
 	BillingAddrFlag = cli.StringFlag{
 		Name:    "billing_addr",
 		EnvVars: []string{"BILLING_ADDR"},
-		Value:   "localhost:5000",
 	}
 )
