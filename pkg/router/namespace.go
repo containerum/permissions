@@ -215,7 +215,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//       $ref: '#/definitions/NamespaceWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/namespaces/:namespace", handlers.getNamespaceHandler)
+	r.engine.GET("/namespaces/:label", handlers.getNamespaceHandler)
 
 	// swagger:operation GET /namespaces Namespaces GetUserNamespaces
 	//
@@ -230,6 +230,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    in: path
 	//    required: true
 	//    type: string
+	//  - $ref: '#/parameters/Filters'
 	// responses:
 	//   '200':
 	//     description: namespaces response
@@ -254,6 +255,9 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    in: path
 	//    required: true
 	//    type: string
+	//  - $ref: '#/parameters/Filters'
+	//  - $ref: '#/parameters/PageNum'
+	//  - $ref: '#/parameters/PerPageLimit'
 	// responses:
 	//   '200':
 	//     description: namespaces response

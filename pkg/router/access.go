@@ -100,8 +100,19 @@ func (ah *accessHandlers) deleteVolumeAccessHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (ah *accessHandlers) getNamespaceAccessHandlers(ctx *gin.Context) {
+func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
 	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("label"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
+		return
+	}
+
+	httputil.MaskForNonAdmin(ctx, &ret)
+	ctx.JSON(http.StatusOK, ret)
+}
+
+func (ah *accessHandlers) getVolumeAccessHandler(ctx *gin.Context) {
+	ret, err := ah.acts.GetVolumeAccess(ctx.Request.Context(), ctx.Param("label"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
@@ -273,5 +284,27 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//       $ref: '#/definitions/NamespaceWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/namespace/:label/accesses", handlers.getNamespaceAccessHandlers)
+	r.engine.GET("/namespaces/:label/accesses", handlers.getNamespaceAccessHandler)
+
+	// swagger:operation GET /volumes/{label}/accesses Permissions GetVolumeWithPermissions
+	//
+	// Get volume with user permissions.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: volume response
+	//     schema:
+	//       $ref: '#/definitions/VolumeWithPermissions'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/volumes/:label/accesses", handlers.getVolumeAccessHandler)
 }

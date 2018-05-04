@@ -265,5 +265,5 @@ func (b BillingDummyClient) GetVolumeTariff(ctx context.Context, tariffID string
 }
 
 func (b BillingDummyClient) String() string {
-	return "billing service dummy"
+	return "billing service dummy client"
 }

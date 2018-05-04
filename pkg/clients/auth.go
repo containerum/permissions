@@ -97,7 +97,7 @@ func (as AuthDummyClient) UpdateUserAccess(ctx context.Context, userID string, a
 }
 
 func (AuthDummyClient) String() string {
-	return "ch-auth client dummy"
+	return "auth dummy client"
 }
 
 func (AuthDummyClient) Close() error {

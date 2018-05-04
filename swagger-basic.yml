@@ -17,6 +17,24 @@ parameters:
     $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserIDHeader"
   UserRoleHeader:
     $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserRoleHeader"
+  PageNum:
+    name: page
+    in: query
+    type: integer
+    minimum: 0
+    required: false
+  PerPageLimit:
+    name: per_page
+    in: query
+    type: integer
+    minimum: 0
+    required: false
+  Filters:
+    name: filter
+    in: query
+    type: string
+    required: false
+    description: A set of filters separated with comma. See "dao" package for more information.
 responses:
   error:
     description: cherry error

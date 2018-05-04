@@ -12,6 +12,13 @@ import (
 
 type VolumeActions interface {
 	CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error
+	GetVolume(ctx context.Context, label string) (model.VolumeWithPermissions, error)
+	GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error)
+	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error)
+}
+
+var StandardVolumeFilter = dao.VolumeFilter{
+	NotDeleted: true,
 }
 
 func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error {
@@ -77,4 +84,45 @@ func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest
 	})
 
 	return err
+}
+
+func (s *Server) GetVolume(ctx context.Context, label string) (model.VolumeWithPermissions, error) {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"label":   label,
+	}).Infof("get volume")
+
+	return s.db.VolumeByLabel(ctx, userID, label)
+}
+
+func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error) {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"filters": filters,
+	}).Infof("get user volumes")
+
+	var filter dao.VolumeFilter
+	if IsAdminRole(ctx) {
+		filter = dao.ParseVolumeFilter(filters...)
+	} else {
+		filter = StandardVolumeFilter
+	}
+
+	return s.db.UserVolumes(ctx, userID, filter)
+}
+
+func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error) {
+	s.log.WithFields(logrus.Fields{
+		"page":     page,
+		"per_page": perPage,
+		"filters":  filters,
+	}).Infof("get all volumes")
+
+	filter := dao.ParseVolumeFilter()
+	filter.Limit = perPage
+	filter.SetPage(page)
+
+	return s.db.AllVolumes(ctx, filter)
 }

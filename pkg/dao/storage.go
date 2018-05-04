@@ -19,7 +19,7 @@ func (dao *DAO) CreateStorage(ctx context.Context, storage *model.Storage) error
 	return dao.handleError(err)
 }
 
-func (dao *DAO) GetStorages(ctx context.Context) (ret []model.Storage, err error) {
+func (dao *DAO) AllStorages(ctx context.Context) (ret []model.Storage, err error) {
 	dao.log.Debugf("get storage list")
 
 	err = dao.db.Model(&ret).Select()
