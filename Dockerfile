@@ -9,7 +9,7 @@ COPY --from=builder /bin/permissions /app
 ENV MODE="release" \
   LOG_LEVEL=4 \
   DB_URL="postgres://postgres@localhost:5432/postgres?sslmode=disabled" \
-  LISTEN_ADDR=":4242"
+  LISTEN_ADDR=":4242" \
   AUTH_ADDR="ch-auth:1112" \
   USER_ADDR="user-manager:8111"
 EXPOSE 4242
