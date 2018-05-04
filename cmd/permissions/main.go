@@ -62,6 +62,9 @@ func main() {
 			&LogLevelFlag,
 			&DBAddrFlag,
 			&ListenAddrFlag,
+			&AuthAddrFlag,
+			&KubeAPIAddrFlag,
+			&UserAddrFlag,
 			&BillingAddrFlag,
 		},
 		Before: func(ctx *cli.Context) error {
