@@ -12,9 +12,10 @@ import (
 )
 
 type Clients struct {
-	Auth clients.AuthClient
-	User clients.UserManagerClient
-	Kube clients.KubeAPIClient
+	Auth    clients.AuthClient
+	User    clients.UserManagerClient
+	Kube    clients.KubeAPIClient
+	Billing clients.BillingClient
 }
 
 func (c *Clients) Close() error {

@@ -5,6 +5,7 @@ import (
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	"github.com/go-pg/pg"
 )
 
 func (dao *DAO) CreateStorage(ctx context.Context, storage *model.Storage) error {
@@ -47,6 +48,8 @@ func (dao *DAO) UpdateStorage(ctx context.Context, name string, storage model.St
 }
 
 func (dao *DAO) DeleteStorage(ctx context.Context, storage model.Storage) error {
+	dao.log.WithField("name", storage.Name).Debugf("delete storage")
+
 	result, err := dao.db.Model(&storage).
 		WherePK().
 		WhereOr("name = ?name").
@@ -58,4 +61,21 @@ func (dao *DAO) DeleteStorage(ctx context.Context, storage model.Storage) error 
 		return errors.ErrResourceNotExists().AddDetailF("storage %s not exists", storage.Name)
 	}
 	return nil
+}
+
+func (dao *DAO) LeastUsedStorage(ctx context.Context, minFree int) (ret model.Storage, err error) {
+	dao.log.WithField("min_free", minFree).Debugf("get least used storage with constraint")
+
+	err = dao.db.Model(&ret).
+		Where("size - used >= ?", minFree).
+		OrderExpr("used ASC").
+		First()
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrNoFreeStorages()
+	default:
+		err = dao.handleError(err)
+	}
+
+	return
 }

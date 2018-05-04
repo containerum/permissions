@@ -71,3 +71,9 @@ SID = "permissions"
     StatusHTTP = 400
     Message = "Resource quota exceeded"
     Kind = 11
+
+[[error]]
+    Name = "ErrNoFreeStorages"
+    StatusHTTP = 507
+    Message = "No free storages found for volume"
+    Kind = 12

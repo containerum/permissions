@@ -210,13 +210,15 @@ func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace)
 
 	_, err := dao.db.Model(namespace).
 		OnConflict("(owner_user_id, label) DO UPDATE").
+		Set("deleted = FALSE").
+		Set("delete_time = NULL").
+		Set("create_time = now()").
+		Set("tariff_id = ?tariff_id").
 		Set("ram = ?ram").
 		Set("cpu = ?cpu").
 		Set("max_ext_services = ?max_ext_services").
 		Set("max_int_services = ?max_int_services").
 		Set("max_traffic = ?max_traffic").
-		Set("deleted = FALSE").
-		Set("delete_time = NULL").
 		Returning("*").
 		Insert()
 	if err != nil {

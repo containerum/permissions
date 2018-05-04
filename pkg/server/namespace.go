@@ -50,7 +50,7 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]mo
 	s.log.WithField("user_id", userID).Infof("get user namespaces")
 
 	var filter dao.NamespaceFilter
-	if httputil.MustGetUserRole(ctx) != "admin" {
+	if !IsAdminRole(ctx) {
 		filter = StandardNamespaceFilter
 	} else {
 		filter = dao.ParseNamespaceFilter(filters...)

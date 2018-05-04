@@ -79,3 +79,7 @@ required = [
   name = "github.com/containerum/cherry"
   version = "~1.0.1-rc2"
 
+
+[[constraint]]
+  name = "github.com/containerum/bill-external"
+  version = "~1.0.0"
