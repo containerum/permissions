@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	umtypes "git.containerum.net/ch/user-manager/pkg/models"
@@ -94,6 +95,10 @@ func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context) (map[string
 	return *ret, nil
 }
 
+func (u *UserManagerHTTPClient) String() string {
+	return fmt.Sprintf("user-manager http client: url=%s", u.client.HostURL)
+}
+
 type UserManagerDummyClient struct {
 	log         *logrus.Entry
 	givenLogins map[string]umtypes.User
@@ -147,4 +152,8 @@ func (u *UserManagerDummyClient) UserLoginIDList(ctx context.Context) (map[strin
 	u.log.Info("get user info by id")
 	id := uuid.NewV4().String()
 	return map[string]string{id: "fake-" + id + "@test.com"}, nil
+}
+
+func (u *UserManagerDummyClient) String() string {
+	return "user-manager dummy client"
 }

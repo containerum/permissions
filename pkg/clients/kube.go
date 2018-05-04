@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	"git.containerum.net/ch/kube-api/pkg/model"
@@ -102,6 +103,10 @@ func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.Namesp
 	return nil
 }
 
+func (k *KubeAPIHTTPClient) String() string {
+	return fmt.Sprintf("kube-api http client: url=%s", k.client.HostURL)
+}
+
 type KubeAPIDummyClient struct {
 	log *logrus.Entry
 }
@@ -141,4 +146,8 @@ func (k *KubeAPIDummyClient) DeleteNamespace(ctx context.Context, ns model.Names
 	}).Debug("set namespace quota")
 
 	return nil
+}
+
+func (k *KubeAPIDummyClient) String() string {
+	return "kube-api dummy client"
 }
