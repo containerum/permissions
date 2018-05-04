@@ -47,4 +47,10 @@ var (
 		EnvVars: []string{"KUBE_API_ADDR"},
 		Value:   "localhost:1212",
 	}
+
+	BillingAddrFlag = cli.StringFlag{
+		Name:    "billing_addr",
+		EnvVars: []string{"BILLING_ADDR"},
+		Value:   "localhost:5000",
+	}
 )

@@ -62,6 +62,7 @@ func main() {
 			&LogLevelFlag,
 			&DBAddrFlag,
 			&ListenAddrFlag,
+			&BillingAddrFlag,
 		},
 		Before: func(ctx *cli.Context) error {
 			prettyPrintFlags(ctx)
