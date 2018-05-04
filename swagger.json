@@ -847,6 +847,43 @@
           }
         }
       }
+    },
+    "/volumes/{label}/accesses": {
+      "get": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Get volume with user permissions.",
+        "operationId": "GetVolumeWithPermissions",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "volume response",
+            "schema": {
+              "$ref": "#/definitions/VolumeWithPermissions"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
     }
   },
   "definitions": {
