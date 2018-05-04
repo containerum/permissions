@@ -127,7 +127,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//       $ref: '#/definitions/VolumeWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/volumes/:volume", handlers.getVolumeHandler)
+	r.engine.GET("/volumes/:label", handlers.getVolumeHandler)
 
 	// swagger:operation GET /volumes Volumes GetUserVolumes
 	//

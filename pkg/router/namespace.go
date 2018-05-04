@@ -215,7 +215,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//       $ref: '#/definitions/NamespaceWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/namespaces/:namespace", handlers.getNamespaceHandler)
+	r.engine.GET("/namespaces/:label", handlers.getNamespaceHandler)
 
 	// swagger:operation GET /namespaces Namespaces GetUserNamespaces
 	//

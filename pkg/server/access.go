@@ -17,6 +17,7 @@ type AccessActions interface {
 	SetUserAccesses(ctx context.Context, accessLevel model.AccessLevel) error
 	GetNamespaceAccess(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
 	SetNamespaceAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error
+	GetVolumeAccess(ctx context.Context, label string) (model.VolumeWithPermissions, error)
 	SetVolumeAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error
 	DeleteNamespaceAccess(ctx context.Context, label string, targetUser string) error
 	DeleteVolumeAccess(ctx context.Context, label string, targetUser string) error
@@ -184,6 +185,32 @@ func (s *Server) SetVolumeAccess(ctx context.Context, label, targetUser string, 
 	})
 
 	return err
+}
+
+func (s *Server) GetVolumeAccess(ctx context.Context, label string) (model.VolumeWithPermissions, error) {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"label":   label,
+	}).Infof("get volume access")
+
+	vol, err := s.db.VolumeByLabel(ctx, userID, label)
+	if err != nil {
+		return model.VolumeWithPermissions{}, err
+	}
+	err = s.db.VolumePermissions(ctx, &vol)
+
+	// TODO: maybe better method for get user login list by id list
+	for i, perm := range vol.Permissions {
+		info, err := s.clients.User.UserInfoByID(ctx, perm.UserID)
+		if err != nil {
+			return model.VolumeWithPermissions{}, err
+		}
+
+		vol.Permissions[i].UserLogin = info.Login
+	}
+
+	return vol, err
 }
 
 func (s *Server) DeleteNamespaceAccess(ctx context.Context, label string, targetUser string) error {
