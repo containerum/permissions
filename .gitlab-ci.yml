@@ -1,23 +1,26 @@
 stages:
-  # - test
-  # - dev-release
-  # - dev-deploy
+  - test
+  - build
+  - deploy
+
 
 variables:
-  TAG_DEV: develop
-  TAG: production
   CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}
-  DEVELOP_NAMESPACE: hosting
+  NAMESPACE: hosting
 
-test-build:
+.docker-login: &docker-login
+  before_script:
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+
+build:
   services:
   image: docker:latest
   stage: test
   tags:
     - build
   script:
-    - docker build -t ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF} .
-    - docker rmi --force ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}
+    - docker build -t ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8} .
+    - docker rmi --force ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8}
   except:
     - develop
     - master
@@ -25,23 +28,23 @@ test-build:
     - tags
 
 
-dev-release:
+build:
   image: docker:latest
-  stage: dev-release
+  stage: build
   tags:
     - build
+  <<: *docker-login
   script:
-    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
-    - docker build -t ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}  .
-    - docker push ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}
-    - docker rmi --force ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}
+    - docker build -t ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8} .
+    - docker push ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8}
+    - docker rmi --force ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8}
   only:
     - develop
 
 
-dev-deploy:
+deploy:
   image: exon/helm
-  stage: dev-deploy
+  stage: deploy
   tags:
     - develop
   before_script:
@@ -53,6 +56,6 @@ dev-deploy:
     name: develop
   script:
     - cd deploy
-    - helm upgrade --install  --namespace=${DEVELOP_NAMESPACE} ${CI_PROJECT_NAME} --set image.tag=${TAG_DEV}-${CI_BUILD_REF} --set environment=develop --values values.yaml --values env/develop.yaml .
+    - helm upgrade --install ${CI_PROJECT_NAME} --namespace=${NAMESPACE} --set image.tag=${CI_COMMIT_SHA:0:8} --values values.yaml --values env/develop.yaml .
   only:
     - develop

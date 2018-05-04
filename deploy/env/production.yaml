@@ -1,3 +1,0 @@
-env:
-  CH_MC_TEXTLOG: "true"
-  CH_MC_DEBUG: "true"
