@@ -107,7 +107,7 @@ func (r *Router) SetupStorageRoutes(acts server.StorageActions) {
 	//     $ref: '#/responses/error'
 	group.GET("/", handlers.getStoragesHandler)
 
-	// swagger:operation POST /storages/{name} Storages UpdateStorage
+	// swagger:operation PUT /storages/{name} Storages UpdateStorage
 	//
 	// Update storage.
 	//

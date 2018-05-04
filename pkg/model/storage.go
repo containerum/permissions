@@ -67,5 +67,5 @@ type UpdateStorageRequest struct {
 	Name     *string  `json:"name,omitempty"`
 	Size     *int     `json:"size,omitempty"`
 	Replicas *int     `json:"replicas,omitempty"`
-	IPs      []string `json:"replicas,omitempty"`
+	IPs      []string `json:"ips,omitempty"`
 }
