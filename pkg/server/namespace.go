@@ -47,7 +47,10 @@ func (s *Server) GetNamespace(ctx context.Context, label string) (model.Namespac
 func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]model.NamespaceWithPermissions, error) {
 	userID := httputil.MustGetUserID(ctx)
 
-	s.log.WithField("user_id", userID).Infof("get user namespaces")
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"filters": filters,
+	}).Infof("get user namespaces")
 
 	var filter dao.NamespaceFilter
 	if !IsAdminRole(ctx) {
@@ -60,7 +63,11 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]mo
 }
 
 func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error) {
-	s.log.Infof("get all namespaces")
+	s.log.WithFields(logrus.Fields{
+		"page":     page,
+		"per_page": perPage,
+		"filters":  filters,
+	}).Infof("get all namespaces")
 
 	filter := dao.ParseNamespaceFilter(filters...)
 	filter.Limit = perPage

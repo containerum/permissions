@@ -36,8 +36,8 @@ func init() {
 	}
 }
 
-func ParseVolumeFilter(filters ...string) NamespaceFilter {
-	var ret NamespaceFilter
+func ParseVolumeFilter(filters ...string) VolumeFilter {
+	var ret VolumeFilter
 	v := reflect.ValueOf(&ret)
 	for _, filter := range filters {
 		if field, ok := volFilterCache[filter]; ok {
