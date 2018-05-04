@@ -6,6 +6,13 @@ import (
 	"git.containerum.net/ch/permissions/pkg/model"
 )
 
+type StorageActions interface {
+	CreateStorage(ctx context.Context, storage model.Storage) error
+	GetStorages(ctx context.Context) ([]model.Storage, error)
+	UpdateStorage(ctx context.Context, name string, req model.UpdateStorageRequest) error
+	DeleteStorage(ctx context.Context, name string) error
+}
+
 func (s *Server) CreateStorage(ctx context.Context, storage model.Storage) error {
 	s.log.Infof("create storage %+v", storage)
 
@@ -19,7 +26,7 @@ func (s *Server) GetStorages(ctx context.Context) ([]model.Storage, error) {
 	return s.db.GetStorages(ctx)
 }
 
-func (s *Server) UpdateStorage(ctx context.Context, name string, req *model.UpdateStorageRequest) error {
+func (s *Server) UpdateStorage(ctx context.Context, name string, req model.UpdateStorageRequest) error {
 	s.log.Infof("update storage")
 
 	var storage model.Storage
