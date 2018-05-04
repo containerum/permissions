@@ -16,6 +16,8 @@ import (
 	"git.containerum.net/ch/permissions/pkg/utils/version"
 	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/cherry/adaptors/gonic"
+	"github.com/containerum/utils/httputil"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -63,6 +65,7 @@ func main() {
 			&DBAddrFlag,
 			&ListenAddrFlag,
 			&BillingAddrFlag,
+			&CORSFlag,
 		},
 		Before: func(ctx *cli.Context) error {
 			prettyPrintFlags(ctx)
@@ -95,6 +98,16 @@ func main() {
 			g.Use(gonic.Recovery(errors.ErrInternal, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin_recovery"))))
 			g.Use(ginrus.Ginrus(logrus.StandardLogger(), time.RFC3339, true))
 			binding.Validator = &validation.GinValidatorV9{Validate: validate} // gin has no local validator
+
+			if ctx.Bool(CORSFlag.Name) {
+				corsCfg := cors.DefaultConfig()
+				corsCfg.AllowAllOrigins = true
+				corsCfg.AddAllowHeaders(
+					httputil.UserIDXHeader,
+					httputil.UserRoleXHeader,
+				)
+				g.Use(cors.New(corsCfg))
+			}
 
 			r := router.NewRouter(g, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
 			r.SetupAccessRoutes(srv)

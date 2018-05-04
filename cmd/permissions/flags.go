@@ -53,4 +53,8 @@ var (
 		EnvVars: []string{"BILLING_ADDR"},
 		Value:   "localhost:5000",
 	}
+
+	CORSFlag = cli.BoolFlag{
+		Name: "cors",
+	}
 )

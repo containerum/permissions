@@ -7,7 +7,6 @@ import (
 	"git.containerum.net/ch/permissions/static"
 	"github.com/containerum/cherry"
 	"github.com/containerum/utils/httputil"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/universal-translator"
 	"gopkg.in/go-playground/validator.v9"
@@ -75,13 +74,6 @@ type Router struct {
 }
 
 func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
-	corsCfg := cors.DefaultConfig()
-	corsCfg.AllowAllOrigins = true
-	corsCfg.AddAllowHeaders(
-		httputil.UserIDXHeader,
-		httputil.UserRoleXHeader,
-	)
-	engine.Use(cors.New(corsCfg))
 	engine.StaticFS("/static", static.HTTP)
 
 	ret := &Router{
