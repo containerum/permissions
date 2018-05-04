@@ -108,3 +108,13 @@ func (vp *VolumeWithPermissions) Mask() {
 		vp.Permissions = nil
 	}
 }
+
+// VolumeCreateRequest is a request object for creating volume
+//
+// swagger:model
+type VolumeCreateRequest struct {
+	// swagger:strfmt uuid
+	TariffID string `json:"tariff_id"`
+
+	Label string `json:"label"`
+}
