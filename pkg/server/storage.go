@@ -26,7 +26,7 @@ func (s *Server) CreateStorage(ctx context.Context, storage model.Storage) error
 func (s *Server) GetStorages(ctx context.Context) ([]model.Storage, error) {
 	s.log.Infof("get storages")
 
-	return s.db.GetStorages(ctx)
+	return s.db.AllStorages(ctx)
 }
 
 func (s *Server) UpdateStorage(ctx context.Context, name string, req model.UpdateStorageRequest) error {
