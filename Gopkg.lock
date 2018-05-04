@@ -46,7 +46,10 @@
 
 [[projects]]
   name = "github.com/containerum/bill-external"
-  packages = ["models"]
+  packages = [
+    "errors",
+    "models"
+  ]
   revision = "b82383afa02471b3ca82c9d9721f606b97fda3f8"
   version = "v1.0.0"
 
@@ -468,6 +471,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e5795e929b974af7b7ba50531b7afaac188685bdb30a5e1b14a0608feb280cfa"
+  inputs-digest = "191591239148df92a7b6c63421fecbf1f75180722bc824418f798449ec9c9c98"
   solver-name = "gps-cdcl"
   solver-version = 1
