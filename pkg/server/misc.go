@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 
-	"git.containerum.net/ch/utils/httputil"
 	"github.com/containerum/bill-external/errors"
 	billing "github.com/containerum/bill-external/models"
+	"github.com/containerum/utils/httputil"
 )
 
 // IsAdminRole checks that request came from user with admin permissions.

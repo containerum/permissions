@@ -100,6 +100,7 @@ func main() {
 			r.SetupAccessRoutes(srv)
 			r.SetupNamespaceRoutes(srv)
 			r.SetupStorageRoutes(srv)
+			r.SetupVolumeHandlers(srv)
 
 			// for graceful shutdown
 			httpsrv := &http.Server{

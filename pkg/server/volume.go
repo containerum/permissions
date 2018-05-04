@@ -10,6 +10,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type VolumeActions interface {
+	CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error
+}
+
 func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
