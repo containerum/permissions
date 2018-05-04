@@ -59,3 +59,13 @@ func (s *Storage) BeforeUpdate(db orm.DB) error {
 	}
 	return nil
 }
+
+// UpdateStorageRequest represents request object for updating storage
+//
+// swagger:model
+type UpdateStorageRequest struct {
+	Name     *string  `json:"name,omitempty"`
+	Size     *int     `json:"size,omitempty"`
+	Replicas *int     `json:"replicas,omitempty"`
+	IPs      []string `json:"replicas,omitempty"`
+}
