@@ -4,21 +4,18 @@ strategy:
   maxSurge: 1
   maxUnavailable: 1
 
-
 name: permissions
 
 image:
   secret: gitlab-registry
   repository: registry.containerum.net/ch/permissions
-  tag: staging
+  tag: latest
   pullPolicy: Always
-
-environment: develop
 
 service:
   name: permissions
-  externalPort: 6543
+  externalPort: 4242
   externalIP: 192.168.88.210
-  internalPort: 6543
+  internalPort: 4242
 
 resources: {}

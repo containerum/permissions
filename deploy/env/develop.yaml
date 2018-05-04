@@ -1,3 +1,7 @@
 env:
-  CH_MC_TEXTLOG: "true"
-  CH_MC_DEBUG: "true"
+  MODE: "release"
+  LOG_LEVEL: 4
+  DB_URL: "postgres://postgres@localhost:5432/postgres?sslmode=disabled"
+  LISTEN_ADDR: "4242"
+  AUTH_ADDR: "ch-auth:1112"
+  USER_ADDR: "user-manager:8111"
