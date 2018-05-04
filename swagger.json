@@ -100,6 +100,15 @@
             "name": "label",
             "in": "path",
             "required": true
+          },
+          {
+            "$ref": "#/parameters/Filters"
+          },
+          {
+            "$ref": "#/parameters/PageNum"
+          },
+          {
+            "$ref": "#/parameters/PerPageLimit"
           }
         ],
         "responses": {
@@ -220,6 +229,55 @@
         }
       }
     },
+    "/admin/volumes": {
+      "get": {
+        "tags": [
+          "Volumes"
+        ],
+        "summary": "Get all volumes (admin only).",
+        "operationId": "GetAllVolumes",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/parameters/Filters"
+          },
+          {
+            "$ref": "#/parameters/PageNum"
+          },
+          {
+            "$ref": "#/parameters/PerPageLimit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "volumes response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VolumeWithPermissions"
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
+    },
     "/namespaces": {
       "get": {
         "tags": [
@@ -242,6 +300,9 @@
             "name": "label",
             "in": "path",
             "required": true
+          },
+          {
+            "$ref": "#/parameters/Filters"
           }
         ],
         "responses": {
@@ -591,6 +652,47 @@
       }
     },
     "/volumes": {
+      "get": {
+        "tags": [
+          "Volumes"
+        ],
+        "summary": "Get user volumes.",
+        "operationId": "GetUserVolumes",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/parameters/Filters"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "volumes response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VolumeWithPermissions"
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      },
       "post": {
         "description": "Should be chosen first storage, where free space allows to create volume with provided capacity.",
         "tags": [
@@ -620,6 +722,43 @@
         "responses": {
           "201": {
             "description": "volume created"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
+    },
+    "/volumes/{label}": {
+      "get": {
+        "tags": [
+          "Volumes"
+        ],
+        "summary": "Get volume.",
+        "operationId": "GetVolume",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "volume response",
+            "schema": {
+              "$ref": "#/definitions/VolumeWithPermissions"
+            }
           },
           "default": {
             "$ref": "#/responses/error"
@@ -2904,6 +3043,24 @@
     }
   },
   "parameters": {
+    "Filters": {
+      "type": "string",
+      "description": "A set of filters separated with comma. See \"dao\" package for more information.",
+      "name": "filter",
+      "in": "query"
+    },
+    "PageNum": {
+      "minimum": 0,
+      "type": "integer",
+      "name": "page",
+      "in": "query"
+    },
+    "PerPageLimit": {
+      "minimum": 0,
+      "type": "integer",
+      "name": "per_page",
+      "in": "query"
+    },
     "SubstitutedUserID": {
       "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
     },

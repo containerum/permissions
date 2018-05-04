@@ -142,6 +142,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//    in: path
 	//    required: true
 	//    type: string
+	//  - $ref: '#/parameters/Filters'
 	// responses:
 	//   '200':
 	//     description: volumes response
@@ -166,6 +167,9 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//    in: path
 	//    required: true
 	//    type: string
+	//  - $ref: '#/parameters/Filters'
+	//  - $ref: '#/parameters/PageNum'
+	//  - $ref: '#/parameters/PerPageLimit'
 	// responses:
 	//   '200':
 	//     description: volumes response
