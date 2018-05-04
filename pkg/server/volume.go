@@ -12,6 +12,9 @@ import (
 
 type VolumeActions interface {
 	CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error
+	GetVolume(ctx context.Context, label string) (model.VolumeWithPermissions, error)
+	GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error)
+	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error)
 }
 
 func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error {
