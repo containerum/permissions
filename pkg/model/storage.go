@@ -1,5 +1,10 @@
 package model
 
+import (
+	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/go-pg/pg/orm"
+)
+
 // Storage describes volumes storage
 //
 // swagger:model
@@ -20,4 +25,37 @@ type Storage struct {
 	IPs []string `sql:"ips,notnull,type:inet[],array" json:"ips"`
 
 	Volumes []*Volume `pg:"fk:storage_id" sql:"-" json:"volumes"`
+}
+
+func (s *Storage) BeforeInsert(db orm.DB) error {
+	cnt, err := db.Model(s).Where("name = ?name").Count()
+	if err != nil {
+		return err
+	}
+	if cnt > 0 {
+		return errors.ErrResourceAlreadyExists().AddDetailF("storage %s already exists", s.Name)
+	}
+	return nil
+}
+
+func (s *Storage) BeforeUpdate(db orm.DB) error {
+	oldStorage := *s
+	err := db.Model(&oldStorage).WherePK().Select()
+	if err != nil {
+		return err
+	}
+	if oldStorage.Used != s.Used {
+		return errors.ErrRequestValidationFailed().AddDetailF("can`t change \"used\" for storage")
+	}
+	if s.Size < s.Used {
+		return errors.ErrQuotaExceeded().AddDetailF("storage quota exceeded")
+	}
+	cnt, err := db.Model(s).Where("name = ?name").Count()
+	if err != nil {
+		return err
+	}
+	if cnt > 0 {
+		return errors.ErrResourceAlreadyExists().AddDetailF("storage with this name already exist")
+	}
+	return nil
 }

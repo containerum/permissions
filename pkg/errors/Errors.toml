@@ -65,3 +65,9 @@ SID = "permissions"
     StatusHTTP = 400
     Message = "Resource already exists"
     Kind = 10
+
+[[error]]
+    Name = "ErrQuotaExceeded"
+    StatusHTTP = 400
+    Message = "Resource quota exceeded"
+    Kind = 11

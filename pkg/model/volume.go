@@ -42,7 +42,12 @@ func (v *Volume) BeforeInsert(db orm.DB) error {
 		return errors.ErrResourceAlreadyExists().AddDetailF("volume %s already exists", v.Label)
 	}
 
-	return nil
+	_, err = db.Model((*Storage)(nil)).
+		Where("id", v.StorageID).
+		Set("used = used + (?)", v.Capacity).
+		Update()
+
+	return err
 }
 
 func (v *Volume) AfterUpdate(db orm.DB) error {
@@ -67,23 +72,13 @@ func (v *Volume) AfterUpdate(db orm.DB) error {
 }
 
 func (v *Volume) AfterInsert(db orm.DB) error {
-	err := db.Insert(&Permission{
+	return db.Insert(&Permission{
 		ResourceID:         v.ID,
 		UserID:             v.OwnerUserID,
 		ResourceKind:       "Volume",
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})
-	if err != nil {
-		return err
-	}
-
-	_, err = db.Model((*Storage)(nil)).
-		Where("id", v.StorageID).
-		Set("used = used + (?)", v.Capacity).
-		Update()
-
-	return err
 }
 
 func (v *Volume) Mask() {
