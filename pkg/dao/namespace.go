@@ -303,6 +303,21 @@ func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace)
 	return nil
 }
 
+func (dao *DAO) DeleteNamespaceVolumes(ctx context.Context, namespace model.Namespace) (deleted []model.Volume, err error) {
+	dao.log.Debugf("delete namespace volumes %+v", namespace)
+
+	_, err = dao.db.Model(&deleted).
+		Where("ns_id = ?", namespace.ID).
+		Where("NOT deleted").
+		Set("active = FALSE").
+		Set("deleted = TRUE").
+		Set("deleted_time = now()").
+		Returning("*").
+		Update()
+	err = dao.handleError(err)
+	return
+}
+
 func (dao *DAO) DeleteAllUserNamespaces(ctx context.Context, userID string) (deleted []model.Namespace, err error) {
 	dao.log.WithField("user_id", userID).Debugf("delete user namespaces")
 
@@ -322,5 +337,20 @@ func (dao *DAO) DeleteAllUserNamespaces(ctx context.Context, userID string) (del
 		return
 	}
 
+	return
+}
+
+func (dao *DAO) DeleteAllUserNamespaceVolumes(ctx context.Context, userID string) (deleted []model.Volume, err error) {
+	dao.log.WithField("user_id", userID).Debugf("delete user namespace volumes")
+
+	_, err = dao.db.Model(&deleted).
+		Where("owner_user_id = ?", userID).
+		Where("NOT deleted").
+		Set("active = FALSE").
+		Set("deleted = TRUE").
+		Set("deleted_time = now()").
+		Returning("*").
+		Update()
+	err = dao.handleError(err)
 	return
 }

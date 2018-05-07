@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
@@ -87,6 +88,33 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 
 		if createErr := tx.CreateNamespace(ctx, &ns); createErr != nil {
 			return createErr
+		}
+
+		if tariff.VolumeSize > 0 {
+			storage, getErr := tx.LeastUsedStorage(ctx, tariff.VolumeSize)
+			if getErr != nil {
+				return getErr
+			}
+
+			vol := model.Volume{
+				Resource: model.Resource{
+					OwnerUserID: userID,
+					Label:       fmt.Sprintf("%s-volume", ns.Label),
+				},
+				Capacity:    tariff.VolumeSize,
+				Replicas:    2,
+				NamespaceID: &ns.ID,
+				GlusterName: VolumeGlusterName(ns.Label, userID),
+				StorageID:   storage.ID,
+			}
+			vol.Active = new(bool)
+
+			createErr := tx.CreateVolume(ctx, &vol)
+			if createErr != nil {
+				return createErr
+			}
+
+			// TODO: create it actually
 		}
 
 		if createErr := s.clients.Kube.CreateNamespace(ctx, kubeNS(ns)); createErr != nil {
@@ -283,9 +311,16 @@ func (s *Server) DeleteNamespace(ctx context.Context, label string) error {
 	}).Infof("delete namespace")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		ns := &model.Namespace{Resource: model.Resource{OwnerUserID: userID, Label: label}}
+		ns, getErr := tx.NamespaceByLabel(ctx, userID, label)
+		if getErr != nil {
+			return getErr
+		}
 
-		if delErr := tx.DeleteNamespace(ctx, ns); delErr != nil {
+		if _, delErr := tx.DeleteNamespaceVolumes(ctx, ns.Namespace); delErr != nil {
+			return delErr
+		}
+
+		if delErr := tx.DeleteNamespace(ctx, &ns.Namespace); delErr != nil {
 			return delErr
 		}
 
@@ -310,6 +345,10 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 	err := s.db.Transactional(func(tx *dao.DAO) error {
 		deletedNamespaces, delErr := tx.DeleteAllUserNamespaces(ctx, userID)
 		if delErr != nil {
+			return delErr
+		}
+
+		if _, delErr := tx.DeleteAllUserNamespaceVolumes(ctx, userID); delErr != nil {
 			return delErr
 		}
 
