@@ -23,8 +23,18 @@ func init() {
 			return err
 		}
 
+		if _, err := db.Model(&model.Volume{}).
+			Exec( /* language=sql */ `CREATE UNIQUE INDEX unique_vol_owner_label ON "?TableName" ("owner_user_id", "label") WHERE NOT deleted`); err != nil {
+			return err
+		}
+
 		return nil
 	}, func(db migrations.DB) error {
+		if _, err := db.Model(&model.Volume{}).
+			Exec( /* language=sql */ `DROP INDEX IF EXISTS unique_vol_owner_label`); err != nil {
+			return err
+		}
+
 		if _, err := db.Model(&model.Volume{}).Exec( /* language=sql*/
 			`ALTER TABLE "?TableName" DROP CONSTRAINT IF EXISTS namespace_fk`); err != nil {
 			return err

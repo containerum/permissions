@@ -191,17 +191,6 @@ func (dao *DAO) CreateVolume(ctx context.Context, vol *model.Volume) error {
 	dao.log.Debugf("create volume %+v", vol)
 
 	_, err := dao.db.Model(vol).
-		OnConflict("(owner_user_id, label) DO UPDATE").
-		Set("deleted = FALSE").
-		Set("delete_time = NULL").
-		Set("create_time = now()").
-		Set("tariff_id = ?tariff_id").
-		Set("active = TRUE").
-		Set("capacity = ?capacity").
-		Set("replicas = ?replicas").
-		Set("namespace_id = ?namespace_id").
-		Set("gluster_name = ?gluster_name").
-		Set("storage_id = ?storage_id").
 		Returning("*").
 		Insert()
 	return dao.handleError(err)

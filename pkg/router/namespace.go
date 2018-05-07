@@ -67,6 +67,22 @@ func (nh *namespaceHandlers) adminResizeNamespaceHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (nh *namespaceHandlers) renameNamespaceHandler(ctx *gin.Context) {
+	var req model.NamespaceRenameRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := nh.acts.RenameNamespace(ctx.Request.Context(), ctx.Param("label"), req.Label); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 func (nh *namespaceHandlers) deleteNamespaceHandler(ctx *gin.Context) {
 	if err := nh.acts.DeleteNamespace(ctx.Request.Context(), ctx.Param("label")); err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
@@ -195,6 +211,31 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.PUT("/admin/namespaces/:label", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespaceHandler)
+
+	// swagger:operation PUT /namespaces/{label}/rename Namespaces RenameNamespace
+	//
+	// Rename namespace.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/NamespaceRenameRequest'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: namespace renamed
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.PUT("/namespaces/:label/rename", handlers.renameNamespaceHandler)
 
 	// swagger:operation DELETE /namespaces/{label} Namespaces DeleteNamespace
 	//

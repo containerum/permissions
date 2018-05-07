@@ -98,3 +98,10 @@ type NamespaceCreateRequest struct {
 	TariffID string `json:"tariff_id" binding:"required,uuid"`
 	Label    string `json:"label" binding:"required"`
 }
+
+// NamespaceRenameRequest contains parameters for renaming namespace
+//
+// swagger:model
+type NamespaceRenameRequest struct {
+	Label string `json:"label" binding:"required"`
+}

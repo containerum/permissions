@@ -19,6 +19,7 @@ type NamespaceActions interface {
 	GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error)
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
 	AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error
+	RenameNamespace(ctx context.Context, label, newLabel string) error
 	DeleteNamespace(ctx context.Context, label string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
 }
@@ -238,6 +239,34 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, label string, req mod
 		}
 		if setErr := s.clients.Kube.SetNamespaceQuota(ctx, kubeNS); setErr != nil {
 			return setErr
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *Server) RenameNamespace(ctx context.Context, label, newLabel string) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id":   userID,
+		"label":     label,
+		"new_label": newLabel,
+	}).Infof("rename namespace")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		ns, getErr := tx.NamespaceByLabel(ctx, userID, label)
+		if getErr != nil {
+			return getErr
+		}
+
+		if renameErr := tx.RenameNamespace(ctx, &ns.Namespace, newLabel); renameErr != nil {
+			return renameErr
+		}
+
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
+			return updErr
 		}
 
 		return nil

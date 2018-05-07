@@ -25,9 +25,9 @@ type Resource struct {
 	TariffID *string `sql:"tariff_id,type:uuid" json:"tariff_id,omitempty"`
 
 	// swagger:strfmt uuid
-	OwnerUserID string `sql:"owner_user_id,type:uuid,notnull,unique:unique_owner_label" json:"owner_user_id,omitempty"`
+	OwnerUserID string `sql:"owner_user_id,type:uuid,notnull" json:"owner_user_id,omitempty"`
 
-	Label string `sql:"label,notnull,unique:unique_owner_label" json:"label"`
+	Label string `sql:"label,notnull" json:"label"`
 }
 
 func (r *Resource) BeforeDelete(db orm.DB) error {
