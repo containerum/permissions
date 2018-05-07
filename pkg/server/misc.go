@@ -31,6 +31,10 @@ func CheckTariff(tariff billing.Tariff, isAdmin bool) error {
 	return nil
 }
 
+func NamespaceVolumeGlusterLabel(nsLabel string) string {
+	return fmt.Sprintf("%s-volume", nsLabel)
+}
+
 // VolumeGlusterName generates volume name for glusterfs (non-persistent volumes)
 func VolumeGlusterName(nsLabel, userID string) string {
 	glusterName := sha256.Sum256([]byte(fmt.Sprintf("%s-volume%s", nsLabel, userID)))
