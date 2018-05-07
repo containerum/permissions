@@ -13,6 +13,7 @@ import (
 )
 
 type NamespaceActions interface {
+	CreateNamespace(ctx context.Context, req model.NamespaceCreateRequest) error
 	GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
 	GetUserNamespaces(ctx context.Context, filters ...string) ([]model.NamespaceWithPermissions, error)
 	GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error)
