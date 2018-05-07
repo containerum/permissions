@@ -543,6 +543,48 @@
         }
       }
     },
+    "/namespaces/{label}/rename": {
+      "put": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Rename namespace.",
+        "operationId": "RenameNamespace",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NamespaceRenameRequest"
+            }
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace renamed"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      }
+    },
     "/storages": {
       "get": {
         "tags": [
@@ -1712,6 +1754,17 @@
         "tariff_id": {
           "type": "string",
           "x-go-name": "TariffID"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "NamespaceRenameRequest": {
+      "description": "NamespaceRenameRequest contains parameters for renaming namespace",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
