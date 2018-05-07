@@ -90,3 +90,11 @@ type NamespaceAdminResizeRequest struct {
 	MaxIntServices *int `json:"max_int_services"`
 	MaxTraffic     *int `json:"max_traffic"`
 }
+
+// NamespaceCreateRequest contains parameters for creating namespace
+//
+// swagger:model
+type NamespaceCreateRequest struct {
+	TariffID string `json:"tariff_id" binding:"required,uuid"`
+	Label    string `json:"label" binding:"required"`
+}

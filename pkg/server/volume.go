@@ -66,7 +66,7 @@ func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest
 
 		// TODO: create it actually
 
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, userID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
 			return updErr
 		}
 
