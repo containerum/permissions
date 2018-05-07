@@ -218,6 +218,34 @@ func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace)
 	return err
 }
 
+func (dao *DAO) RenameNamespace(ctx context.Context, namespace *model.Namespace, newLabel string) error {
+	dao.log.WithField("new_label", newLabel).Debugf("rename namespace %+v", namespace)
+
+	cnt, err := dao.db.Model(namespace).
+		Where("owner_user_id = ?owner_user_id").
+		Where("label = ?", newLabel).
+		Where("NOT deleted").
+		Count()
+	if err != nil {
+		return dao.handleError(err)
+	}
+	if cnt > 0 {
+		return errors.ErrResourceAlreadyExists().AddDetailF("namespace %s already exists", newLabel)
+	}
+
+	_, err = dao.db.Model(namespace).
+		WherePK().
+		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
+			return query.
+				Where("owner_user_id = ?owner_user_id").
+				Where("label = ?label"), nil
+		}).
+		Set("label = ?", newLabel).
+		Returning("*").
+		Update()
+	return dao.handleError(err)
+}
+
 func (dao *DAO) ResizeNamespace(ctx context.Context, namespace model.Namespace) error {
 	dao.log.Debugf("resize namespace %+v", namespace)
 
