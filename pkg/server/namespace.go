@@ -21,6 +21,7 @@ type NamespaceActions interface {
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
 	AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error
 	RenameNamespace(ctx context.Context, label, newLabel string) error
+	ResizeNamespace(ctx context.Context, label, newTariffID string) error
 	DeleteNamespace(ctx context.Context, label string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
 }

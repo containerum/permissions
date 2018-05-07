@@ -95,8 +95,10 @@ type NamespaceAdminResizeRequest struct {
 //
 // swagger:model
 type NamespaceCreateRequest struct {
+	// swagger:strfmt uuid
 	TariffID string `json:"tariff_id" binding:"required,uuid"`
-	Label    string `json:"label" binding:"required"`
+
+	Label string `json:"label" binding:"required"`
 }
 
 // NamespaceRenameRequest contains parameters for renaming namespace
@@ -104,4 +106,12 @@ type NamespaceCreateRequest struct {
 // swagger:model
 type NamespaceRenameRequest struct {
 	Label string `json:"label" binding:"required"`
+}
+
+// NamespaceResizeRequest contains parameters for changing namespace quota
+//
+// swagger:model
+type NamespaceResizeRequest struct {
+	// swagger:strfmt uuid
+	TariffID string `json:"tariff_id" binding:"required,uuid"`
 }
