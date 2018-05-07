@@ -209,16 +209,6 @@ func (dao *DAO) CreateNamespace(ctx context.Context, namespace *model.Namespace)
 	dao.log.Debugf("create namespace %+v", namespace)
 
 	_, err := dao.db.Model(namespace).
-		OnConflict("(owner_user_id, label) DO UPDATE").
-		Set("deleted = FALSE").
-		Set("delete_time = NULL").
-		Set("create_time = now()").
-		Set("tariff_id = ?tariff_id").
-		Set("ram = ?ram").
-		Set("cpu = ?cpu").
-		Set("max_ext_services = ?max_ext_services").
-		Set("max_int_services = ?max_int_services").
-		Set("max_traffic = ?max_traffic").
 		Returning("*").
 		Insert()
 	if err != nil {
@@ -263,8 +253,8 @@ func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace)
 	namespace.DeleteTime = &now
 
 	result, err := dao.db.Model(namespace).
-		WherePK().
 		Where("NOT deleted").
+		WherePK().
 		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
 			return query.
 				Where("label = ?label").
