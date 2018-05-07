@@ -319,6 +319,40 @@
             "$ref": "#/responses/error"
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Create namespace using billing.",
+        "operationId": "CreateNamespace",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NamespaceCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "namespace created"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
       }
     },
     "/namespaces/{label}": {
@@ -1663,6 +1697,21 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "Memory"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "NamespaceCreateRequest": {
+      "description": "NamespaceCreateRequest contains parameters for creating namespace",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "tariff_id": {
+          "type": "string",
+          "x-go-name": "TariffID"
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
