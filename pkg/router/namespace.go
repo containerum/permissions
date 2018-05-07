@@ -19,7 +19,7 @@ type namespaceHandlers struct {
 	acts server.NamespaceActions
 }
 
-func (nh *namespaceHandlers) adminCreateNamespace(ctx *gin.Context) {
+func (nh *namespaceHandlers) adminCreateNamespaceHandler(ctx *gin.Context) {
 	var req model.NamespaceAdminCreateRequest
 
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
@@ -35,7 +35,23 @@ func (nh *namespaceHandlers) adminCreateNamespace(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
-func (nh *namespaceHandlers) adminResizeNamespace(ctx *gin.Context) {
+func (nh *namespaceHandlers) createNamespaceHandler(ctx *gin.Context) {
+	var req model.NamespaceCreateRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := nh.acts.CreateNamespace(ctx.Request.Context(), req); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+func (nh *namespaceHandlers) adminResizeNamespaceHandler(ctx *gin.Context) {
 	var req model.NamespaceAdminResizeRequest
 
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
@@ -132,7 +148,28 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespace created
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.POST("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminCreateNamespace)
+	r.engine.POST("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminCreateNamespaceHandler)
+
+	// swagger:operation POST /namespaces Namespaces CreateNamespace
+	//
+	// Create namespace using billing.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/NamespaceCreateRequest'
+	// responses:
+	//   '201':
+	//     description: namespace created
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.POST("/namespaces", handlers.createNamespaceHandler)
 
 	// swagger:operation PUT /admin/namespaces/{label} Namespaces AdminResizeNamespace
 	//
@@ -157,7 +194,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespace resized
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/admin/namespaces/:label", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespace)
+	r.engine.PUT("/admin/namespaces/:label", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespaceHandler)
 
 	// swagger:operation DELETE /namespaces/{label} Namespaces DeleteNamespace
 	//

@@ -13,6 +13,7 @@ import (
 )
 
 type NamespaceActions interface {
+	CreateNamespace(ctx context.Context, req model.NamespaceCreateRequest) error
 	GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
 	GetUserNamespaces(ctx context.Context, filters ...string) ([]model.NamespaceWithPermissions, error)
 	GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error)
@@ -24,6 +25,81 @@ type NamespaceActions interface {
 
 var StandardNamespaceFilter = dao.NamespaceFilter{
 	NotDeleted: true,
+}
+
+func kubeNS(ns model.Namespace) kubeAPIModel.NamespaceWithOwner {
+	createdAt := ns.CreateTime.Format(time.RFC3339)
+	maxExtServices := uint(ns.MaxExtServices)
+	maxIntServices := uint(ns.MaxIntServices)
+	maxTraffic := uint(ns.MaxTraffic)
+	return kubeAPIModel.NamespaceWithOwner{
+		Namespace: kubeClientModel.Namespace{
+			CreatedAt:     &createdAt,
+			Label:         ns.Label,
+			Access:        string(model.AccessOwner),
+			MaxExtService: &maxExtServices,
+			MaxIntService: &maxIntServices,
+			MaxTraffic:    &maxTraffic,
+			Resources: kubeClientModel.Resources{
+				Hard: kubeClientModel.Resource{
+					CPU:    uint(ns.CPU),
+					Memory: uint(ns.RAM),
+				},
+			},
+		},
+		Name:   ns.ID,
+		Owner:  ns.OwnerUserID,
+		Access: string(model.AccessOwner),
+	}
+}
+
+func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateRequest) error {
+	userID := httputil.MustGetUserID(ctx)
+
+	s.log.WithFields(logrus.Fields{
+		"user_id":   userID,
+		"tariff_id": req.TariffID,
+		"label":     req.Label,
+	}).Infof("create namespace")
+
+	tariff, err := s.clients.Billing.GetNamespaceTariff(ctx, req.TariffID)
+	if err != nil {
+		return err
+	}
+
+	if chkErr := CheckTariff(tariff.Tariff, IsAdminRole(ctx)); chkErr != nil {
+		return chkErr
+	}
+
+	err = s.db.Transactional(func(tx *dao.DAO) error {
+		ns := model.Namespace{
+			Resource: model.Resource{
+				OwnerUserID: userID,
+				Label:       req.Label,
+			},
+			CPU:            tariff.CPULimit,
+			RAM:            tariff.MemoryLimit,
+			MaxExtServices: tariff.ExternalServices,
+			MaxIntServices: tariff.InternalServices,
+			MaxTraffic:     tariff.Traffic,
+		}
+
+		if createErr := tx.CreateNamespace(ctx, &ns); createErr != nil {
+			return createErr
+		}
+
+		if createErr := s.clients.Kube.CreateNamespace(ctx, kubeNS(ns)); createErr != nil {
+			return createErr
+		}
+
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
+			return updErr
+		}
+
+		return nil
+	})
+
+	return err
 }
 
 func (s *Server) GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error) {
@@ -100,35 +176,11 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 			return createErr
 		}
 
-		createdAt := ns.CreateTime.Format(time.RFC3339)
-		maxExtServices := uint(ns.MaxExtServices)
-		maxIntServices := uint(ns.MaxIntServices)
-		maxTraffic := uint(ns.MaxTraffic)
-		nsKube := kubeAPIModel.NamespaceWithOwner{
-			Namespace: kubeClientModel.Namespace{
-				CreatedAt:     &createdAt,
-				Label:         ns.Label,
-				Access:        string(model.AccessOwner),
-				MaxExtService: &maxExtServices,
-				MaxIntService: &maxIntServices,
-				MaxTraffic:    &maxTraffic,
-				Resources: kubeClientModel.Resources{
-					Hard: kubeClientModel.Resource{
-						CPU:    uint(ns.CPU),
-						Memory: uint(ns.RAM),
-					},
-				},
-			},
-			Name:   ns.ID,
-			Owner:  ns.OwnerUserID,
-			Access: string(model.AccessOwner),
-		}
-
-		if createErr := s.clients.Kube.CreateNamespace(ctx, nsKube); createErr != nil {
+		if createErr := s.clients.Kube.CreateNamespace(ctx, kubeNS(ns)); createErr != nil {
 			return createErr
 		}
 
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, userID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
 			return updErr
 		}
 

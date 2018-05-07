@@ -75,7 +75,7 @@ func (s *Server) SetUserAccesses(ctx context.Context, access model.AccessLevel) 
 			return err
 		}
 
-		if err := updateUserAccesses(ctx, s.clients.Auth, s.db, userID); err != nil {
+		if err := updateUserAccesses(ctx, s.clients.Auth, tx, userID); err != nil {
 			return err
 		}
 
@@ -113,7 +113,7 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, label, targetUser strin
 			return setErr
 		}
 
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
@@ -177,7 +177,7 @@ func (s *Server) SetVolumeAccess(ctx context.Context, label, targetUser string, 
 			return setErr
 		}
 
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
@@ -240,7 +240,7 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, label string, target
 			return delErr
 		}
 
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
@@ -277,7 +277,7 @@ func (s *Server) DeleteVolumeAccess(ctx context.Context, label string, targetUse
 			return delErr
 		}
 
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, targetUserInfo.ID); updErr != nil {
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, targetUserInfo.ID); updErr != nil {
 			return updErr
 		}
 
