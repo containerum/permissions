@@ -15,6 +15,8 @@ type VolumeActions interface {
 	GetVolume(ctx context.Context, label string) (model.VolumeWithPermissions, error)
 	GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error)
 	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error)
+	DeleteVolume(ctx context.Context, label string) error
+	DeleteAllUserVolumes(ctx context.Context) error
 }
 
 var StandardVolumeFilter = dao.VolumeFilter{
@@ -125,4 +127,58 @@ func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters .
 	filter.SetPage(page)
 
 	return s.db.AllVolumes(ctx, filter)
+}
+
+func (s *Server) DeleteVolume(ctx context.Context, label string) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"label":   label,
+	}).Infof("delete volume")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		vol := &model.Volume{Resource: model.Resource{OwnerUserID: userID, Label: label}}
+
+		if delErr := tx.DeleteVolume(ctx, vol); delErr != nil {
+			return delErr
+		}
+
+		// TODO: actually delete it
+
+		if unsubErr := s.clients.Billing.Unsubscribe(ctx, vol.ID); unsubErr != nil {
+			return unsubErr
+		}
+
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
+			return updErr
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *Server) DeleteAllUserVolumes(ctx context.Context) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithField("user_id", userID).Infof("delete all user volumes")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		_, delErr := tx.DeleteAllVolumes(ctx, userID)
+		if delErr != nil {
+			return delErr
+		}
+
+		// TODO: actually delete it
+
+		// TODO: unsubscribe all (needed method)
+
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
+			return updErr
+		}
+
+		return nil
+	})
+
+	return err
 }
