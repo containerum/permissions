@@ -125,3 +125,11 @@ type VolumeCreateRequest struct {
 type VolumeRenameRequest struct {
 	Label string `json:"label" binding:"required"`
 }
+
+// VolumeResizeRequest contains parameters for changing volume size
+//
+// swagger:model
+type VolumeResizeRequest struct {
+	// swagger:strfmt uuid
+	TariffID string `json:"tariff_id" binding:"required,uuid"`
+}

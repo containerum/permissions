@@ -907,6 +907,46 @@
           }
         }
       },
+      "put": {
+        "tags": [
+          "Volumes"
+        ],
+        "summary": "Resize volume.",
+        "operationId": "ResizeVolume",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VolumeResizeRequest"
+            }
+          },
+          {
+            "type": "string",
+            "name": "label",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "volume resized"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      },
       "delete": {
         "tags": [
           "Volumes"
@@ -3229,6 +3269,18 @@
         "label": {
           "type": "string",
           "x-go-name": "Label"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "VolumeResizeRequest": {
+      "description": "VolumeResizeRequest contains parameters for changing volume size",
+      "type": "object",
+      "properties": {
+        "tariff_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "TariffID"
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"

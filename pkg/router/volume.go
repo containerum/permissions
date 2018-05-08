@@ -115,6 +115,20 @@ func (vh *volumeHandlers) renameVolumeHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (vh *volumeHandlers) resizeVolumeHandler(ctx *gin.Context) {
+	var req model.VolumeResizeRequest
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(vh.tv.BadRequest(ctx, err))
+		return
+	}
+	if err := vh.acts.ResizeVolume(ctx.Request.Context(), ctx.Param("label"), req.TariffID); err != nil {
+		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	handlers := &volumeHandlers{tv: r.tv, acts: acts}
 
@@ -274,4 +288,29 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.PUT("/volumes/:label/rename", handlers.renameVolumeHandler)
+
+	// swagger:operation PUT /volumes/{label} Volumes ResizeVolume
+	//
+	// Resize volume.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/VolumeResizeRequest'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: volume resized
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.PUT("/volumes/:label", handlers.resizeVolumeHandler)
 }
