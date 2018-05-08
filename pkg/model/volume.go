@@ -114,7 +114,14 @@ func (vp *VolumeWithPermissions) Mask() {
 // swagger:model
 type VolumeCreateRequest struct {
 	// swagger:strfmt uuid
-	TariffID string `json:"tariff_id"`
+	TariffID string `json:"tariff_id" binding:"required,uuid"`
 
-	Label string `json:"label"`
+	Label string `json:"label" binding:"required"`
+}
+
+// VolumeRenameRequest is a request object for renaming volume
+//
+// swagger:model
+type VolumeRenameRequest struct {
+	Label string `json:"label" binding:"required"`
 }

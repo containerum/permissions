@@ -196,6 +196,40 @@ func (dao *DAO) CreateVolume(ctx context.Context, vol *model.Volume) error {
 	return dao.handleError(err)
 }
 
+func (dao *DAO) RenameVolume(ctx context.Context, vol *model.Volume, newLabel string) error {
+	dao.log.WithField("new_label", newLabel).Debugf("rename volume %+v", vol)
+
+	cnt, err := dao.db.Model(&model.Volume{Resource: model.Resource{OwnerUserID: vol.OwnerUserID, Label: newLabel}}).
+		Where("owner_user_id = ?owner_user_id").
+		Where("label = ?label").
+		Count()
+	if err != nil {
+		return dao.handleError(err)
+	}
+	if cnt >= 0 {
+		return errors.ErrResourceAlreadyExists().AddDetailF("volume %s already exists", newLabel)
+	}
+
+	result, err := dao.db.Model(vol).
+		WherePK().
+		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
+			return query.
+				Where("label = ?label").
+				Where("owner_user_id = ?owner_user_id"), nil
+		}).
+		Set("label = ?", newLabel).
+		Returning("*").
+		Update()
+	if err != nil {
+		return dao.handleError(err)
+	}
+	if result.RowsAffected() <= 0 {
+		return errors.ErrResourceNotExists().AddDetailF("volume %s not exists", vol.Label)
+	}
+
+	return nil
+}
+
 func (dao *DAO) DeleteVolume(ctx context.Context, vol *model.Volume) error {
 	dao.log.Debugf("delete volume %+v", vol)
 
