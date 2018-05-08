@@ -182,3 +182,30 @@ func (s *Server) DeleteAllUserVolumes(ctx context.Context) error {
 
 	return err
 }
+
+func (s *Server) RenameVolume(ctx context.Context, label, newLabel string) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id":   userID,
+		"label":     label,
+		"new_label": newLabel,
+	}).Infof("rename volume")
+
+	err := s.db.Transactional(func(tx *dao.DAO) error {
+		vol := &model.Volume{Resource: model.Resource{OwnerUserID: userID, Label: label}}
+
+		if renErr := tx.RenameVolume(ctx, vol, newLabel); renErr != nil {
+			return renErr
+		}
+
+		// TODO: rename it actually
+
+		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
+			return updErr
+		}
+
+		return nil
+	})
+
+	return err
+}
