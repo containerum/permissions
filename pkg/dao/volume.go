@@ -195,3 +195,52 @@ func (dao *DAO) CreateVolume(ctx context.Context, vol *model.Volume) error {
 		Insert()
 	return dao.handleError(err)
 }
+
+func (dao *DAO) DeleteVolume(ctx context.Context, vol *model.Volume) error {
+	dao.log.Debugf("delete volume %+v", vol)
+
+	result, err := dao.db.Model(vol).
+		WherePK().
+		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
+			return query.
+				Where("label = ?label").
+				Where("owner_user_id = ?owner_user_id"), nil
+		}).
+		Set("active = FALSE").
+		Set("deleted = TRUE").
+		Set("delete_time = now()").
+		Returning("*").
+		Update()
+	if err != nil {
+		return dao.handleError(err)
+	}
+
+	if result.RowsAffected() <= 0 {
+		return errors.ErrResourceNotExists().AddDetailF("volume %s not exists", vol.Label)
+	}
+
+	return nil
+}
+
+func (dao *DAO) DeleteAllVolumes(ctx context.Context, userID string) (deletedVols []model.Volume, err error) {
+	dao.log.WithField("user_id", userID).Debugf("delete all user volumes")
+
+	result, err := dao.db.Model(&deletedVols).
+		Where("owner_user_id = ?", userID).
+		Where("ns_id IS NULL").
+		Where("NOT deleted").
+		Set("active = FALSE").
+		Set("deleted = TRUE").
+		Set("delete_time = now()").
+		Returning("*").
+		Update()
+	if err != nil {
+		err = dao.handleError(err)
+		return
+	}
+	if result.RowsAffected() <= 0 {
+		err = errors.ErrResourceNotExists().AddDetailF("user has no volumes")
+	}
+
+	return
+}
