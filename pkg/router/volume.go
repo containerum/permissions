@@ -100,6 +100,21 @@ func (vh *volumeHandlers) deleteAllUserVolumesHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (vh *volumeHandlers) renameVolumeHandler(ctx *gin.Context) {
+	var req model.NamespaceRenameRequest
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(vh.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := vh.acts.RenameVolume(ctx.Request.Context(), ctx.Param("label"), req.Label); err != nil {
+		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	handlers := &volumeHandlers{tv: r.tv, acts: acts}
 
@@ -234,4 +249,29 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.DELETE("/admin/volumes", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserVolumesHandler)
+
+	// swagger:operation PUT /volumes/{label}/rename Volumes RenameVolume
+	//
+	// Rename volume.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/VolumeRenameRequest'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: volume renamed
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.PUT("/volumes/:label/rename", handlers.renameVolumeHandler)
 }
