@@ -13,6 +13,7 @@ import (
 type VolumeActions interface {
 	CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error
 	RenameVolume(ctx context.Context, label, newLabel string) error
+	ResizeVolume(ctx context.Context, label string, newTariffID string) error
 	GetVolume(ctx context.Context, label string) (model.VolumeWithPermissions, error)
 	GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error)
 	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error)
