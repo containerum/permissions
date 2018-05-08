@@ -15,6 +15,8 @@ type VolumeActions interface {
 	GetVolume(ctx context.Context, label string) (model.VolumeWithPermissions, error)
 	GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error)
 	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error)
+	DeleteVolume(ctx context.Context, label string) error
+	DeleteAllUserVolumes(ctx context.Context) error
 }
 
 var StandardVolumeFilter = dao.VolumeFilter{

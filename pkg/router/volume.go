@@ -82,6 +82,24 @@ func (vh *volumeHandlers) getAllVolumesHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ret)
 }
 
+func (vh *volumeHandlers) deleteVolumeHandler(ctx *gin.Context) {
+	if err := vh.acts.DeleteVolume(ctx.Request.Context(), ctx.Param("label")); err != nil {
+		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (vh *volumeHandlers) deleteAllUserVolumesHandler(ctx *gin.Context) {
+	if err := vh.acts.DeleteAllUserVolumes(ctx.Request.Context()); err != nil {
+		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
 func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	handlers := &volumeHandlers{tv: r.tv, acts: acts}
 
@@ -180,4 +198,40 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/volumes", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllVolumesHandler)
+
+	// swagger:operation DELETE /volumes/{label} Volumes DeleteVolume
+	//
+	// Delete volume.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: label
+	//    in: path
+	//    required: true
+	//    type: string
+	// responses:
+	//   '200':
+	//     description: volume deleted
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.DELETE("/volumes/:label", handlers.deleteVolumeHandler)
+
+	// swagger:operation DELETE /admin/volumes Volumes DeleteAllUserVolumes
+	//
+	// Delete all user volumes (admin only).
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	// responses:
+	//   '200':
+	//     description: volumes deleted
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.DELETE("/admin/volumes", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserVolumesHandler)
 }
