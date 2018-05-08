@@ -297,7 +297,7 @@ func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace)
 	}
 
 	if result.RowsAffected() <= 0 {
-		return errors.ErrResourceNotExists().AddDetailF("namespace %s not exists for user", namespace.Label)
+		return errors.ErrResourceNotExists().AddDetailF("namespace %s not exists", namespace.Label)
 	}
 
 	return nil

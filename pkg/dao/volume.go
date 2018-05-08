@@ -230,6 +230,29 @@ func (dao *DAO) RenameVolume(ctx context.Context, vol *model.Volume, newLabel st
 	return nil
 }
 
+func (dao *DAO) ResizeVolume(ctx context.Context, vol model.Volume) error {
+	dao.log.Debugf("resize volume %+v", vol)
+
+	result, err := dao.db.Model(&vol).
+		WherePK().
+		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
+			return query.
+				Where("label = ?label").
+				Where("owner_user_id = ?owner_user_id"), nil
+		}).
+		Set("capacity = ?capacity").
+		Set("replicas = ?replicas").
+		Update()
+	if err != nil {
+		return dao.handleError(err)
+	}
+	if result.RowsAffected() <= 0 {
+		return errors.ErrResourceNotExists().AddDetailF("volume %s not exists", vol.Label)
+	}
+
+	return nil
+}
+
 func (dao *DAO) DeleteVolume(ctx context.Context, vol *model.Volume) error {
 	dao.log.Debugf("delete volume %+v", vol)
 
