@@ -210,3 +210,41 @@ func (s *Server) RenameVolume(ctx context.Context, label, newLabel string) error
 
 	return err
 }
+
+func (s *Server) ResizeVolume(ctx context.Context, label string, newTariffID string) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id":       userID,
+		"label":         label,
+		"new_tariff_id": newTariffID,
+	}).Infof("resize volume")
+
+	newTariff, err := s.clients.Billing.GetVolumeTariff(ctx, newTariffID)
+	if err != nil {
+		return err
+	}
+
+	if chkErr := CheckTariff(newTariff.Tariff, IsAdminRole(ctx)); chkErr != nil {
+		return chkErr
+	}
+
+	err = s.db.Transactional(func(tx *dao.DAO) error {
+		vol, getErr := tx.VolumeByLabel(ctx, userID, label)
+		if getErr != nil {
+			return getErr
+		}
+
+		vol.Replicas = newTariff.ReplicasLimit
+		vol.Capacity = newTariff.StorageLimit
+
+		if resizeErr := tx.ResizeVolume(ctx, vol.Volume); resizeErr != nil {
+			return resizeErr
+		}
+
+		// TODO: resize it actually
+
+		return nil
+	})
+
+	return err
+}
