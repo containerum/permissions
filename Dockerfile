@@ -11,6 +11,8 @@ ENV MODE="release" \
   DB_URL="postgres://postgres@localhost:5432/postgres?sslmode=disabled" \
   LISTEN_ADDR=":4242" \
   AUTH_ADDR="ch-auth:1112" \
-  USER_ADDR="user-manager:8111"
+  USER_ADDR="user-manager:8111" \
+  KUBE_API_ADDR="kube-api:1214" \
+  BILLING_ADDR="billing-manager:5000"
 EXPOSE 4242
 CMD "/app/permissions"
