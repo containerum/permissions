@@ -1,6 +1,8 @@
 package model
 
 import (
+	"encoding/json"
+
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/pg/orm"
 )
@@ -20,12 +22,12 @@ type Volume struct {
 	Replicas int `sql:"replicas,notnull" json:"replicas"`
 
 	// swagger:strfmt uuid
-	NamespaceID *string `sql:"ns_id,type:UUID" json:"namespace_id,omitempty"`
+	NamespaceID *string `sql:"ns_id,type:uuid" json:"namespace_id,omitempty"`
 
 	GlusterName string `sql:"gluster_name,notnull" json:"gluster_name,omitempty"`
 
 	// swagger:strfmt uuid
-	StorageID string `sql:"storage_id,type:UUID,notnull" json:"storage_id,omitempty"`
+	StorageID string `sql:"storage_id,type:uuid,notnull" json:"storage_id,omitempty"`
 }
 
 func (v *Volume) BeforeInsert(db orm.DB) error {
@@ -75,7 +77,7 @@ func (v *Volume) AfterInsert(db orm.DB) error {
 	return db.Insert(&Permission{
 		ResourceID:         v.ID,
 		UserID:             v.OwnerUserID,
-		ResourceKind:       "Volume",
+		ResourceType:       ResourceVolume,
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})
@@ -90,15 +92,33 @@ func (v *Volume) Mask() {
 	v.StorageID = ""
 }
 
-// VolumeWithPermissions is a response object for get requests
-//
-// swagger:model
+// swagger:ignore
 type VolumeWithPermissions struct {
 	Volume `pg:",override"`
 
-	Permission
+	Permission Permission `pg:"fk:resource_id" sql:"-" json:",inline"`
 
 	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
+}
+
+// VolumeWithPermissions is a response object for get requests
+//
+// swagger:model VolumeWithPermissions
+type VolumeWithPermissionsJSON struct {
+	Volume
+	Permission
+	Permissions []Permission `json:"users,omitempty"`
+}
+
+// Workaround while json "inline" tag not inlines fields on marshal
+func (vp VolumeWithPermissions) MarshalJSON() ([]byte, error) {
+	npJSON := VolumeWithPermissionsJSON{
+		Volume:      vp.Volume,
+		Permission:  vp.Permission,
+		Permissions: vp.Permissions,
+	}
+
+	return json.Marshal(npJSON)
 }
 
 func (vp *VolumeWithPermissions) Mask() {

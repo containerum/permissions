@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
@@ -20,7 +21,7 @@ const (
 )
 
 func (al *AccessLevel) UnmarshalJSON(b []byte) error {
-	str := AccessLevel(b)
+	str := AccessLevel(bytes.Replace(b, []byte(`"`), []byte(``), -1))
 	switch str {
 	case AccessNone, AccessRead, AccessReadDelete, AccessWrite, AccessOwner:
 		*al = str
@@ -31,6 +32,13 @@ func (al *AccessLevel) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+type ResourceType string
+
+const (
+	ResourceNamespace ResourceType = "Namespace"
+	ResourceVolume    ResourceType = "Volume"
+)
+
 // Permission represents information about user permission to resource
 //
 // swagger:model
@@ -40,10 +48,10 @@ type Permission struct {
 	// swagger:strfmt uuid
 	ID string `sql:"perm_id,pk,type:uuid,default:uuid_generate_v4()" json:"perm_id,omitempty"`
 
-	ResourceKind string `sql:"resource_type,notnull,unique:unique_user_access" json:"kind,omitempty"` // WARN: custom type here, do not forget create it
+	ResourceType ResourceType `sql:"resource_type,notnull,unique:unique_user_access" json:"kind,omitempty"` // WARN: custom type here, do not forget create it
 
 	// swagger:strfmt uuid
-	ResourceID string `sql:"resource_id,type:UUID,notnull,unique:unique_user_access" json:"resource_id,omitempty"`
+	ResourceID string `sql:"resource_id,type:uuid,notnull,unique:unique_user_access" json:"resource_id,omitempty"`
 
 	CreateTime *time.Time `sql:"create_time,default:now(),notnull" json:"create_time,omitempty"`
 
@@ -65,7 +73,7 @@ func (p *Permission) BeforeInsert(db orm.DB) error {
 		cnt, err := db.Model((*Permission)(nil)).
 			Column("id").
 			Where("resource_id = ?", p.ResourceID).
-			Where("resource_type = ?", p.ResourceKind).
+			Where("resource_type = ?", p.ResourceType).
 			Where("initial_access_level = ?", AccessOwner).
 			Count()
 		if err != nil {
@@ -92,7 +100,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 
 func (p *Permission) Mask() {
 	p.ID = ""
-	p.ResourceKind = "" // will be already known though
+	p.ResourceType = "" // will be already known though
 	p.ResourceID = ""
 	p.CreateTime = nil
 	p.UserID = ""

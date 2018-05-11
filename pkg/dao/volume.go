@@ -101,11 +101,8 @@ func (dao *DAO) VolumeByLabel(ctx context.Context, userID, label string) (ret mo
 
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("permissions.*").
-		Join("JOIN permissions").
-		JoinOn("permissions.kind = ?", "Volume").
-		JoinOn("permissions.resource_id = ?TableAlias.id").
-		Where("permissions.user_id = ?", userID).
+		Column("Permission").
+		Where("permission.user_id = ?", userID).
 		Where("?TableAlias.label = ?", label).
 		Where("NOT ?TableAlias.deleted").
 		Select()
@@ -147,13 +144,12 @@ func (dao *DAO) UserVolumes(ctx context.Context, userID string, filter VolumeFil
 		"filters": filter,
 	}).Debugf("get user volumes")
 
+	ret = make([]model.VolumeWithPermissions, 0)
+
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("permissions.*").
-		Join("JOIN permissions").
-		JoinOn("permissions.kind = ?", "Volume").
-		JoinOn("permissions.resource_id = ?TableAlias.id").
-		Where("permissions.user_id = ?", userID).
+		Column("Permission").
+		Where("permission.user_id = ?", userID).
 		Apply(filter.Filter).
 		Select()
 	switch err {
@@ -169,12 +165,11 @@ func (dao *DAO) UserVolumes(ctx context.Context, userID string, filter VolumeFil
 func (dao *DAO) AllVolumes(ctx context.Context, filter VolumeFilter) (ret []model.VolumeWithPermissions, err error) {
 	dao.log.WithField("fields", filter).Debugf("get all volumes")
 
+	ret = make([]model.VolumeWithPermissions, 0)
+
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("permissions.*").
-		Join("JOIN permissions").
-		JoinOn("permissions.kind = ?", "Volume").
-		JoinOn("permissions.resource_id = ?TableAlias.id").
+		Column("Permission").
 		Apply(filter.Filter).
 		Select()
 	switch err {
@@ -281,6 +276,8 @@ func (dao *DAO) DeleteVolume(ctx context.Context, vol *model.Volume) error {
 
 func (dao *DAO) DeleteAllVolumes(ctx context.Context, userID string) (deletedVols []model.Volume, err error) {
 	dao.log.WithField("user_id", userID).Debugf("delete all user volumes")
+
+	deletedVols = make([]model.Volume, 0)
 
 	result, err := dao.db.Model(&deletedVols).
 		Where("owner_user_id = ?", userID).
