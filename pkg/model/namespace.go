@@ -1,6 +1,8 @@
 package model
 
 import (
+	"encoding/json"
+
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/pg/orm"
 )
@@ -43,21 +45,39 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 	return db.Insert(&Permission{
 		ResourceID:         ns.ID,
 		UserID:             ns.OwnerUserID,
-		ResourceKind:       "Namespace",
+		ResourceType:       ResourceNamespace,
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})
 }
 
-// NamespaceWithPermissions is a response object for get requests
-//
-// swagger:model
+// swagger:ignore
 type NamespaceWithPermissions struct {
 	Namespace `pg:",override"`
 
-	Permission
+	Permission Permission `pg:"fk:resource_id" sql:"-" json:",inline"`
 
 	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
+}
+
+// NamespaceWithPermissions is a response object for get requests
+//
+// swagger:model NamespaceWithPermissions
+type NamespaceWithPermissionsJSON struct {
+	Namespace
+	Permission
+	Permissions []Permission `json:"users,omitempty"`
+}
+
+// Workaround while json "inline" tag not inlines fields on marshal
+func (np NamespaceWithPermissions) MarshalJSON() ([]byte, error) {
+	npJSON := NamespaceWithPermissionsJSON{
+		Namespace:   np.Namespace,
+		Permission:  np.Permission,
+		Permissions: np.Permissions,
+	}
+
+	return json.Marshal(npJSON)
 }
 
 func (np *NamespaceWithPermissions) Mask() {

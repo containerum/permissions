@@ -96,12 +96,6 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "label",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/parameters/Filters"
           },
           {
@@ -247,12 +241,6 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "label",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/parameters/Filters"
           },
           {
@@ -320,12 +308,6 @@
           },
           {
             "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "type": "string",
-            "name": "label",
-            "in": "path",
-            "required": true
           },
           {
             "$ref": "#/parameters/Filters"
@@ -809,12 +791,6 @@
           },
           {
             "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "type": "string",
-            "name": "label",
-            "in": "path",
-            "required": true
           },
           {
             "$ref": "#/parameters/Filters"
@@ -2167,8 +2143,7 @@
           "x-go-name": "ID"
         },
         "kind": {
-          "type": "string",
-          "x-go-name": "ResourceKind"
+          "$ref": "#/definitions/ResourceType"
         },
         "label": {
           "type": "string",
@@ -2242,6 +2217,7 @@
           "x-go-name": "Volumes"
         }
       },
+      "x-go-name": "NamespaceWithPermissionsJSON",
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "NamespacesList": {
@@ -2301,8 +2277,7 @@
           "x-go-name": "CreateTime"
         },
         "kind": {
-          "type": "string",
-          "x-go-name": "ResourceKind"
+          "$ref": "#/definitions/ResourceType"
         },
         "login": {
           "type": "string",
@@ -2526,6 +2501,10 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+    },
+    "ResourceType": {
+      "type": "string",
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "Resources": {
       "type": "object",
@@ -3387,8 +3366,7 @@
           "x-go-name": "ID"
         },
         "kind": {
-          "type": "string",
-          "x-go-name": "ResourceKind"
+          "$ref": "#/definitions/ResourceType"
         },
         "label": {
           "type": "string",
@@ -3450,6 +3428,7 @@
           "x-go-name": "Permissions"
         }
       },
+      "x-go-name": "VolumeWithPermissionsJSON",
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "authClient": {
@@ -3468,13 +3447,15 @@
       "minimum": 0,
       "type": "integer",
       "name": "page",
-      "in": "query"
+      "in": "query",
+      "required": true
     },
     "PerPageLimit": {
       "minimum": 0,
       "type": "integer",
       "name": "per_page",
-      "in": "query"
+      "in": "query",
+      "required": true
     },
     "SubstitutedUserID": {
       "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"

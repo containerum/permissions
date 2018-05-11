@@ -39,10 +39,10 @@ func extractAccessesFromDB(ctx context.Context, db *dao.DAO, userID string) (*au
 			Access: string(permission.CurrentAccessLevel),
 			Label:  permission.Label,
 		}
-		switch permission.ResourceKind {
-		case "Namespace":
+		switch permission.ResourceType {
+		case model.ResourceNamespace:
 			ret.Namespace = append(ret.Namespace, obj)
-		case "Volume":
+		case model.ResourceVolume:
 			ret.Volume = append(ret.Volume, obj)
 		}
 	}

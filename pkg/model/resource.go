@@ -54,5 +54,4 @@ func (r *Resource) Mask() {
 	r.DeleteTime = nil
 	r.TariffID = nil
 	r.OwnerUserID = ""
-	r.Label = ""
 }

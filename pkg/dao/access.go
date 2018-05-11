@@ -20,8 +20,8 @@ func (dao *DAO) UserAccesses(ctx context.Context, userID string) ([]AccessWithLa
 	err := dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
 		ColumnExpr("coalesce(ns.label, vol.label) AS label").
-		Join("LEFT JOIN namespaces AS ns").JoinOn("?TableAlias.resource_id = ns.id").JoinOn("?TableAlias.resource_type = ?", "Namespace").
-		Join("LEFT JOIN volumes AS vol").JoinOn("?TableAlias.resource_id = vol.id").JoinOn("?TableAlias.resource_type = ?", "Volume").
+		Join("LEFT JOIN namespaces AS ns").JoinOn("?TableAlias.resource_id = ns.id").JoinOn("?TableAlias.resource_type = ?", model.ResourceNamespace).
+		Join("LEFT JOIN volumes AS vol").JoinOn("?TableAlias.resource_id = vol.id").JoinOn("?TableAlias.resource_type = ?", model.ResourceVolume).
 		Where("?TableAlias.user_id = ?", userID).
 		WhereGroup(func(query *orm.Query) (*orm.Query, error) {
 			return query.
@@ -76,7 +76,7 @@ func (dao *DAO) SetNamespaceAccess(ctx context.Context, ns model.Namespace, acce
 	dao.log.WithField("ns_id", ns.ID).Debugf("set namespace access %s to %s", accessLevel, toUserID)
 
 	return dao.setResourceAccess(ctx, model.Permission{
-		ResourceKind:       "Namespace",
+		ResourceType:       model.ResourceNamespace,
 		ResourceID:         ns.ID,
 		UserID:             toUserID,
 		InitialAccessLevel: accessLevel,
@@ -88,7 +88,7 @@ func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLev
 	dao.log.WithField("vol_id", vol.ID).Debugf("set volume access %s to %s", accessLevel, toUserID)
 
 	return dao.setResourceAccess(ctx, model.Permission{
-		ResourceKind:       "Volume",
+		ResourceType:       model.ResourceVolume,
 		ResourceID:         vol.ID,
 		UserID:             toUserID,
 		InitialAccessLevel: accessLevel,
@@ -96,8 +96,8 @@ func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLev
 	})
 }
 
-func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resource, kind string, userID string) error {
-	_, err := dao.db.Model(&model.Permission{UserID: userID, ResourceID: resource.ID, ResourceKind: kind}).
+func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resource, kind model.ResourceType, userID string) error {
+	_, err := dao.db.Model(&model.Permission{UserID: userID, ResourceID: resource.ID, ResourceType: kind}).
 		Where("user_id = ?user_id").
 		Where("resource_type = ?resource_type").
 		Where("resource_id = ?resource_id").
@@ -114,11 +114,11 @@ func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resourc
 func (dao *DAO) DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error {
 	dao.log.WithField("ns_id", ns.ID).Debugf("delete namespace access to user %s", userID)
 
-	return dao.deleteResourceAccess(ctx, ns.Resource, "Namespace", userID)
+	return dao.deleteResourceAccess(ctx, ns.Resource, model.ResourceNamespace, userID)
 }
 
 func (dao *DAO) DeleteVolumeAccess(ctx context.Context, vol model.Volume, userID string) error {
 	dao.log.WithField("vol_id", vol.ID).Debugf("delete volume access to user %s", userID)
 
-	return dao.deleteResourceAccess(ctx, vol.Resource, "Volume", userID)
+	return dao.deleteResourceAccess(ctx, vol.Resource, model.ResourceVolume, userID)
 }

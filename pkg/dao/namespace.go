@@ -94,11 +94,8 @@ func (dao *DAO) NamespaceByLabel(ctx context.Context, userID, label string) (ret
 
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("permissions.*").
-		Join("JOIN permissions").
-		JoinOn("permissions.resource_type = ?", "Namespace").
-		JoinOn("permissions.resource_id = ?TableAlias.id").
-		Where("permissions.user_id = ?", userID).
+		Column("Permission").
+		Where("permission.user_id = ?", userID).
 		Where("?TableAlias.label = ?", label).
 		Where("NOT ?TableAlias.deleted").
 		Select()
@@ -120,12 +117,7 @@ func (dao *DAO) NamespaceVolumes(ctx context.Context, ns *model.Namespace) (err 
 
 	err = dao.db.Model(ns).
 		Column("Volumes").
-		Relation("Volumes", func(q *orm.Query) (*orm.Query, error) {
-			return q.Column("permissions.*").
-				Join("JOIN permissions").
-				JoinOn("permissions.resource_type = ?", "Volume").
-				JoinOn("permissions.resource_id = ?id"), nil
-		}).
+		Relation("Volumes").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
@@ -163,13 +155,12 @@ func (dao *DAO) UserNamespaces(ctx context.Context, userID string, filter Namesp
 		"filters": filter,
 	}).Debugf("get user namespaces")
 
+	ret = make([]model.NamespaceWithPermissions, 0)
+
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("permissions.*", "Volumes").
-		Join("JOIN permissions").
-		JoinOn("permissions.resource_type = ?", "Namespace").
-		JoinOn("permissions.resource_id = ?TableAlias.id").
-		Where("permissions.user_id = ?", userID).
+		Column("Volumes", "Permission").
+		Where("permission.user_id = ?", userID).
 		Apply(filter.Filter).
 		Relation("Volumes").
 		Select()
@@ -186,12 +177,11 @@ func (dao *DAO) UserNamespaces(ctx context.Context, userID string, filter Namesp
 func (dao *DAO) AllNamespaces(ctx context.Context, filter NamespaceFilter) (ret []model.NamespaceWithPermissions, err error) {
 	dao.log.Debugf("get all namespaces")
 
+	ret = make([]model.NamespaceWithPermissions, 0)
+
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("permissions.*", "Volumes").
-		Join("JOIN permissions").
-		JoinOn("permissions.resource_type = ?", "Namespace").
-		JoinOn("permissions.resource_id = ?TableAlias.id").
+		Column("Volumes", "Permission").
 		Apply(filter.Filter).
 		Relation("Volumes").
 		Select()
@@ -306,12 +296,14 @@ func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace)
 func (dao *DAO) DeleteNamespaceVolumes(ctx context.Context, namespace model.Namespace) (deleted []model.Volume, err error) {
 	dao.log.Debugf("delete namespace volumes %+v", namespace)
 
+	deleted = make([]model.Volume, 0)
+
 	_, err = dao.db.Model(&deleted).
 		Where("ns_id = ?", namespace.ID).
 		Where("NOT deleted").
 		Set("active = FALSE").
 		Set("deleted = TRUE").
-		Set("deleted_time = now()").
+		Set("delete_time = now()").
 		Returning("*").
 		Update()
 	err = dao.handleError(err)
@@ -320,6 +312,8 @@ func (dao *DAO) DeleteNamespaceVolumes(ctx context.Context, namespace model.Name
 
 func (dao *DAO) DeleteAllUserNamespaces(ctx context.Context, userID string) (deleted []model.Namespace, err error) {
 	dao.log.WithField("user_id", userID).Debugf("delete user namespaces")
+
+	deleted = make([]model.Namespace, 0)
 
 	result, err := dao.db.Model(&deleted).
 		Where("owner_user_id = ?", userID).
@@ -343,12 +337,14 @@ func (dao *DAO) DeleteAllUserNamespaces(ctx context.Context, userID string) (del
 func (dao *DAO) DeleteAllUserNamespaceVolumes(ctx context.Context, userID string) (deleted []model.Volume, err error) {
 	dao.log.WithField("user_id", userID).Debugf("delete user namespace volumes")
 
+	deleted = make([]model.Volume, 0)
+
 	_, err = dao.db.Model(&deleted).
 		Where("owner_user_id = ?", userID).
 		Where("NOT deleted").
 		Set("active = FALSE").
 		Set("deleted = TRUE").
-		Set("deleted_time = now()").
+		Set("delete_time = now()").
 		Returning("*").
 		Update()
 	err = dao.handleError(err)
