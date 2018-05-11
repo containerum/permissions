@@ -205,7 +205,7 @@ func (b *BillingHTTPClient) GetVolumeTariff(ctx context.Context, tariffID string
 	resp, err := b.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		SetResult(btypes.NamespaceTariff{}).
+		SetResult(btypes.VolumeTariff{}).
 		Get(fmt.Sprintf("/tariffs/volume/%s", tariffID))
 	if err != nil {
 		return btypes.VolumeTariff{}, err
