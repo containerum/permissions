@@ -345,10 +345,6 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: label
-	//    in: path
-	//    required: true
-	//    type: string
 	//  - $ref: '#/parameters/Filters'
 	// responses:
 	//   '200':
@@ -370,10 +366,6 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: label
-	//    in: path
-	//    required: true
-	//    type: string
 	//  - $ref: '#/parameters/Filters'
 	//  - $ref: '#/parameters/PageNum'
 	//  - $ref: '#/parameters/PerPageLimit'
