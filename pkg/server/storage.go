@@ -32,21 +32,24 @@ func (s *Server) GetStorages(ctx context.Context) ([]model.Storage, error) {
 func (s *Server) UpdateStorage(ctx context.Context, name string, req model.UpdateStorageRequest) error {
 	s.log.Infof("update storage")
 
-	var storage model.Storage
-	if req.Name != nil {
-		storage.Name = *req.Name
-	}
-	if req.Size != nil {
-		storage.Size = *req.Size
-	}
-	if req.Replicas != nil {
-		storage.Replicas = *req.Replicas
-	}
-	if len(req.IPs) <= 0 {
-		storage.IPs = req.IPs
-	}
-
 	return s.db.Transactional(func(tx *dao.DAO) error {
+		storage, getErr := tx.StorageByName(ctx, name)
+		if getErr != nil {
+			return getErr
+		}
+		if req.Name != nil {
+			storage.Name = *req.Name
+		}
+		if req.Size != nil {
+			storage.Size = *req.Size
+		}
+		if req.Replicas != nil {
+			storage.Replicas = *req.Replicas
+		}
+		if len(req.IPs) <= 0 {
+			storage.IPs = req.IPs
+		}
+
 		return tx.UpdateStorage(ctx, name, storage)
 	})
 }

@@ -19,6 +19,20 @@ func (dao *DAO) CreateStorage(ctx context.Context, storage *model.Storage) error
 	return dao.handleError(err)
 }
 
+func (dao *DAO) StorageByName(ctx context.Context, name string) (ret model.Storage, err error) {
+	dao.log.WithField("name", name).Debugf("get storage by name")
+
+	err = dao.db.Model(&ret).Where("name = ?", name).Select()
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrResourceNotExists().AddDetailF("storage %s not exists", name)
+	default:
+		err = dao.handleError(err)
+	}
+
+	return
+}
+
 func (dao *DAO) AllStorages(ctx context.Context) (ret []model.Storage, err error) {
 	dao.log.Debugf("get storage list")
 

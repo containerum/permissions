@@ -55,7 +55,7 @@ func (s *Storage) BeforeUpdate(db orm.DB) error {
 		return err
 	}
 	if cnt > 0 {
-		return errors.ErrResourceAlreadyExists().AddDetailF("storage with this name already exist")
+		return errors.ErrResourceAlreadyExists().AddDetailF("storage %s already exist", s.Name)
 	}
 	return nil
 }
