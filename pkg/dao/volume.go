@@ -76,16 +76,24 @@ func (f *VolumeFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	return q.Apply(f.Paginate), nil
 }
 
-func (dao *DAO) VolumeByID(ctx context.Context, id string) (ret model.Volume, err error) {
-	dao.log.WithField("id", id).Debugf("get volume by id")
+func (dao *DAO) VolumeByID(ctx context.Context, userID, id string) (ret model.VolumeWithPermissions, err error) {
+	dao.log.WithFields(logrus.Fields{
+		"id":      id,
+		"user_id": userID,
+	}).Debugf("get volume by id")
 
 	err = dao.db.Model(&ret).
-		Where("id = ?", id).
-		Where("NOT deleted").
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		WherePK().
+		Where("permission.resource_id = ?TableAlias.id").
+		Where("permission.user_id = ?", userID).
+		Where("coalesce(permission.current_access_level, ?0) > ?0", model.AccessNone).
+		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
-		err = errors.ErrResourceNotExists().AddDetailF("volume with id %s no exists", id)
+		err = errors.ErrResourceNotExists().AddDetailF("volume with id %s not exists", id)
 	default:
 		err = dao.handleError(err)
 	}
@@ -123,6 +131,7 @@ func (dao *DAO) VolumePermissions(ctx context.Context, vol *model.VolumeWithPerm
 	}).Debugf("get volume permissions")
 
 	err = dao.db.Model(vol).
+		WherePK().
 		Column("Permissions").
 		Relation("Permissions", func(q *orm.Query) (*orm.Query, error) {
 			return q.Where("initial_access_level != ?", model.AccessOwner), nil
@@ -207,11 +216,6 @@ func (dao *DAO) RenameVolume(ctx context.Context, vol *model.Volume, newLabel st
 
 	result, err := dao.db.Model(vol).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("label = ?", newLabel).
 		Returning("*").
 		Update()
@@ -230,11 +234,6 @@ func (dao *DAO) ResizeVolume(ctx context.Context, vol model.Volume) error {
 
 	result, err := dao.db.Model(&vol).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("capacity = ?capacity").
 		Set("replicas = ?replicas").
 		Update()
@@ -253,11 +252,6 @@ func (dao *DAO) DeleteVolume(ctx context.Context, vol *model.Volume) error {
 
 	result, err := dao.db.Model(vol).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("active = FALSE").
 		Set("deleted = TRUE").
 		Set("delete_time = now()").

@@ -69,16 +69,25 @@ func (f *NamespaceFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	return q.Apply(f.Paginate), nil
 }
 
-func (dao *DAO) NamespaceByID(ctx context.Context, id string) (ret model.Namespace, err error) {
-	dao.log.WithField("id", id).Debugf("get namespace by id")
+func (dao *DAO) NamespaceByID(ctx context.Context, userID, id string) (ret model.NamespaceWithPermissions, err error) {
+	dao.log.WithFields(logrus.Fields{
+		"id":      id,
+		"user_id": userID,
+	}).Debugf("get namespace by id")
 
+	ret.ID = id
 	err = dao.db.Model(&ret).
-		Where("id = ?", id).
-		Where("NOT deleted").
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		WherePK().
+		Where("permission.resource_id = ?TableAlias.id").
+		Where("permission.user_id = ?", userID).
+		Where("coalesce(permission.current_access_level, ?0) > ?0", model.AccessNone).
+		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
-		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s no exists", id)
+		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s not exists", id)
 	default:
 		err = dao.handleError(err)
 	}
@@ -118,11 +127,6 @@ func (dao *DAO) NamespaceVolumes(ctx context.Context, ns *model.Namespace) (err 
 	err = dao.db.Model(ns).
 		Column("Volumes").
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("owner_user_id = ?owner_user_id").
-				Where("label = ?label"), nil
-		}).
 		Where("NOT deleted").
 		Relation("Volumes").
 		Select()
@@ -143,6 +147,7 @@ func (dao *DAO) NamespacePermissions(ctx context.Context, ns *model.NamespaceWit
 	}).Debugf("get namespace permissions")
 
 	err := dao.db.Model(ns).
+		WherePK().
 		Column("Permissions").
 		Relation("Permissions", func(q *orm.Query) (*orm.Query, error) {
 			return q.Where("initial_access_level != ?", model.AccessOwner), nil
@@ -232,11 +237,6 @@ func (dao *DAO) RenameNamespace(ctx context.Context, namespace *model.Namespace,
 
 	_, err = dao.db.Model(namespace).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("owner_user_id = ?owner_user_id").
-				Where("label = ?label"), nil
-		}).
 		Set("label = ?", newLabel).
 		Returning("*").
 		Update()
@@ -248,11 +248,6 @@ func (dao *DAO) ResizeNamespace(ctx context.Context, namespace model.Namespace) 
 
 	result, err := dao.db.Model(&namespace).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("cpu = ?cpu").
 		Set("ram = ?ram").
 		Set("max_ext_services = ?max_ext_services").
@@ -280,11 +275,6 @@ func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace)
 	result, err := dao.db.Model(namespace).
 		Where("NOT deleted").
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("deleted = ?deleted").
 		Set("delete_time = ?delete_time").
 		Returning("*").

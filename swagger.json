@@ -181,7 +181,7 @@
         }
       }
     },
-    "/admin/namespaces/{label}": {
+    "/admin/namespaces/{id}": {
       "put": {
         "tags": [
           "Namespaces"
@@ -208,7 +208,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -363,7 +363,7 @@
         }
       }
     },
-    "/namespaces/{label}": {
+    "/namespaces/{id}": {
       "get": {
         "tags": [
           "Namespaces"
@@ -382,7 +382,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -425,7 +425,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -457,7 +457,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -472,7 +472,7 @@
         }
       }
     },
-    "/namespaces/{label}/access": {
+    "/namespaces/{id}/access": {
       "put": {
         "tags": [
           "Permissions"
@@ -498,8 +498,8 @@
             }
           },
           {
-            "description": "Namespace label",
-            "name": "label",
+            "description": "Namespace ID",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -538,8 +538,8 @@
             }
           },
           {
-            "description": "Namespace label",
-            "name": "label",
+            "description": "Namespace ID",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -554,7 +554,7 @@
         }
       }
     },
-    "/namespaces/{label}/accesses": {
+    "/namespaces/{id}/accesses": {
       "get": {
         "tags": [
           "Permissions"
@@ -573,7 +573,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -591,7 +591,7 @@
         }
       }
     },
-    "/namespaces/{label}/rename": {
+    "/namespaces/{id}/rename": {
       "put": {
         "tags": [
           "Namespaces"
@@ -618,7 +618,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -847,7 +847,7 @@
         }
       }
     },
-    "/volumes/{label}": {
+    "/volumes/{id}": {
       "get": {
         "tags": [
           "Volumes"
@@ -866,7 +866,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -909,7 +909,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -941,7 +941,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -956,7 +956,7 @@
         }
       }
     },
-    "/volumes/{label}/access": {
+    "/volumes/{id}/access": {
       "put": {
         "tags": [
           "Permissions"
@@ -982,8 +982,8 @@
             }
           },
           {
-            "description": "Volume label",
-            "name": "label",
+            "description": "Volume ID",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -1022,8 +1022,8 @@
             }
           },
           {
-            "description": "Namespace label",
-            "name": "label",
+            "description": "Namespace ID",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -1038,7 +1038,7 @@
         }
       }
     },
-    "/volumes/{label}/accesses": {
+    "/volumes/{id}/accesses": {
       "get": {
         "tags": [
           "Permissions"
@@ -1057,7 +1057,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }
@@ -1075,7 +1075,7 @@
         }
       }
     },
-    "/volumes/{label}/rename": {
+    "/volumes/{id}/rename": {
       "put": {
         "tags": [
           "Volumes"
@@ -1102,7 +1102,7 @@
           },
           {
             "type": "string",
-            "name": "label",
+            "name": "id",
             "in": "path",
             "required": true
           }

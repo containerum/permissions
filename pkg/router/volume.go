@@ -34,7 +34,7 @@ func (vh *volumeHandlers) createVolumeHandler(ctx *gin.Context) {
 }
 
 func (vh *volumeHandlers) getVolumeHandler(ctx *gin.Context) {
-	ret, err := vh.acts.GetVolume(ctx.Request.Context(), ctx.Param("label"))
+	ret, err := vh.acts.GetVolume(ctx.Request.Context(), ctx.Param("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
 		return
@@ -83,7 +83,7 @@ func (vh *volumeHandlers) getAllVolumesHandler(ctx *gin.Context) {
 }
 
 func (vh *volumeHandlers) deleteVolumeHandler(ctx *gin.Context) {
-	if err := vh.acts.DeleteVolume(ctx.Request.Context(), ctx.Param("label")); err != nil {
+	if err := vh.acts.DeleteVolume(ctx.Request.Context(), ctx.Param("id")); err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
 		return
 	}
@@ -107,7 +107,7 @@ func (vh *volumeHandlers) renameVolumeHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := vh.acts.RenameVolume(ctx.Request.Context(), ctx.Param("label"), req.Label); err != nil {
+	if err := vh.acts.RenameVolume(ctx.Request.Context(), ctx.Param("id"), req.Label); err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
 		return
 	}
@@ -121,7 +121,7 @@ func (vh *volumeHandlers) resizeVolumeHandler(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(vh.tv.BadRequest(ctx, err))
 		return
 	}
-	if err := vh.acts.ResizeVolume(ctx.Request.Context(), ctx.Param("label"), req.TariffID); err != nil {
+	if err := vh.acts.ResizeVolume(ctx.Request.Context(), ctx.Param("id"), req.TariffID); err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
 		return
 	}
@@ -154,7 +154,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     $ref: '#/responses/error'
 	r.engine.POST("/volumes", handlers.createVolumeHandler)
 
-	// swagger:operation GET /volumes/{label} Volumes GetVolume
+	// swagger:operation GET /volumes/{id} Volumes GetVolume
 	//
 	// Get volume.
 	//
@@ -163,7 +163,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -174,7 +174,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//       $ref: '#/definitions/VolumeWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/volumes/:label", handlers.getVolumeHandler)
+	r.engine.GET("/volumes/:id", handlers.getVolumeHandler)
 
 	// swagger:operation GET /volumes Volumes GetUserVolumes
 	//
@@ -220,7 +220,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/volumes", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllVolumesHandler)
 
-	// swagger:operation DELETE /volumes/{label} Volumes DeleteVolume
+	// swagger:operation DELETE /volumes/{id} Volumes DeleteVolume
 	//
 	// Delete volume.
 	//
@@ -229,7 +229,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -238,7 +238,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     description: volume deleted
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.DELETE("/volumes/:label", handlers.deleteVolumeHandler)
+	r.engine.DELETE("/volumes/:id", handlers.deleteVolumeHandler)
 
 	// swagger:operation DELETE /admin/volumes Volumes DeleteAllUserVolumes
 	//
@@ -256,7 +256,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     $ref: '#/responses/error'
 	r.engine.DELETE("/admin/volumes", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserVolumesHandler)
 
-	// swagger:operation PUT /volumes/{label}/rename Volumes RenameVolume
+	// swagger:operation PUT /volumes/{id}/rename Volumes RenameVolume
 	//
 	// Rename volume.
 	//
@@ -270,7 +270,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/VolumeRenameRequest'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -279,9 +279,9 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     description: volume renamed
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/volumes/:label/rename", handlers.renameVolumeHandler)
+	r.engine.PUT("/volumes/:id/rename", handlers.renameVolumeHandler)
 
-	// swagger:operation PUT /volumes/{label} Volumes ResizeVolume
+	// swagger:operation PUT /volumes/{id} Volumes ResizeVolume
 	//
 	// Resize volume.
 	//
@@ -295,7 +295,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/VolumeResizeRequest'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -304,5 +304,5 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     description: volume resized
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/volumes/:label", handlers.resizeVolumeHandler)
+	r.engine.PUT("/volumes/:id", handlers.resizeVolumeHandler)
 }

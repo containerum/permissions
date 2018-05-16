@@ -15,14 +15,14 @@ import (
 
 type NamespaceActions interface {
 	CreateNamespace(ctx context.Context, req model.NamespaceCreateRequest) error
-	GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
+	GetNamespace(ctx context.Context, id string) (model.NamespaceWithPermissions, error)
 	GetUserNamespaces(ctx context.Context, filters ...string) ([]model.NamespaceWithPermissions, error)
 	GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error)
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
-	AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error
-	RenameNamespace(ctx context.Context, label, newLabel string) error
-	ResizeNamespace(ctx context.Context, label, newTariffID string) error
-	DeleteNamespace(ctx context.Context, label string) error
+	AdminResizeNamespace(ctx context.Context, id string, req model.NamespaceAdminResizeRequest) error
+	RenameNamespace(ctx context.Context, id, newLabel string) error
+	ResizeNamespace(ctx context.Context, id, newTariffID string) error
+	DeleteNamespace(ctx context.Context, id string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
 }
 
@@ -62,7 +62,7 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 	s.log.WithFields(logrus.Fields{
 		"user_id":   userID,
 		"tariff_id": req.TariffID,
-		"label":     req.Label,
+		"id":        req.Label,
 	}).Infof("create namespace")
 
 	tariff, err := s.clients.Billing.GetNamespaceTariff(ctx, req.TariffID)
@@ -132,15 +132,15 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 	return err
 }
 
-func (s *Server) GetNamespace(ctx context.Context, label string) (model.NamespaceWithPermissions, error) {
+func (s *Server) GetNamespace(ctx context.Context, id string) (model.NamespaceWithPermissions, error) {
 	userID := httputil.MustGetUserID(ctx)
 
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
-		"label":   label,
+		"id":      id,
 	}).Infof("get namespace")
 
-	ns, err := s.db.NamespaceByLabel(ctx, userID, label)
+	ns, err := s.db.NamespaceByID(ctx, userID, id)
 	if err != nil {
 		return model.NamespaceWithPermissions{}, err
 	}
@@ -220,16 +220,16 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 	return err
 }
 
-func (s *Server) AdminResizeNamespace(ctx context.Context, label string, req model.NamespaceAdminResizeRequest) error {
+func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.NamespaceAdminResizeRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 
 	s.log.
 		WithField("user_id", userID).
-		WithField("label", label).
+		WithField("id", id).
 		Infof("admin resize namespace %+v", req)
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		ns, getErr := tx.NamespaceByLabel(ctx, userID, label)
+		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
 		}
@@ -276,16 +276,16 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, label string, req mod
 	return err
 }
 
-func (s *Server) RenameNamespace(ctx context.Context, label, newLabel string) error {
+func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
-		"user_id":   userID,
-		"label":     label,
-		"new_label": newLabel,
+		"user_id": userID,
+		"id":      id,
+		"new_id":  newLabel,
 	}).Infof("rename namespace")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		ns, getErr := tx.NamespaceByLabel(ctx, userID, label)
+		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
 		}
@@ -304,11 +304,11 @@ func (s *Server) RenameNamespace(ctx context.Context, label, newLabel string) er
 	return err
 }
 
-func (s *Server) ResizeNamespace(ctx context.Context, label, newTariffID string) error {
+func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id":       userID,
-		"label":         label,
+		"id":            id,
 		"new_tariff_id": newTariffID,
 	}).Infof("resize namespace")
 
@@ -322,7 +322,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, label, newTariffID string)
 	}
 
 	err = s.db.Transactional(func(tx *dao.DAO) error {
-		ns, getErr := tx.NamespaceByLabel(ctx, userID, label)
+		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
 		}
@@ -388,15 +388,15 @@ func (s *Server) ResizeNamespace(ctx context.Context, label, newTariffID string)
 	return err
 }
 
-func (s *Server) DeleteNamespace(ctx context.Context, label string) error {
+func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
-		"label":   label,
+		"id":      id,
 	}).Infof("delete namespace")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		ns, getErr := tx.NamespaceByLabel(ctx, userID, label)
+		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
 		}
