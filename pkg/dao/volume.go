@@ -76,16 +76,23 @@ func (f *VolumeFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	return q.Apply(f.Paginate), nil
 }
 
-func (dao *DAO) VolumeByID(ctx context.Context, id string) (ret model.Volume, err error) {
-	dao.log.WithField("id", id).Debugf("get volume by id")
+func (dao *DAO) VolumeByID(ctx context.Context, userID, id string) (ret model.VolumeWithPermissions, err error) {
+	dao.log.WithFields(logrus.Fields{
+		"id":      id,
+		"user_id": userID,
+	}).Debugf("get volume by id")
 
 	err = dao.db.Model(&ret).
-		Where("id = ?", id).
-		Where("NOT deleted").
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		WherePK().
+		Where("permission.resource_id = ?TableAlias.id").
+		Where("coalesce(permission.current_access_level, ?0) > ?0", model.AccessNone).
+		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
-		err = errors.ErrResourceNotExists().AddDetailF("volume with id %s no exists", id)
+		err = errors.ErrResourceNotExists().AddDetailF("volume with id %s not exists", id)
 	default:
 		err = dao.handleError(err)
 	}

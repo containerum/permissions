@@ -69,16 +69,24 @@ func (f *NamespaceFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	return q.Apply(f.Paginate), nil
 }
 
-func (dao *DAO) NamespaceByID(ctx context.Context, id string) (ret model.Namespace, err error) {
-	dao.log.WithField("id", id).Debugf("get namespace by id")
+func (dao *DAO) NamespaceByID(ctx context.Context, userID, id string) (ret model.NamespaceWithPermissions, err error) {
+	dao.log.WithFields(logrus.Fields{
+		"id":      id,
+		"user_id": userID,
+	}).Debugf("get namespace by id")
 
+	ret.ID = id
 	err = dao.db.Model(&ret).
-		Where("id = ?", id).
-		Where("NOT deleted").
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		WherePK().
+		Where("permission.resource_id = ?TableAlias.id").
+		Where("coalesce(permission.current_access_level, ?0) > ?0", model.AccessNone).
+		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
-		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s no exists", id)
+		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s not exists", id)
 	default:
 		err = dao.handleError(err)
 	}
