@@ -175,7 +175,12 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 		"filters":  filters,
 	}).Infof("get all namespaces")
 
-	filter := dao.ParseNamespaceFilter(filters...)
+	var filter dao.NamespaceFilter
+	if len(filters) > 0 {
+		filter = dao.ParseNamespaceFilter(filters...)
+	} else {
+		filter = StandardNamespaceFilter
+	}
 	filter.Limit = perPage
 	filter.SetPage(page)
 

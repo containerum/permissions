@@ -124,7 +124,12 @@ func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters .
 		"filters":  filters,
 	}).Infof("get all volumes")
 
-	filter := dao.ParseVolumeFilter()
+	var filter dao.VolumeFilter
+	if len(filters) > 0 {
+		filter = dao.ParseVolumeFilter()
+	} else {
+		filter = StandardVolumeFilter
+	}
 	filter.Limit = perPage
 	filter.SetPage(page)
 
