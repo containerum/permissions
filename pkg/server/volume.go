@@ -139,7 +139,7 @@ func (s *Server) DeleteVolume(ctx context.Context, id string) error {
 	}).Infof("delete volume")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		vol := &model.Volume{Resource: model.Resource{OwnerUserID: userID, Label: id}}
+		vol := &model.Volume{Resource: model.Resource{ID: id}}
 
 		if delErr := tx.DeleteVolume(ctx, vol); delErr != nil {
 			return delErr
@@ -194,7 +194,7 @@ func (s *Server) RenameVolume(ctx context.Context, id, newLabel string) error {
 	}).Infof("rename volume")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		vol := &model.Volume{Resource: model.Resource{OwnerUserID: userID, Label: id}}
+		vol := &model.Volume{Resource: model.Resource{ID: id}}
 
 		if renErr := tx.RenameVolume(ctx, vol, newLabel); renErr != nil {
 			return renErr

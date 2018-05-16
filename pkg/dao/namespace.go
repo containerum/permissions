@@ -81,6 +81,7 @@ func (dao *DAO) NamespaceByID(ctx context.Context, userID, id string) (ret model
 		Column("Permission").
 		WherePK().
 		Where("permission.resource_id = ?TableAlias.id").
+		Where("permission.user_id = ?", userID).
 		Where("coalesce(permission.current_access_level, ?0) > ?0", model.AccessNone).
 		Where("NOT ?TableAlias.deleted").
 		Select()
@@ -146,6 +147,7 @@ func (dao *DAO) NamespacePermissions(ctx context.Context, ns *model.NamespaceWit
 	}).Debugf("get namespace permissions")
 
 	err := dao.db.Model(ns).
+		WherePK().
 		Column("Permissions").
 		Relation("Permissions", func(q *orm.Query) (*orm.Query, error) {
 			return q.Where("initial_access_level != ?", model.AccessOwner), nil

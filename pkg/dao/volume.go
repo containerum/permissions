@@ -87,6 +87,7 @@ func (dao *DAO) VolumeByID(ctx context.Context, userID, id string) (ret model.Vo
 		Column("Permission").
 		WherePK().
 		Where("permission.resource_id = ?TableAlias.id").
+		Where("permission.user_id = ?", userID).
 		Where("coalesce(permission.current_access_level, ?0) > ?0", model.AccessNone).
 		Where("NOT ?TableAlias.deleted").
 		Select()
@@ -130,6 +131,7 @@ func (dao *DAO) VolumePermissions(ctx context.Context, vol *model.VolumeWithPerm
 	}).Debugf("get volume permissions")
 
 	err = dao.db.Model(vol).
+		WherePK().
 		Column("Permissions").
 		Relation("Permissions", func(q *orm.Query) (*orm.Query, error) {
 			return q.Where("initial_access_level != ?", model.AccessOwner), nil
