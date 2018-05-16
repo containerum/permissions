@@ -15,12 +15,12 @@ import (
 type AccessActions interface {
 	GetUserAccesses(ctx context.Context) (*authProto.ResourcesAccess, error)
 	SetUserAccesses(ctx context.Context, accessLevel model.AccessLevel) error
-	GetNamespaceAccess(ctx context.Context, label string) (model.NamespaceWithPermissions, error)
-	SetNamespaceAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error
-	GetVolumeAccess(ctx context.Context, label string) (model.VolumeWithPermissions, error)
-	SetVolumeAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error
-	DeleteNamespaceAccess(ctx context.Context, label string, targetUser string) error
-	DeleteVolumeAccess(ctx context.Context, label string, targetUser string) error
+	GetNamespaceAccess(ctx context.Context, id string) (model.NamespaceWithPermissions, error)
+	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error
+	GetVolumeAccess(ctx context.Context, id string) (model.VolumeWithPermissions, error)
+	SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error
+	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
+	DeleteVolumeAccess(ctx context.Context, id string, targetUser string) error
 }
 
 func extractAccessesFromDB(ctx context.Context, db *dao.DAO, userID string) (*authProto.ResourcesAccess, error) {
@@ -85,12 +85,12 @@ func (s *Server) SetUserAccesses(ctx context.Context, access model.AccessLevel) 
 	return err
 }
 
-func (s *Server) SetNamespaceAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error {
+func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,
 		"target_user":  targetUser,
-		"label":        label,
+		"id":           id,
 		"access_level": accessLevel,
 	}).Debugf("set namespace access")
 
@@ -100,13 +100,13 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, label, targetUser strin
 			return err
 		}
 
-		ns, getErr := tx.NamespaceByLabel(ctx, ownerID, label)
+		ns, getErr := tx.NamespaceByID(ctx, ownerID, id)
 		if getErr != nil {
 			return getErr
 		}
 
 		if ns.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", label)
+			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", id)
 		}
 
 		if setErr := tx.SetNamespaceAccess(ctx, ns.Namespace, accessLevel, targetUserInfo.ID); setErr != nil {
@@ -123,14 +123,14 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, label, targetUser strin
 	return err
 }
 
-func (s *Server) GetNamespaceAccess(ctx context.Context, label string) (model.NamespaceWithPermissions, error) {
+func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (model.NamespaceWithPermissions, error) {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
-		"label":   label,
+		"id":      id,
 	}).Infof("get namespace access")
 
-	ns, err := s.db.NamespaceByLabel(ctx, userID, label)
+	ns, err := s.db.NamespaceByID(ctx, userID, id)
 	if err != nil {
 		return model.NamespaceWithPermissions{}, err
 	}
@@ -149,12 +149,12 @@ func (s *Server) GetNamespaceAccess(ctx context.Context, label string) (model.Na
 	return ns, err
 }
 
-func (s *Server) SetVolumeAccess(ctx context.Context, label, targetUser string, accessLevel model.AccessLevel) error {
+func (s *Server) SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,
 		"target_user":  targetUser,
-		"label":        label,
+		"id":           id,
 		"access_level": accessLevel,
 	}).Debugf("set volume access")
 
@@ -164,13 +164,13 @@ func (s *Server) SetVolumeAccess(ctx context.Context, label, targetUser string, 
 			return err
 		}
 
-		vol, getErr := tx.VolumeByLabel(ctx, ownerID, label)
+		vol, getErr := tx.VolumeByID(ctx, ownerID, id)
 		if getErr != nil {
 			return getErr
 		}
 
 		if vol.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", label)
+			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", id)
 		}
 
 		if setErr := tx.SetVolumeAccess(ctx, vol.Volume, accessLevel, targetUserInfo.ID); setErr != nil {
@@ -187,14 +187,14 @@ func (s *Server) SetVolumeAccess(ctx context.Context, label, targetUser string, 
 	return err
 }
 
-func (s *Server) GetVolumeAccess(ctx context.Context, label string) (model.VolumeWithPermissions, error) {
+func (s *Server) GetVolumeAccess(ctx context.Context, id string) (model.VolumeWithPermissions, error) {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
-		"label":   label,
+		"id":      id,
 	}).Infof("get volume access")
 
-	vol, err := s.db.VolumeByLabel(ctx, userID, label)
+	vol, err := s.db.VolumeByID(ctx, userID, id)
 	if err != nil {
 		return model.VolumeWithPermissions{}, err
 	}
@@ -213,11 +213,11 @@ func (s *Server) GetVolumeAccess(ctx context.Context, label string) (model.Volum
 	return vol, err
 }
 
-func (s *Server) DeleteNamespaceAccess(ctx context.Context, label string, targetUser string) error {
+func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":    ownerID,
-		"label":       label,
+		"id":          id,
 		"target_user": targetUser,
 	}).Debugf("delete namespace access")
 
@@ -227,13 +227,13 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, label string, target
 			return err
 		}
 
-		ns, getErr := tx.NamespaceByLabel(ctx, ownerID, label)
+		ns, getErr := tx.NamespaceByID(ctx, ownerID, id)
 		if getErr != nil {
 			return getErr
 		}
 
 		if ns.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", label)
+			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", id)
 		}
 
 		if delErr := tx.DeleteNamespaceAccess(ctx, ns.Namespace, targetUserInfo.ID); delErr != nil {
@@ -250,11 +250,11 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, label string, target
 	return err
 }
 
-func (s *Server) DeleteVolumeAccess(ctx context.Context, label string, targetUser string) error {
+func (s *Server) DeleteVolumeAccess(ctx context.Context, id string, targetUser string) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":    ownerID,
-		"label":       label,
+		"id":          id,
 		"target_user": targetUser,
 	}).Debugf("delete volume access")
 
@@ -264,13 +264,13 @@ func (s *Server) DeleteVolumeAccess(ctx context.Context, label string, targetUse
 			return err
 		}
 
-		vol, getErr := tx.VolumeByLabel(ctx, ownerID, label)
+		vol, getErr := tx.VolumeByID(ctx, ownerID, id)
 		if getErr != nil {
 			return getErr
 		}
 
 		if vol.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", label)
+			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", id)
 		}
 
 		if delErr := tx.DeleteVolumeAccess(ctx, vol.Volume, targetUserInfo.ID); delErr != nil {
