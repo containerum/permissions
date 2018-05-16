@@ -126,11 +126,6 @@ func (dao *DAO) NamespaceVolumes(ctx context.Context, ns *model.Namespace) (err 
 	err = dao.db.Model(ns).
 		Column("Volumes").
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("owner_user_id = ?owner_user_id").
-				Where("label = ?label"), nil
-		}).
 		Where("NOT deleted").
 		Relation("Volumes").
 		Select()
@@ -240,11 +235,6 @@ func (dao *DAO) RenameNamespace(ctx context.Context, namespace *model.Namespace,
 
 	_, err = dao.db.Model(namespace).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("owner_user_id = ?owner_user_id").
-				Where("label = ?label"), nil
-		}).
 		Set("label = ?", newLabel).
 		Returning("*").
 		Update()
@@ -256,11 +246,6 @@ func (dao *DAO) ResizeNamespace(ctx context.Context, namespace model.Namespace) 
 
 	result, err := dao.db.Model(&namespace).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("cpu = ?cpu").
 		Set("ram = ?ram").
 		Set("max_ext_services = ?max_ext_services").
@@ -288,11 +273,6 @@ func (dao *DAO) DeleteNamespace(ctx context.Context, namespace *model.Namespace)
 	result, err := dao.db.Model(namespace).
 		Where("NOT deleted").
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("deleted = ?deleted").
 		Set("delete_time = ?delete_time").
 		Returning("*").

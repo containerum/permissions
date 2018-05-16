@@ -214,11 +214,6 @@ func (dao *DAO) RenameVolume(ctx context.Context, vol *model.Volume, newLabel st
 
 	result, err := dao.db.Model(vol).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("label = ?", newLabel).
 		Returning("*").
 		Update()
@@ -237,11 +232,6 @@ func (dao *DAO) ResizeVolume(ctx context.Context, vol model.Volume) error {
 
 	result, err := dao.db.Model(&vol).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("capacity = ?capacity").
 		Set("replicas = ?replicas").
 		Update()
@@ -260,11 +250,6 @@ func (dao *DAO) DeleteVolume(ctx context.Context, vol *model.Volume) error {
 
 	result, err := dao.db.Model(vol).
 		WherePK().
-		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
-			return query.
-				Where("label = ?label").
-				Where("owner_user_id = ?owner_user_id"), nil
-		}).
 		Set("active = FALSE").
 		Set("deleted = TRUE").
 		Set("delete_time = now()").
