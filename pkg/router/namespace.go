@@ -59,7 +59,7 @@ func (nh *namespaceHandlers) adminResizeNamespaceHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := nh.acts.AdminResizeNamespace(ctx.Request.Context(), ctx.Param("label"), req); err != nil {
+	if err := nh.acts.AdminResizeNamespace(ctx.Request.Context(), ctx.Param("id"), req); err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
@@ -75,7 +75,7 @@ func (nh *namespaceHandlers) renameNamespaceHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := nh.acts.RenameNamespace(ctx.Request.Context(), ctx.Param("label"), req.Label); err != nil {
+	if err := nh.acts.RenameNamespace(ctx.Request.Context(), ctx.Param("id"), req.Label); err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
@@ -84,7 +84,7 @@ func (nh *namespaceHandlers) renameNamespaceHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) deleteNamespaceHandler(ctx *gin.Context) {
-	if err := nh.acts.DeleteNamespace(ctx.Request.Context(), ctx.Param("label")); err != nil {
+	if err := nh.acts.DeleteNamespace(ctx.Request.Context(), ctx.Param("id")); err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
@@ -102,7 +102,7 @@ func (nh *namespaceHandlers) deleteAllUserNamespacesHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) getNamespaceHandler(ctx *gin.Context) {
-	ret, err := nh.acts.GetNamespace(ctx.Request.Context(), ctx.Param("label"))
+	ret, err := nh.acts.GetNamespace(ctx.Request.Context(), ctx.Param("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
@@ -150,7 +150,7 @@ func (nh *namespaceHandlers) resizeNamespaceHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := nh.acts.ResizeNamespace(ctx.Request.Context(), ctx.Param("label"), req.TariffID); err != nil {
+	if err := nh.acts.ResizeNamespace(ctx.Request.Context(), ctx.Param("id"), req.TariffID); err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
@@ -203,7 +203,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.POST("/namespaces", handlers.createNamespaceHandler)
 
-	// swagger:operation PUT /admin/namespaces/{label} Namespaces AdminResizeNamespace
+	// swagger:operation PUT /admin/namespaces/{id} Namespaces AdminResizeNamespace
 	//
 	// Resize namespace without billing (admin only).
 	//
@@ -217,7 +217,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceAdminResizeRequest'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -226,9 +226,9 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespace resized
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/admin/namespaces/:label", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespaceHandler)
+	r.engine.PUT("/admin/namespaces/:id", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespaceHandler)
 
-	// swagger:operation PUT /namespaces/{label}/rename Namespaces RenameNamespace
+	// swagger:operation PUT /namespaces/{id}/rename Namespaces RenameNamespace
 	//
 	// Rename namespace.
 	//
@@ -242,7 +242,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceRenameRequest'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -251,9 +251,9 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespace renamed
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/namespaces/:label/rename", handlers.renameNamespaceHandler)
+	r.engine.PUT("/namespaces/:id/rename", handlers.renameNamespaceHandler)
 
-	// swagger:operation PUT /namespaces/{label} Namespaces ResizeNamespace
+	// swagger:operation PUT /namespaces/{id} Namespaces ResizeNamespace
 	//
 	// Resize namespace.
 	//
@@ -267,7 +267,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceResizeRequest'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -276,9 +276,9 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespace resized
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/namespaces/:label", handlers.resizeNamespaceHandler)
+	r.engine.PUT("/namespaces/:id", handlers.resizeNamespaceHandler)
 
-	// swagger:operation DELETE /namespaces/{label} Namespaces DeleteNamespace
+	// swagger:operation DELETE /namespaces/{id} Namespaces DeleteNamespace
 	//
 	// Delete namespace.
 	//
@@ -287,7 +287,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -296,7 +296,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespace deleted
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.DELETE("/namespaces/:label", handlers.deleteNamespaceHandler)
+	r.engine.DELETE("/namespaces/:id", handlers.deleteNamespaceHandler)
 
 	// swagger:operation DELETE /admin/namespaces Namespaces DeleteAllUserNamespaces
 	//
@@ -314,7 +314,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.DELETE("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserNamespacesHandler)
 
-	// swagger:operation GET /namespaces/{label} Namespaces GetNamespace
+	// swagger:operation GET /namespaces/{id} Namespaces GetNamespace
 	//
 	// Get namespace.
 	//
@@ -323,7 +323,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: label
+	//  - name: id
 	//    in: path
 	//    required: true
 	//    type: string
@@ -334,7 +334,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//       $ref: '#/definitions/NamespaceWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/namespaces/:label", handlers.getNamespaceHandler)
+	r.engine.GET("/namespaces/:id", handlers.getNamespaceHandler)
 
 	// swagger:operation GET /namespaces Namespaces GetUserNamespaces
 	//
