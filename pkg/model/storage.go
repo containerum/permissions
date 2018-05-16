@@ -50,13 +50,6 @@ func (s *Storage) BeforeUpdate(db orm.DB) error {
 	if s.Size < s.Used {
 		return errors.ErrQuotaExceeded().AddDetailF("storage quota exceeded")
 	}
-	cnt, err := db.Model(s).Where("name = ?name").Count()
-	if err != nil {
-		return err
-	}
-	if cnt > 0 {
-		return errors.ErrResourceAlreadyExists().AddDetailF("storage %s already exist", s.Name)
-	}
 	return nil
 }
 
