@@ -39,14 +39,6 @@ func (s *Storage) BeforeInsert(db orm.DB) error {
 }
 
 func (s *Storage) BeforeUpdate(db orm.DB) error {
-	oldStorage := *s
-	err := db.Model(&oldStorage).WherePK().Select()
-	if err != nil {
-		return err
-	}
-	if oldStorage.Used != s.Used {
-		return errors.ErrRequestValidationFailed().AddDetailF("can`t change \"used\" for storage")
-	}
 	if s.Size < s.Used {
 		return errors.ErrQuotaExceeded().AddDetailF("storage quota exceeded")
 	}

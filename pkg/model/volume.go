@@ -44,8 +44,8 @@ func (v *Volume) BeforeInsert(db orm.DB) error {
 		return errors.ErrResourceAlreadyExists().AddDetailF("volume %s already exists", v.Label)
 	}
 
-	_, err = db.Model((*Storage)(nil)).
-		Where("id", v.StorageID).
+	_, err = db.Model(&Storage{ID: v.StorageID}).
+		WherePK().
 		Set("used = used + (?)", v.Capacity).
 		Update()
 
