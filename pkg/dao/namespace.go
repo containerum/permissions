@@ -117,6 +117,13 @@ func (dao *DAO) NamespaceVolumes(ctx context.Context, ns *model.Namespace) (err 
 
 	err = dao.db.Model(ns).
 		Column("Volumes").
+		WherePK().
+		WhereOrGroup(func(query *orm.Query) (*orm.Query, error) {
+			return query.
+				Where("owner_user_id = ?owner_user_id").
+				Where("label = ?label"), nil
+		}).
+		Where("NOT deleted").
 		Relation("Volumes").
 		Select()
 	switch err {
