@@ -95,6 +95,24 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 		// that`s our error if we will here
 		return errors.ErrInternal().AddDetails("initial access level must be greater than current access level")
 	}
+	if p.InitialAccessLevel == AccessOwner && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
+		_, err := db.Model(p).
+			Where("resource_id = ?resource_id").
+			Set("current_access_level = LEAST(?TableAlias.initial_access_level, ?current_access_level)").
+			Update()
+		if err != nil {
+			return err
+		}
+	}
+	if p.InitialAccessLevel == AccessOwner && p.InitialAccessLevel == p.CurrentAccessLevel { // un-limiting access
+		_, err := db.Model(p).
+			Where("resource_id = ?resource_id").
+			Set("current_access_level = initial_access_level").
+			Update()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -44,6 +44,19 @@ func (dao *DAO) AllStorages(ctx context.Context) (ret []model.Storage, err error
 func (dao *DAO) UpdateStorage(ctx context.Context, name string, storage model.Storage) error {
 	dao.log.WithField("name", name).Debugf("update storage to %+v", storage)
 
+	if storage.Name != name {
+		cnt, err := dao.db.Model(&storage).
+			WherePK().
+			WhereOr("name = ?", name).
+			Count()
+		if err != nil {
+			return dao.handleError(err)
+		}
+		if cnt > 0 {
+			return errors.ErrResourceAlreadyExists().AddDetailF("storage %s already exists", storage.Name)
+		}
+	}
+
 	result, err := dao.db.Model(&storage).
 		WherePK().
 		WhereOr("name = ?", name).

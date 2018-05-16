@@ -149,7 +149,7 @@ func (b *BillingHTTPClient) Subscribe(ctx context.Context, req btypes.SubscribeT
 	resp, err := b.client.R().
 		SetBody(req).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Post("/user/subscribe")
+		Post("/isp/subscription")
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) 
 			ResourceID: resourceID,
 		}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Post("/user/unsubscribe")
+		Delete(fmt.Sprintf("/isp/subscription/%s", resourceID))
 	if err != nil {
 		return err
 	}
