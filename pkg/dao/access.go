@@ -60,9 +60,8 @@ func (dao *DAO) SetUserAccesses(ctx context.Context, userID string, level model.
 func (dao *DAO) setResourceAccess(ctx context.Context, permission model.Permission) error {
 	_, err := dao.db.Model(&permission).
 		OnConflict(`(resource_type, resource_id, user_id) DO UPDATE`).
-		Set("initial_access_level = EXCLUDED.initial_access_level").
-		Set(`current_access_level = CASE WHEN current_access_level < EXCLUDED.initial_access_level THEN current_access_level
-										ELSE EXCLUDED.initial_access_level`).
+		Set(`current_access_level = CASE WHEN current_access_level < initial_access_level THEN current_access_level
+										ELSE initial_access_level`).
 		Insert()
 
 	if err != nil {
