@@ -23,6 +23,7 @@ import (
 type BillingClient interface {
 	Subscribe(ctx context.Context, req btypes.SubscribeTariffRequest) error
 	Unsubscribe(ctx context.Context, resourceID string) error
+	MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error
 
 	GetNamespaceTariff(ctx context.Context, tariffID string) (btypes.NamespaceTariff, error)
 	GetVolumeTariff(ctx context.Context, tariffID string) (btypes.VolumeTariff, error)
@@ -166,11 +167,27 @@ func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) 
 	}).Infoln("unsubscribing")
 
 	resp, err := b.client.R().
-		SetBody(btypes.UnsubscribeTariffRequest{
-			ResourceID: resourceID,
-		}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Delete(fmt.Sprintf("/isp/subscription/%s", resourceID))
+	if err != nil {
+		return err
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+
+	return nil
+}
+
+func (b *BillingHTTPClient) MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error {
+	b.log.WithField("resource_ids", resourceIDs).Infoln("massive unsubscribing")
+
+	resp, err := b.client.R().
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(btypes.MassiveUnsubscribeTariffRequest{
+			Resources: resourceIDs,
+		}).
+		Delete("/isp/subscription")
 	if err != nil {
 		return err
 	}
@@ -241,6 +258,12 @@ func (b BillingDummyClient) Unsubscribe(ctx context.Context, resourceID string) 
 	b.log.WithFields(logrus.Fields{
 		"resource_id": resourceID,
 	}).Infoln("unsubscribing")
+	return nil
+}
+
+func (b *BillingDummyClient) MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error {
+	b.log.WithField("resource_ids", resourceIDs).Infoln("massive unsubscribing")
+
 	return nil
 }
 
