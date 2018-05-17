@@ -22,6 +22,7 @@ import (
 // BillingClient is an interface to billing service
 type BillingClient interface {
 	Subscribe(ctx context.Context, req btypes.SubscribeTariffRequest) error
+	Rename(ctx context.Context, resourceID, newLabel string) error
 	Unsubscribe(ctx context.Context, resourceID string) error
 	MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error
 
@@ -145,7 +146,7 @@ func (b *BillingHTTPClient) Subscribe(ctx context.Context, req btypes.SubscribeT
 		"tariff_id":   req.TariffID,
 		"resource_id": req.ResourceID,
 		"kind":        req.ResourceType,
-	}).Infoln("subscribing")
+	}).Debugln("subscribing")
 
 	resp, err := b.client.R().
 		SetBody(req).
@@ -161,10 +162,32 @@ func (b *BillingHTTPClient) Subscribe(ctx context.Context, req btypes.SubscribeT
 	return nil
 }
 
+func (b *BillingHTTPClient) Rename(ctx context.Context, resourceID, newLabel string) error {
+	b.log.WithFields(logrus.Fields{
+		"resource_id": resourceID,
+		"new_label":   newLabel,
+	}).Debugln("Rename")
+
+	resp, err := b.client.R().
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(btypes.RenameRequest{
+			ResourceLabel: newLabel,
+		}).
+		Put(fmt.Sprintf("/resource/%s", resourceID))
+	if err != nil {
+		return err
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+
+	return nil
+}
+
 func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) error {
 	b.log.WithFields(logrus.Fields{
 		"resource_id": resourceID,
-	}).Infoln("unsubscribing")
+	}).Debugln("unsubscribing")
 
 	resp, err := b.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
@@ -180,7 +203,7 @@ func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) 
 }
 
 func (b *BillingHTTPClient) MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error {
-	b.log.WithField("resource_ids", resourceIDs).Infoln("massive unsubscribing")
+	b.log.WithField("resource_ids", resourceIDs).Debugln("massive unsubscribing")
 
 	resp, err := b.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
@@ -199,7 +222,7 @@ func (b *BillingHTTPClient) MassiveUnsubscribe(ctx context.Context, resourceIDs 
 }
 
 func (b *BillingHTTPClient) GetNamespaceTariff(ctx context.Context, tariffID string) (btypes.NamespaceTariff, error) {
-	b.log.WithField("tariff_id", tariffID).Infoln("get namespace tariff")
+	b.log.WithField("tariff_id", tariffID).Debugln("get namespace tariff")
 
 	resp, err := b.client.R().
 		SetContext(ctx).
@@ -217,7 +240,7 @@ func (b *BillingHTTPClient) GetNamespaceTariff(ctx context.Context, tariffID str
 }
 
 func (b *BillingHTTPClient) GetVolumeTariff(ctx context.Context, tariffID string) (btypes.VolumeTariff, error) {
-	b.log.WithField("tariff_id", tariffID).Infoln("get volume tariff")
+	b.log.WithField("tariff_id", tariffID).Debugln("get volume tariff")
 
 	resp, err := b.client.R().
 		SetContext(ctx).
@@ -250,25 +273,34 @@ func (b BillingDummyClient) Subscribe(ctx context.Context, req btypes.SubscribeT
 		"tariff_id":   req.TariffID,
 		"resource_id": req.ResourceID,
 		"kind":        req.ResourceType,
-	}).Infoln("subscribing")
+	}).Debugln("subscribing")
+	return nil
+}
+
+func (b BillingDummyClient) Rename(ctx context.Context, resourceID, newLabel string) error {
+	b.log.WithFields(logrus.Fields{
+		"resource_id": resourceID,
+		"new_label":   newLabel,
+	}).Debugln("Rename")
+
 	return nil
 }
 
 func (b BillingDummyClient) Unsubscribe(ctx context.Context, resourceID string) error {
 	b.log.WithFields(logrus.Fields{
 		"resource_id": resourceID,
-	}).Infoln("unsubscribing")
+	}).Debugln("unsubscribing")
 	return nil
 }
 
-func (b *BillingDummyClient) MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error {
-	b.log.WithField("resource_ids", resourceIDs).Infoln("massive unsubscribing")
+func (b BillingDummyClient) MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error {
+	b.log.WithField("resource_ids", resourceIDs).Debugln("massive unsubscribing")
 
 	return nil
 }
 
 func (b BillingDummyClient) GetNamespaceTariff(ctx context.Context, tariffID string) (btypes.NamespaceTariff, error) {
-	b.log.WithField("tariff_id", tariffID).Infoln("get namespace tariff")
+	b.log.WithField("tariff_id", tariffID).Debugln("get namespace tariff")
 	for _, nsTariff := range fakeNSTariffs {
 		if nsTariff.ID != "" && nsTariff.ID == tariffID {
 			return nsTariff, nil
@@ -278,7 +310,7 @@ func (b BillingDummyClient) GetNamespaceTariff(ctx context.Context, tariffID str
 }
 
 func (b BillingDummyClient) GetVolumeTariff(ctx context.Context, tariffID string) (btypes.VolumeTariff, error) {
-	b.log.WithField("tariff_id", tariffID).Infoln("get volume tariff")
+	b.log.WithField("tariff_id", tariffID).Debugln("get volume tariff")
 	for _, volumeTariff := range fakeVolumeTariffs {
 		if volumeTariff.ID != "" && volumeTariff.ID == tariffID {
 			return volumeTariff, nil

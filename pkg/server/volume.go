@@ -213,6 +213,10 @@ func (s *Server) RenameVolume(ctx context.Context, id, newLabel string) error {
 
 		// TODO: rename it actually
 
+		if renErr := s.clients.Billing.Rename(ctx, vol.ID, newLabel); renErr != nil {
+			return renErr
+		}
+
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
 			return updErr
 		}
