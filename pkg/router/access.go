@@ -178,10 +178,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    schema:
 	//      $ref: "#/definitions/SetResourceAccessRequest"
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    description: Namespace ID
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//	 '200':
 	//	   description: access set
@@ -228,10 +225,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    schema:
 	//      $ref: "#/definitions/DeleteResourceAccessRequest"
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    description: Namespace ID
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//	 '200':
 	//	   description: access deleted
@@ -253,10 +247,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    schema:
 	//      $ref: "#/definitions/DeleteResourceAccessRequest"
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    description: Namespace ID
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//	 '200':
 	//	   description: access deleted
@@ -273,10 +264,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace response
@@ -295,10 +283,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: volume response

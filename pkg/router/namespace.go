@@ -210,10 +210,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceAdminResizeRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace resized
@@ -235,10 +232,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceRenameRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace renamed
@@ -260,10 +254,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceResizeRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace resized
@@ -280,10 +271,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace deleted
@@ -316,10 +304,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace response
