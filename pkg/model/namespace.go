@@ -5,6 +5,7 @@ import (
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/go-pg/pg/orm"
+	"github.com/sirupsen/logrus"
 )
 
 // Namespace describes namespace
@@ -49,6 +50,23 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 		InitialAccessLevel: AccessOwner,
 		CurrentAccessLevel: AccessOwner,
 	})
+}
+
+func (ns *Namespace) BeforeUpdate(db orm.DB) error {
+	if ns.Deleted {
+		cnt, err := db.Model(&Volume{NamespaceID: &ns.ID}).
+			Where("namespace_id = ?namespace_id").
+			Where("NOT deleted").
+			Count()
+		if err != nil {
+			return err
+		}
+		if cnt > 0 {
+			logrus.Error("trying to delete namespace with volumes")
+			return errors.ErrInternal()
+		}
+	}
+	return nil
 }
 
 // swagger:ignore
