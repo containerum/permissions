@@ -82,6 +82,7 @@ func (dao *DAO) VolumeByID(ctx context.Context, userID, id string) (ret model.Vo
 		"user_id": userID,
 	}).Debugf("get volume by id")
 
+	ret.ID = id
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
 		Column("Permission").
