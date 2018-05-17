@@ -171,14 +171,20 @@ func (s *Server) DeleteAllUserVolumes(ctx context.Context) error {
 	s.log.WithField("user_id", userID).Infof("delete all user volumes")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
-		_, delErr := tx.DeleteAllVolumes(ctx, userID)
+		deletedVols, delErr := tx.DeleteAllVolumes(ctx, userID)
 		if delErr != nil {
 			return delErr
 		}
 
 		// TODO: actually delete it
 
-		// TODO: unsubscribe all (needed method)
+		var resourceIDs []string
+		for _, v := range deletedVols {
+			resourceIDs = append(resourceIDs, v.ID)
+		}
+		if unsubErr := s.clients.Billing.MassiveUnsubscribe(ctx, resourceIDs); unsubErr != nil {
+			return unsubErr
+		}
 
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
 			return updErr

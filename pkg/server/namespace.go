@@ -406,12 +406,21 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return getErr
 		}
 
-		if _, delErr := tx.DeleteNamespaceVolumes(ctx, ns.Namespace); delErr != nil {
+		deletedVols, delErr := tx.DeleteNamespaceVolumes(ctx, ns.Namespace)
+		if delErr != nil {
 			return delErr
 		}
 
 		if delErr := tx.DeleteNamespace(ctx, &ns.Namespace); delErr != nil {
 			return delErr
+		}
+
+		resourceIDs := []string{ns.ID}
+		for _, v := range deletedVols {
+			resourceIDs = append(resourceIDs, v.ID)
+		}
+		if unsubErr := s.clients.Billing.MassiveUnsubscribe(ctx, resourceIDs); unsubErr != nil {
+			return unsubErr
 		}
 
 		if delErr := s.clients.Kube.DeleteNamespace(ctx, kubeAPIModel.NamespaceWithOwner{Name: ns.ID}); delErr != nil {
@@ -433,13 +442,26 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 	s.log.WithField("user_id", userID).Infof("delete all user namespaces")
 
 	err := s.db.Transactional(func(tx *dao.DAO) error {
+		deletedVols, delErr := tx.DeleteAllUserNamespaceVolumes(ctx, userID)
+		if delErr != nil {
+			return delErr
+		}
+
 		deletedNamespaces, delErr := tx.DeleteAllUserNamespaces(ctx, userID)
 		if delErr != nil {
 			return delErr
 		}
 
-		if _, delErr := tx.DeleteAllUserNamespaceVolumes(ctx, userID); delErr != nil {
-			return delErr
+		var resourceIDs []string
+		for _, v := range deletedNamespaces {
+			resourceIDs = append(resourceIDs, v.ID)
+		}
+		for _, v := range deletedVols {
+			resourceIDs = append(resourceIDs, v.ID)
+		}
+
+		if unsubErr := s.clients.Billing.MassiveUnsubscribe(ctx, resourceIDs); unsubErr != nil {
+			return unsubErr
 		}
 
 		// kube-api don`t have method to delete list of namespaces
