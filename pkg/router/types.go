@@ -92,7 +92,7 @@ func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 		httputil.UserRoleXHeader: "eq=admin|eq=user",
 	}))
 	ret.engine.Use(tv.ValidateURLParams(map[string]string{
-		"id": "uuid",
+		"id": "omitempty,uuid",
 	}))
 	ret.engine.Use(httputil.SubstituteUserMiddleware(tv.Validate, tv.UniversalTranslator, errors.ErrRequestValidationFailed))
 	return ret
