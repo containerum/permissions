@@ -55,7 +55,7 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 func (ns *Namespace) BeforeUpdate(db orm.DB) error {
 	if ns.Deleted {
 		cnt, err := db.Model(&Volume{NamespaceID: &ns.ID}).
-			Where("namespace_id = ?namespace_id").
+			Where("ns_id = ?ns_id").
 			Where("NOT deleted").
 			Count()
 		if err != nil {
