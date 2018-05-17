@@ -63,7 +63,7 @@ func NewAuthGRPCClient(addr string) (as *AuthGRPCClient, err error) {
 }
 
 func (as AuthGRPCClient) UpdateUserAccess(ctx context.Context, userID string, access *authProto.ResourcesAccess) error {
-	as.log.WithField("user_id", userID).Infoln("update user access")
+	as.log.WithField("user_id", userID).Debugf("update user access to %+v", access)
 	_, err := as.client.UpdateAccess(ctx, &authProto.UpdateAccessRequest{
 		Users: []*authProto.UpdateAccessRequestElement{
 			{UserId: userID, Access: access},
@@ -92,7 +92,7 @@ func NewAuthDummyClient() AuthClient {
 }
 
 func (as AuthDummyClient) UpdateUserAccess(ctx context.Context, userID string, access *authProto.ResourcesAccess) error {
-	as.log.WithField("user_id", userID).Infoln("update user access to %+v", access)
+	as.log.WithField("user_id", userID).Debugf("update user access to %+v", access)
 	return nil
 }
 
