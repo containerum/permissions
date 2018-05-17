@@ -10,9 +10,23 @@ type SubscribeTariffRequest struct {
 	ResourceID    string       `json:"resource_id"`
 }
 
-// UnsubscribeTariffRequest contains parameters needed for tariff unsubscribing
+// ChangeTariffRequest contains parameters needed for tariff changing
 //
 // swagger:model
-type UnsubscribeTariffRequest struct {
-	ResourceID string `json:"resource_id"`
+type ChangeTariffRequest struct {
+	TariffID      string       `json:"tariff_id"`
+}
+
+// MassiveUnsubscribeTariffRequest contains parameters needed for all tariffs unsubscribing
+//
+// swagger:model
+type MassiveUnsubscribeTariffRequest struct {
+	Resources []string `json:"resources"`
+}
+
+// RenameRequest contains parameters needed for resource renaming
+//
+// swagger:model
+type RenameRequest struct {
+	ResourceLabel      string       `json:"resource_label"`
 }

@@ -50,8 +50,8 @@
     "errors",
     "models"
   ]
-  revision = "b82383afa02471b3ca82c9d9721f606b97fda3f8"
-  version = "v1.0.0"
+  revision = "bef9fc78109d3f926fcd1b1717d6962856beacd9"
+  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/containerum/cherry"
