@@ -237,6 +237,7 @@ func (dao *DAO) ResizeVolume(ctx context.Context, vol model.Volume) error {
 		WherePK().
 		Set("capacity = ?capacity").
 		Set("replicas = ?replicas").
+		Set("tariff_id = ?tariff_id").
 		Update()
 	if err != nil {
 		return dao.handleError(err)
