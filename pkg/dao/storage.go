@@ -77,10 +77,7 @@ func (dao *DAO) UpdateStorage(ctx context.Context, name string, storage model.St
 func (dao *DAO) DeleteStorage(ctx context.Context, storage model.Storage) error {
 	dao.log.WithField("name", storage.Name).Debugf("delete storage")
 
-	result, err := dao.db.Model(&storage).
-		WherePK().
-		WhereOr("name = ?name").
-		Delete()
+	result, err := dao.db.Model(&storage).WherePK().Delete()
 	if err != nil {
 		return dao.handleError(err)
 	}

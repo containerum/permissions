@@ -48,7 +48,8 @@ func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.Names
 	k.log.WithFields(logrus.Fields{
 		"cpu":    req.Resources.Hard.CPU,
 		"memory": req.Resources.Hard.Memory,
-		"name":   req.Label,
+		"label":  req.Label,
+		"name":   req.Name,
 		"access": req.Access,
 	}).Debug("create namespace")
 
@@ -71,13 +72,14 @@ func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Name
 		"cpu":    ns.Resources.Hard.CPU,
 		"memory": ns.Resources.Hard.Memory,
 		"label":  ns.Label,
+		"name":   ns.Name,
 	}).Debug("set namespace quota")
 
 	resp, err := k.client.R().
 		SetBody(ns).
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Put("/namespaces/" + url.PathEscape(ns.Label))
+		Put("/namespaces/" + ns.Name)
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}

@@ -61,7 +61,7 @@ func (dao *DAO) setResourceAccess(ctx context.Context, permission model.Permissi
 	_, err := dao.db.Model(&permission).
 		OnConflict(`(resource_type, resource_id, user_id) DO UPDATE`).
 		Set(`initial_access_level = ?initial_access_level`).
-		Set(`current_access_level = LEAST(?initial_access_level, ?current_access_level)`).
+		Set(`current_access_level = LEAST(?initial_access_level, ?current_access_level)::ACCESS_LEVEL`).
 		Insert()
 
 	if err != nil {
