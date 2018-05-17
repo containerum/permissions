@@ -2,27 +2,26 @@ package router
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
-func getFilters(ctx *gin.Context) []string {
-	q := ctx.Query("filter")
+func getFilters(values url.Values) []string {
+	q := values.Get("filter")
 	if len(q) == 0 {
 		return nil
 	}
 	return strings.Split(q, ",")
 }
 
-func getPaginationParams(ctx *gin.Context) (page, perPage int, err error) {
-	page, err = strconv.Atoi(ctx.Query("page"))
+func getPaginationParams(values url.Values) (page, perPage int, err error) {
+	page, err = strconv.Atoi(values.Get("page"))
 	if err != nil {
 		err = fmt.Errorf("page number not integer")
 		return
 	}
-	perPage, err = strconv.Atoi(ctx.Query("per_page"))
+	perPage, err = strconv.Atoi(values.Get("per_page"))
 	if err != nil {
 		err = fmt.Errorf("per page limit not integer")
 		return

@@ -110,7 +110,7 @@ func (nh *namespaceHandlers) getNamespaceHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
-	ret, err := nh.acts.GetUserNamespaces(ctx.Request.Context(), getFilters(ctx)...)
+	ret, err := nh.acts.GetUserNamespaces(ctx.Request.Context(), getFilters(ctx.Request.URL.Query())...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
@@ -122,12 +122,12 @@ func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) getAllNamespacesHandler(ctx *gin.Context) {
-	page, perPage, err := getPaginationParams(ctx)
+	page, perPage, err := getPaginationParams(ctx.Request.URL.Query())
 	if err != nil {
 		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
-	ret, err := nh.acts.GetAllNamespaces(ctx.Request.Context(), page, perPage, getFilters(ctx)...)
+	ret, err := nh.acts.GetAllNamespaces(ctx.Request.Context(), page, perPage, getFilters(ctx.Request.URL.Query())...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
