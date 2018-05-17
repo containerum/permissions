@@ -207,10 +207,7 @@
             }
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -381,10 +378,7 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -424,10 +418,7 @@
             }
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -456,10 +447,7 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -498,10 +486,7 @@
             }
           },
           {
-            "description": "Namespace ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -538,10 +523,7 @@
             }
           },
           {
-            "description": "Namespace ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -572,10 +554,7 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -617,10 +596,7 @@
             }
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -865,10 +841,7 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -908,10 +881,7 @@
             }
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -940,10 +910,7 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -1022,10 +989,7 @@
             }
           },
           {
-            "description": "Namespace ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -1056,10 +1020,7 @@
             "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -1101,10 +1062,7 @@
             }
           },
           {
-            "type": "string",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -3455,6 +3413,14 @@
       "type": "integer",
       "name": "per_page",
       "in": "query",
+      "required": true
+    },
+    "ResourceID": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Resource ID",
+      "name": "id",
+      "in": "path",
       "required": true
     },
     "SubstitutedUserID": {
