@@ -253,6 +253,7 @@ func (dao *DAO) ResizeNamespace(ctx context.Context, namespace model.Namespace) 
 		Set("max_ext_services = ?max_ext_services").
 		Set("max_int_services = ?max_int_services").
 		Set("max_traffic = ?max_traffic").
+		Set("tariff_id = ?tariff_id").
 		Update()
 	if err != nil {
 		return dao.handleError(err)
