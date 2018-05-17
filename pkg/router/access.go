@@ -92,7 +92,7 @@ func (ah *accessHandlers) deleteVolumeAccessHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := ah.acts.DeleteVolumeAccess(ctx, ctx.Param("id"), req.UserName); err != nil {
+	if err := ah.acts.DeleteVolumeAccess(ctx.Request.Context(), ctx.Param("id"), req.UserName); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
