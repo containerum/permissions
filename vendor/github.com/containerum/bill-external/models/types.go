@@ -23,10 +23,8 @@ type Tariff struct {
 	Price       float64   `json:"price"`
 	Active      bool      `json:"is_active"`
 	Public      bool      `json:"is_public"`
-	BillingID   int       `json:"billing_id"`
 	Description string    `json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // NamespaceTariff represents billing tariff for namespace
