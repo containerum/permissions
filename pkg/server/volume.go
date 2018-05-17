@@ -256,6 +256,7 @@ func (s *Server) ResizeVolume(ctx context.Context, id string, newTariffID string
 			return getErr
 		}
 
+		vol.TariffID = &newTariff.ID
 		vol.Replicas = newTariff.ReplicasLimit
 		vol.Capacity = newTariff.StorageLimit
 
