@@ -38,7 +38,7 @@ func init() {
 
 func ParseVolumeFilter(filters ...string) VolumeFilter {
 	var ret VolumeFilter
-	v := reflect.ValueOf(&ret)
+	v := reflect.ValueOf(&ret).Elem()
 	for _, filter := range filters {
 		if field, ok := volFilterCache[filter]; ok {
 			v.Field(field).SetBool(true)
@@ -55,16 +55,16 @@ func (f *VolumeFilter) Filter(q *orm.Query) (*orm.Query, error) {
 		q = q.Where("?TableAlias.deleted")
 	}
 	if f.NotLimited {
-		q = q.Where("permissions.initial_access_level = permissions.current_access_level")
+		q = q.Where("permission.initial_access_level = permissions.current_access_level")
 	}
 	if f.Limited {
-		q = q.Where("permissions.initial_access_level != permissions.initial_access_level")
+		q = q.Where("permission.initial_access_level != permissions.initial_access_level")
 	}
 	if f.Owned {
-		q = q.Where("permissions.initial_access_level = ?", model.AccessOwner)
+		q = q.Where("permission.initial_access_level = ?", model.AccessOwner)
 	}
 	if f.NotOwned {
-		q = q.Where("permissions.initial_access_level != ?", model.AccessOwner)
+		q = q.Where("permission.initial_access_level != ?", model.AccessOwner)
 	}
 	if f.Persistent {
 		q = q.Where("?TableAlias.namespace_id IS NULL")

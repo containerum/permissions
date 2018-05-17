@@ -2,8 +2,6 @@ package router
 
 import (
 	"net/http"
-	"strconv"
-	"strings"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -112,7 +110,7 @@ func (nh *namespaceHandlers) getNamespaceHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
-	ret, err := nh.acts.GetUserNamespaces(ctx.Request.Context(), strings.Split(ctx.Query("filter"), ",")...)
+	ret, err := nh.acts.GetUserNamespaces(ctx.Request.Context(), getFilters(ctx)...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
@@ -124,17 +122,12 @@ func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) getAllNamespacesHandler(ctx *gin.Context) {
-	page, err := strconv.Atoi(ctx.Query("page"))
+	page, perPage, err := getPaginationParams(ctx)
 	if err != nil {
-		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailF("page number not integer"), ctx)
+		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
-	perPage, err := strconv.Atoi(ctx.Query("per_page"))
-	if err != nil {
-		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailF("per page limit not integer"), ctx)
-		return
-	}
-	ret, err := nh.acts.GetAllNamespaces(ctx.Request.Context(), page, perPage, strings.Split("filter", ",")...)
+	ret, err := nh.acts.GetAllNamespaces(ctx.Request.Context(), page, perPage, getFilters(ctx)...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return

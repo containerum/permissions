@@ -37,7 +37,7 @@ func init() {
 
 func ParseNamespaceFilter(filters ...string) NamespaceFilter {
 	var ret NamespaceFilter
-	v := reflect.ValueOf(&ret)
+	v := reflect.ValueOf(&ret).Elem()
 	for _, filter := range filters {
 		if field, ok := nsFilterCache[filter]; ok {
 			v.Field(field).SetBool(true)
@@ -54,16 +54,16 @@ func (f *NamespaceFilter) Filter(q *orm.Query) (*orm.Query, error) {
 		q = q.Where("?TableAlias.deleted")
 	}
 	if f.NotLimited {
-		q = q.Where("permissions.initial_access_level = permissions.current_access_level")
+		q = q.Where("permission.initial_access_level = permissions.current_access_level")
 	}
 	if f.Limited {
-		q = q.Where("permissions.initial_access_level != permissions.initial_access_level")
+		q = q.Where("permission.initial_access_level != permissions.initial_access_level")
 	}
 	if f.Owned {
-		q = q.Where("permissions.initial_access_level = ?", model.AccessOwner)
+		q = q.Where("permission.initial_access_level = ?", model.AccessOwner)
 	}
 	if f.NotOwned {
-		q = q.Where("permissions.initial_access_level != ?", model.AccessOwner)
+		q = q.Where("permission.initial_access_level != ?", model.AccessOwner)
 	}
 
 	return q.Apply(f.Paginate), nil
@@ -194,8 +194,8 @@ func (dao *DAO) AllNamespaces(ctx context.Context, filter NamespaceFilter) (ret 
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
 		Column("Volumes", "Permission").
-		Apply(filter.Filter).
 		Relation("Volumes").
+		Apply(filter.Filter).
 		Select()
 	switch err {
 	case pg.ErrNoRows:

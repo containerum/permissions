@@ -2,8 +2,6 @@ package router
 
 import (
 	"net/http"
-	"strconv"
-	"strings"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -46,7 +44,7 @@ func (vh *volumeHandlers) getVolumeHandler(ctx *gin.Context) {
 }
 
 func (vh *volumeHandlers) getUserVolumesHandler(ctx *gin.Context) {
-	ret, err := vh.acts.GetUserVolumes(ctx.Request.Context(), strings.Split(ctx.Param("filter"), ",")...)
+	ret, err := vh.acts.GetUserVolumes(ctx.Request.Context(), getFilters(ctx)...)
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
@@ -61,19 +59,13 @@ func (vh *volumeHandlers) getUserVolumesHandler(ctx *gin.Context) {
 }
 
 func (vh *volumeHandlers) getAllVolumesHandler(ctx *gin.Context) {
-	page, err := strconv.Atoi(ctx.Query("page"))
+	page, perPage, err := getPaginationParams(ctx)
 	if err != nil {
-		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailF("page number not integer"), ctx)
-		return
-	}
-	perPage, err := strconv.Atoi(ctx.Query("per_page"))
-	if err != nil {
-		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailF("per page limit not integer"), ctx)
+		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
-	ret, err := vh.acts.GetAllVolumes(ctx.Request.Context(), page, perPage, strings.Split(ctx.Param("filter"), ",")...)
-
+	ret, err := vh.acts.GetAllVolumes(ctx.Request.Context(), page, perPage, getFilters(ctx)...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
 		return
