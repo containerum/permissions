@@ -299,6 +299,10 @@ func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error
 			return renameErr
 		}
 
+		if renameErr := s.clients.Billing.Rename(ctx, ns.ID, newLabel); renameErr != nil {
+			return renameErr
+		}
+
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
 			return updErr
 		}
