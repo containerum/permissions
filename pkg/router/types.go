@@ -68,6 +68,10 @@ func (tv *TranslateValidate) ValidateHeaders(headerTagMap map[string]string) gin
 	}
 }
 
+func (tv *TranslateValidate) ValidateURLParams(paramTagMap map[string]string) gin.HandlerFunc {
+	return httputil.ValidateURLParamsMiddleware(paramTagMap, tv.Validate, tv.UniversalTranslator, errors.ErrRequestValidationFailed)
+}
+
 type Router struct {
 	engine gin.IRouter
 	tv     *TranslateValidate
@@ -86,6 +90,9 @@ func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 	ret.engine.Use(tv.ValidateHeaders(map[string]string{
 		httputil.UserIDXHeader:   "uuid",
 		httputil.UserRoleXHeader: "eq=admin|eq=user",
+	}))
+	ret.engine.Use(tv.ValidateURLParams(map[string]string{
+		"id": "uuid",
 	}))
 	ret.engine.Use(httputil.SubstituteUserMiddleware(tv.Validate, tv.UniversalTranslator, errors.ErrRequestValidationFailed))
 	return ret

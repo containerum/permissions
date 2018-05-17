@@ -110,7 +110,7 @@ func (nh *namespaceHandlers) getNamespaceHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
-	ret, err := nh.acts.GetUserNamespaces(ctx.Request.Context(), getFilters(ctx)...)
+	ret, err := nh.acts.GetUserNamespaces(ctx.Request.Context(), getFilters(ctx.Request.URL.Query())...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
@@ -122,12 +122,12 @@ func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
 }
 
 func (nh *namespaceHandlers) getAllNamespacesHandler(ctx *gin.Context) {
-	page, perPage, err := getPaginationParams(ctx)
+	page, perPage, err := getPaginationParams(ctx.Request.URL.Query())
 	if err != nil {
 		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
-	ret, err := nh.acts.GetAllNamespaces(ctx.Request.Context(), page, perPage, getFilters(ctx)...)
+	ret, err := nh.acts.GetAllNamespaces(ctx.Request.Context(), page, perPage, getFilters(ctx.Request.URL.Query())...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
@@ -210,10 +210,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceAdminResizeRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace resized
@@ -235,10 +232,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceRenameRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace renamed
@@ -260,10 +254,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/NamespaceResizeRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace resized
@@ -280,10 +271,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace deleted
@@ -316,10 +304,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: namespace response

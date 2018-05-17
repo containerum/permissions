@@ -44,7 +44,7 @@ func (vh *volumeHandlers) getVolumeHandler(ctx *gin.Context) {
 }
 
 func (vh *volumeHandlers) getUserVolumesHandler(ctx *gin.Context) {
-	ret, err := vh.acts.GetUserVolumes(ctx.Request.Context(), getFilters(ctx)...)
+	ret, err := vh.acts.GetUserVolumes(ctx.Request.Context(), getFilters(ctx.Request.URL.Query())...)
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
@@ -59,13 +59,13 @@ func (vh *volumeHandlers) getUserVolumesHandler(ctx *gin.Context) {
 }
 
 func (vh *volumeHandlers) getAllVolumesHandler(ctx *gin.Context) {
-	page, perPage, err := getPaginationParams(ctx)
+	page, perPage, err := getPaginationParams(ctx.Request.URL.Query())
 	if err != nil {
 		gonic.Gonic(errors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
-	ret, err := vh.acts.GetAllVolumes(ctx.Request.Context(), page, perPage, getFilters(ctx)...)
+	ret, err := vh.acts.GetAllVolumes(ctx.Request.Context(), page, perPage, getFilters(ctx.Request.URL.Query())...)
 	if err != nil {
 		ctx.AbortWithStatusJSON(vh.tv.HandleError(err))
 		return
@@ -155,10 +155,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: volume response
@@ -221,10 +218,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: volume deleted
@@ -262,10 +256,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/VolumeRenameRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: volume renamed
@@ -287,10 +278,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//    required: true
 	//    schema:
 	//      $ref: '#/definitions/VolumeResizeRequest'
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    type: string
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
 	//     description: volume resized
