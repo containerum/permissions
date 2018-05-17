@@ -67,8 +67,8 @@
 [[projects]]
   name = "github.com/containerum/utils"
   packages = ["httputil"]
-  revision = "5e922affb542eaeb55ab395ff3c7161179df54b3"
-  version = "v1.0.0"
+  revision = "8604d0da32cc447c0f3a0a026146a3084161dc5e"
+  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/emicklei/go-restful"
