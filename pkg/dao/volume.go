@@ -211,7 +211,7 @@ func (dao *DAO) RenameVolume(ctx context.Context, vol *model.Volume, newLabel st
 	if err != nil {
 		return dao.handleError(err)
 	}
-	if cnt >= 0 {
+	if cnt > 0 {
 		return errors.ErrResourceAlreadyExists().AddDetailF("volume %s already exists", newLabel)
 	}
 
