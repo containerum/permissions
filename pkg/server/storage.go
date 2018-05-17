@@ -58,6 +58,10 @@ func (s *Server) DeleteStorage(ctx context.Context, name string) error {
 	s.log.WithField("name", name).Infof("delete storage")
 
 	return s.db.Transactional(func(tx *dao.DAO) error {
-		return tx.DeleteStorage(ctx, model.Storage{Name: name})
+		storage, err := tx.StorageByName(ctx, name)
+		if err != nil {
+			return err
+		}
+		return tx.DeleteStorage(ctx, storage)
 	})
 }

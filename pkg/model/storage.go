@@ -45,6 +45,20 @@ func (s *Storage) BeforeUpdate(db orm.DB) error {
 	return nil
 }
 
+func (s *Storage) BeforeDelete(db orm.DB) error {
+	cnt, err := db.Model(&Volume{StorageID: s.ID}).
+		Where("storage_id = ?storage_id").
+		Where("NOT deleted").
+		Count()
+	if err != nil {
+		return err
+	}
+	if cnt > 0 {
+		return errors.ErrStorageDelete()
+	}
+	return nil
+}
+
 // UpdateStorageRequest represents request object for updating storage
 //
 // swagger:model

@@ -77,3 +77,9 @@ SID = "permissions"
     StatusHTTP = 507
     Message = "No free storages found for volume"
     Kind = 12
+
+[[error]]
+    Name = "ErrStorageDelete"
+    StatusHTTP = 400
+    Message = "Can`t delete storage with volumes"
+    Kind = 13
