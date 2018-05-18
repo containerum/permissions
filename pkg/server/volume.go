@@ -149,6 +149,10 @@ func (s *Server) DeleteVolume(ctx context.Context, id string) error {
 			return getErr
 		}
 
+		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
+			return chkErr
+		}
+
 		if delErr := tx.DeleteVolume(ctx, &vol.Volume); delErr != nil {
 			return delErr
 		}
@@ -213,6 +217,10 @@ func (s *Server) RenameVolume(ctx context.Context, id, newLabel string) error {
 			return getErr
 		}
 
+		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
+			return chkErr
+		}
+
 		if renErr := tx.RenameVolume(ctx, &vol.Volume, newLabel); renErr != nil {
 			return renErr
 		}
@@ -254,6 +262,10 @@ func (s *Server) ResizeVolume(ctx context.Context, id string, newTariffID string
 		vol, getErr := tx.VolumeByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
+		}
+
+		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
+			return chkErr
 		}
 
 		vol.TariffID = &newTariff.ID

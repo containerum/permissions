@@ -6,7 +6,6 @@ import (
 	"git.containerum.net/ch/auth/proto"
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/dao"
-	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
@@ -105,8 +104,8 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, 
 			return getErr
 		}
 
-		if ns.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", id)
+		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
+			return chkErr
 		}
 
 		if setErr := tx.SetNamespaceAccess(ctx, ns.Namespace, accessLevel, targetUserInfo.ID); setErr != nil {
@@ -169,8 +168,8 @@ func (s *Server) SetVolumeAccess(ctx context.Context, id, targetUser string, acc
 			return getErr
 		}
 
-		if vol.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", id)
+		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
+			return chkErr
 		}
 
 		if setErr := tx.SetVolumeAccess(ctx, vol.Volume, accessLevel, targetUserInfo.ID); setErr != nil {
@@ -232,8 +231,8 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUse
 			return getErr
 		}
 
-		if ns.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("namespace %s not owned by user", id)
+		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
+			return chkErr
 		}
 
 		if delErr := tx.DeleteNamespaceAccess(ctx, ns.Namespace, targetUserInfo.ID); delErr != nil {
@@ -269,8 +268,8 @@ func (s *Server) DeleteVolumeAccess(ctx context.Context, id string, targetUser s
 			return getErr
 		}
 
-		if vol.OwnerUserID != ownerID {
-			return errors.ErrResourceNotOwned().AddDetailF("volume %s not owned by user", id)
+		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
+			return chkErr
 		}
 
 		if delErr := tx.DeleteVolumeAccess(ctx, vol.Volume, targetUserInfo.ID); delErr != nil {

@@ -295,6 +295,10 @@ func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error
 			return getErr
 		}
 
+		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
+			return chkErr
+		}
+
 		if renameErr := tx.RenameNamespace(ctx, &ns.Namespace, newLabel); renameErr != nil {
 			return renameErr
 		}
@@ -334,6 +338,10 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
+		}
+
+		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
+			return chkErr
 		}
 
 		var oldTariff billing.NamespaceTariff
@@ -408,6 +416,10 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
+		}
+
+		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
+			return chkErr
 		}
 
 		deletedVols, delErr := tx.DeleteNamespaceVolumes(ctx, ns.Namespace)
