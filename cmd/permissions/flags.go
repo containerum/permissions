@@ -50,6 +50,11 @@ var (
 		EnvVars: []string{"BILLING_ADDR"},
 	}
 
+	ResourceServiceAddrFlag = cli.StringFlag{
+		Name:    "resource_service_addr",
+		EnvVars: []string{"RESOURCE_SERVICE_ADDR"},
+	}
+
 	CORSFlag = cli.BoolFlag{
 		Name: "cors",
 	}

@@ -15,6 +15,7 @@ ENV MODE="release" \
     AUTH_ADDR="ch-auth:1112" \
     USER_ADDR="user-manager:8111" \
     KUBE_API_ADDR="kube-api:1214" \
+    RESOURCE_SERVICE_ADDR="resource-service:1213" \
     BILLING_ADDR="billing-manager:5000"
 
 EXPOSE 4242
