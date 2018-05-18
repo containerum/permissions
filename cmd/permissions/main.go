@@ -68,6 +68,7 @@ func main() {
 			&KubeAPIAddrFlag,
 			&UserAddrFlag,
 			&BillingAddrFlag,
+			&ResourceServiceAddrFlag,
 			&CORSFlag,
 		},
 		Before: func(ctx *cli.Context) error {

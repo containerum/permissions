@@ -94,6 +94,17 @@ func setupKubeClient(addr string) (clients.KubeAPIClient, error) {
 	}
 }
 
+func setupResourceClient(addr string) (clients.ResourceServiceClient, error) {
+	switch {
+	case opMode == modeDebug && addr == "":
+		return clients.NewResourceServiceDummyClient(), nil
+	case addr != "":
+		return clients.NewResourceServiceHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
+	default:
+		return nil, errors.New("missing configuration for resource-service")
+	}
+}
+
 func setupBillingClient(addr string) (clients.BillingClient, error) {
 	switch {
 	case opMode == modeDebug && addr == "":
@@ -113,11 +124,16 @@ func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
 	if clients.Auth, err = setupAuthClient(ctx.String(AuthAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
 	}
+
 	if clients.User, err = setupUserClient(ctx.String(UserAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
 	}
 
 	if clients.Kube, err = setupKubeClient(ctx.String(KubeAPIAddrFlag.Name)); err != nil {
+		errs = append(errs, err)
+	}
+
+	if clients.Resource, err = setupResourceClient(ctx.String(ResourceServiceAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
 	}
 
