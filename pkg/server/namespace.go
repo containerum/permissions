@@ -431,6 +431,10 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return delErr
 		}
 
+		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.ID); delErr != nil {
+			return delErr
+		}
+
 		resourceIDs := []string{ns.ID}
 		for _, v := range deletedVols {
 			resourceIDs = append(resourceIDs, v.ID)
