@@ -1,21 +1,17 @@
 package clients
 
 import (
-	"github.com/json-iterator/go"
-	"github.com/sirupsen/logrus"
-
 	"context"
-
-	"net/http"
-
+	"fmt"
 	"net/url"
 
-	"fmt"
-
+	berrors "github.com/containerum/bill-external/errors"
 	btypes "github.com/containerum/bill-external/models"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/utils/httputil"
+	"github.com/json-iterator/go"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/resty.v1"
 )
 
@@ -107,16 +103,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-var buildErr = cherry.BuildErr("billing")
-
-func nsTariffNotFound() *cherry.Err {
-	return buildErr("namespace tariff not found", http.StatusNotFound, 1)
-}
-
-func volTarifNotFound() *cherry.Err {
-	return buildErr("volume tariff not found", http.StatusNotFound, 2)
 }
 
 type BillingHTTPClient struct {
@@ -306,7 +292,7 @@ func (b BillingDummyClient) GetNamespaceTariff(ctx context.Context, tariffID str
 			return nsTariff, nil
 		}
 	}
-	return btypes.NamespaceTariff{}, nsTariffNotFound()
+	return btypes.NamespaceTariff{}, berrors.ErrNotFound().AddDetailF("namespace tariff %s not exists", tariffID)
 }
 
 func (b BillingDummyClient) GetVolumeTariff(ctx context.Context, tariffID string) (btypes.VolumeTariff, error) {
@@ -316,7 +302,7 @@ func (b BillingDummyClient) GetVolumeTariff(ctx context.Context, tariffID string
 			return volumeTariff, nil
 		}
 	}
-	return btypes.VolumeTariff{}, volTarifNotFound()
+	return btypes.VolumeTariff{}, berrors.ErrNotFound().AddDetailF("volume tariff %s not exists", tariffID)
 }
 
 func (b BillingDummyClient) String() string {

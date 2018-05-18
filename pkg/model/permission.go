@@ -70,7 +70,7 @@ type Permission struct {
 
 func (p *Permission) BeforeInsert(db orm.DB) error {
 	if p.InitialAccessLevel == AccessOwner {
-		cnt, err := db.Model((*Permission)(nil)).
+		cnt, err := db.Model(p).
 			Column("id").
 			Where("resource_id = ?", p.ResourceID).
 			Where("resource_type = ?", p.ResourceType).
@@ -98,7 +98,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 	if p.InitialAccessLevel == AccessOwner && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
 		_, err := db.Model(p).
 			Where("resource_id = ?resource_id").
-			Set("current_access_level = LEAST(?TableAlias.initial_access_level, ?current_access_level)").
+			Set("current_access_level = LEAST(?TableAlias.initial_access_level, ?current_access_level)::ACCESS_LEVEL").
 			Update()
 		if err != nil {
 			return err
