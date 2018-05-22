@@ -146,8 +146,13 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (model.NamespaceWi
 	}
 
 	err = s.db.NamespaceVolumes(ctx, &ns.Namespace)
+	if err != nil {
+		return ns, err
+	}
 
-	return ns, err
+	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
+
+	return ns, nil
 }
 
 func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]model.NamespaceWithPermissions, error) {
@@ -165,7 +170,16 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]mo
 		filter = dao.ParseNamespaceFilter(filters...)
 	}
 
-	return s.db.UserNamespaces(ctx, userID, filter)
+	namespaces, err := s.db.UserNamespaces(ctx, userID, filter)
+	if err != nil {
+		return namespaces, err
+	}
+
+	for i := range namespaces {
+		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
+	}
+
+	return namespaces, nil
 }
 
 func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]model.NamespaceWithPermissions, error) {
@@ -184,7 +198,16 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 	filter.Limit = perPage
 	filter.SetPage(page)
 
-	return s.db.AllNamespaces(ctx, filter)
+	namespaces, err := s.db.AllNamespaces(ctx, filter)
+	if err != nil {
+		return namespaces, err
+	}
+
+	for i := range namespaces {
+		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
+	}
+
+	return namespaces, nil
 }
 
 func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error {
