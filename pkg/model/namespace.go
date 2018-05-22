@@ -75,7 +75,7 @@ type NamespaceWithPermissions struct {
 
 	Permission Permission `pg:"fk:resource_id" sql:"-" json:",inline"`
 
-	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
+	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users"`
 }
 
 // NamespaceWithPermissions is a response object for get requests
@@ -84,7 +84,7 @@ type NamespaceWithPermissions struct {
 type NamespaceWithPermissionsJSON struct {
 	Namespace
 	Permission
-	Permissions []Permission `json:"users,omitempty"`
+	Permissions []Permission `json:"users"`
 }
 
 // Workaround while json "inline" tag not inlines fields on marshal

@@ -98,7 +98,7 @@ type VolumeWithPermissions struct {
 
 	Permission Permission `pg:"fk:resource_id" sql:"-" json:",inline"`
 
-	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users,omitempty"`
+	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users"`
 }
 
 // VolumeWithPermissions is a response object for get requests
@@ -107,7 +107,7 @@ type VolumeWithPermissions struct {
 type VolumeWithPermissionsJSON struct {
 	Volume
 	Permission
-	Permissions []Permission `json:"users,omitempty"`
+	Permissions []Permission `json:"users"`
 }
 
 // Workaround while json "inline" tag not inlines fields on marshal

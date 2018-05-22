@@ -153,6 +153,9 @@ func (dao *DAO) NamespacePermissions(ctx context.Context, ns *model.NamespaceWit
 			return q.Where("initial_access_level != ?", model.AccessOwner), nil
 		}).
 		Select()
+	if len(ns.Permissions) == 0 {
+		ns.Permissions = make([]model.Permission, 0)
+	}
 	switch err {
 	case pg.ErrNoRows:
 		return nil

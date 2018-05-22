@@ -138,6 +138,9 @@ func (dao *DAO) VolumePermissions(ctx context.Context, vol *model.VolumeWithPerm
 			return q.Where("initial_access_level != ?", model.AccessOwner), nil
 		}).
 		Select()
+	if len(vol.Permissions) == 0 {
+		vol.Permissions = make([]model.Permission, 0)
+	}
 	switch err {
 	case pg.ErrNoRows:
 		err = nil
