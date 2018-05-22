@@ -51,6 +51,5 @@ func (r *Resource) AfterUpdate(db orm.DB) error {
 func (r *Resource) Mask() {
 	r.CreateTime = nil
 	r.DeleteTime = nil
-	r.TariffID = nil
 	r.OwnerUserID = ""
 }
