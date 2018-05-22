@@ -97,7 +97,14 @@ func (s *Server) GetVolume(ctx context.Context, id string) (model.VolumeWithPerm
 		"id":      id,
 	}).Infof("get volume")
 
-	return s.db.VolumeByID(ctx, userID, id)
+	vol, err := s.db.VolumeByID(ctx, userID, id)
+	if err != nil {
+		return vol, err
+	}
+
+	AddOwnerLogin(ctx, &vol.Resource, s.clients.User)
+
+	return vol, nil
 }
 
 func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error) {
@@ -114,7 +121,16 @@ func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]model
 		filter = StandardVolumeFilter
 	}
 
-	return s.db.UserVolumes(ctx, userID, filter)
+	vols, err := s.db.UserVolumes(ctx, userID, filter)
+	if err != nil {
+		return vols, err
+	}
+
+	for i := range vols {
+		AddOwnerLogin(ctx, &vols[i].Resource, s.clients.User)
+	}
+
+	return vols, nil
 }
 
 func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error) {
@@ -133,7 +149,16 @@ func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters .
 	filter.Limit = perPage
 	filter.SetPage(page)
 
-	return s.db.AllVolumes(ctx, filter)
+	vols, err := s.db.AllVolumes(ctx, filter)
+	if err != nil {
+		return vols, err
+	}
+
+	for i := range vols {
+		AddOwnerLogin(ctx, &vols[i].Resource, s.clients.User)
+	}
+
+	return vols, nil
 }
 
 func (s *Server) DeleteVolume(ctx context.Context, id string) error {

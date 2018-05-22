@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/containerum/bill-external/errors"
 	billing "github.com/containerum/bill-external/models"
@@ -46,5 +47,14 @@ func OwnerCheck(ctx context.Context, resource model.Resource) error {
 	if httputil.MustGetUserID(ctx) != resource.OwnerUserID && !IsAdminRole(ctx) {
 		return errors.ErrPermissionDenied().AddDetailF("only resource owner can do this")
 	}
+	return nil
+}
+
+func AddOwnerLogin(ctx context.Context, r *model.Resource, client clients.UserManagerClient) error {
+	user, err := client.UserInfoByID(ctx, r.OwnerUserID)
+	if err != nil {
+		return err
+	}
+	r.OwnerUserLogin = user.Login
 	return nil
 }

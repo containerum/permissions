@@ -27,6 +27,9 @@ type Resource struct {
 	// swagger:strfmt uuid
 	OwnerUserID string `sql:"owner_user_id,type:uuid,notnull" json:"owner_user_id,omitempty"`
 
+	// swagger:strfmt email
+	OwnerUserLogin string `sql:"-" json:"owner_user_login,omitempty"`
+
 	Label string `sql:"label,notnull" json:"label"`
 }
 
