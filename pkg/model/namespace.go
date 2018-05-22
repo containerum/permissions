@@ -98,6 +98,18 @@ func (np NamespaceWithPermissions) MarshalJSON() ([]byte, error) {
 	return json.Marshal(npJSON)
 }
 
+func (np *NamespaceWithPermissions) UnmarshalJSON(b []byte) error {
+	var npJSON NamespaceWithPermissionsJSON
+	err := json.Unmarshal(b, &npJSON)
+	if err != nil {
+		return err
+	}
+	np.Namespace = npJSON.Namespace
+	np.Permission = npJSON.Permission
+	np.Permissions = npJSON.Permissions
+	return nil
+}
+
 func (np *NamespaceWithPermissions) Mask() {
 	np.Namespace.Mask()
 	np.Permission.Mask()
