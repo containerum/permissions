@@ -14,6 +14,7 @@ import (
 
 type ResourceServiceClient interface {
 	DeleteNamespaceResources(ctx context.Context, namespaceID string) error
+	DeleteAllUserNamespaces(ctx context.Context) error
 }
 
 type ResourceServiceHTTPClient struct {
@@ -53,6 +54,21 @@ func (r *ResourceServiceHTTPClient) DeleteNamespaceResources(ctx context.Context
 	return nil
 }
 
+func (r *ResourceServiceHTTPClient) DeleteAllUserNamespaces(ctx context.Context) error {
+	r.log.Debugf("delete all user namespaces")
+
+	resp, err := r.client.R().
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		Delete("/namespaces")
+	if err != nil {
+		return err
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+	return nil
+}
+
 type ResourceServiceDummyClient struct {
 	log *logrus.Entry
 }
@@ -65,6 +81,12 @@ func NewResourceServiceDummyClient() *ResourceServiceDummyClient {
 
 func (r *ResourceServiceDummyClient) DeleteNamespaceResources(ctx context.Context, namespaceID string) error {
 	r.log.WithField("namespace_id", namespaceID).Debugf("delete namespace resources")
+
+	return nil
+}
+
+func (r *ResourceServiceDummyClient) DeleteAllUserNamespaces(ctx context.Context) error {
+	r.log.Debugf("delete all user namespaces")
 
 	return nil
 }
