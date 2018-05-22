@@ -121,6 +121,17 @@ func (vp VolumeWithPermissions) MarshalJSON() ([]byte, error) {
 	return json.Marshal(npJSON)
 }
 
+func (vp *VolumeWithPermissions) UnmarshalJSON(b []byte) error {
+	var vpJSON VolumeWithPermissionsJSON
+	if err := json.Unmarshal(b, &vpJSON); err != nil {
+		return err
+	}
+	vp.Volume = vpJSON.Volume
+	vp.Permissions = vpJSON.Permissions
+	vp.Permission = vpJSON.Permission
+	return nil
+}
+
 func (vp *VolumeWithPermissions) Mask() {
 	vp.Volume.Mask()
 	vp.Permission.Mask()
