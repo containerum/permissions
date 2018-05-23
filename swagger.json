@@ -1126,6 +1126,17 @@
       "type": "object",
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
     },
+    "ChangeTariffRequest": {
+      "description": "ChangeTariffRequest contains parameters needed for tariff changing",
+      "type": "object",
+      "properties": {
+        "tariff_id": {
+          "type": "string",
+          "x-go-name": "TariffID"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
+    },
     "ConfigMap": {
       "description": "ConfigMap -- model for config map",
       "type": "object",
@@ -1740,81 +1751,68 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
+    "MassiveUnsubscribeTariffRequest": {
+      "description": "MassiveUnsubscribeTariffRequest contains parameters needed for all tariffs unsubscribing",
+      "type": "object",
+      "properties": {
+        "resources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Resources"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
+    },
     "Namespace": {
-      "description": "Namespace describes namespace",
+      "description": "Namespace -- namespace representation provided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
       "type": "object",
       "required": [
         "resources"
       ],
       "properties": {
-        "cpu": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CPU"
-        },
-        "create_time": {
+        "access": {
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "CreateTime"
+          "x-go-name": "Access"
         },
-        "delete_time": {
+        "created_at": {
+          "description": "creation date in RFC3339 format",
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "DeleteTime"
-        },
-        "deleted": {
-          "type": "boolean",
-          "x-go-name": "Deleted"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
+          "x-go-name": "CreatedAt"
         },
         "label": {
           "description": "user-visible label for the namespace",
           "type": "string",
           "x-go-name": "Label"
         },
-        "max_external_services": {
+        "max_ext_service": {
           "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxExtServices"
+          "format": "uint64",
+          "x-go-name": "MaxExtService"
         },
-        "max_internal_services": {
+        "max_int_service": {
           "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxIntServices"
+          "format": "uint64",
+          "x-go-name": "MaxIntService"
         },
         "max_traffic": {
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "MaxTraffic"
         },
-        "owner_user_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "OwnerUserID"
-        },
-        "ram": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "RAM"
-        },
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
+        "resources": {
+          "$ref": "#/definitions/Resources"
         },
         "volumes": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/VolumeWithPermissions"
+            "$ref": "#/definitions/Volume"
           },
           "x-go-name": "Volumes"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
     },
     "NamespaceAdminCreateRequest": {
       "description": "NamespaceAdminCreateRequest contains parameters for creating namespace without billing",
@@ -1927,11 +1925,6 @@
       "description": "NamespaceTariff represents billing tariff for namespace\nIf VolumeSize provided non-persistent volume will be created.",
       "type": "object",
       "properties": {
-        "billing_id": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "BillingID"
-        },
         "cpu_limit": {
           "type": "integer",
           "format": "int64",
@@ -1991,11 +1984,6 @@
           "type": "number",
           "format": "double",
           "x-go-name": "TrafficPrice"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "UpdatedAt"
         },
         "volume_size": {
           "type": "integer",
@@ -2134,6 +2122,11 @@
           "type": "string",
           "format": "uuid",
           "x-go-name": "OwnerUserID"
+        },
+        "owner_user_login": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "OwnerUserLogin"
         },
         "perm_id": {
           "type": "string",
@@ -2436,6 +2429,17 @@
       "description": "represents port protocol type (TCP or UDP)",
       "type": "string",
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+    },
+    "RenameRequest": {
+      "description": "RenameRequest contains parameters needed for resource renaming",
+      "type": "object",
+      "properties": {
+        "resource_label": {
+          "type": "string",
+          "x-go-name": "ResourceLabel"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
     "Resource": {
       "description": "Resource -- represents namespace CPU and RAM",
@@ -2972,17 +2976,6 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/golang/protobuf/ptypes/timestamp"
     },
-    "UnsubscribeTariffRequest": {
-      "description": "UnsubscribeTariffRequest contains parameters needed for tariff unsubscribing",
-      "type": "object",
-      "properties": {
-        "resource_id": {
-          "type": "string",
-          "x-go-name": "ResourceID"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
-    },
     "UpdateAccessRequest": {
       "type": "object",
       "title": "UpdateAccessRequest describes request for updating user resources accesses.",
@@ -3116,72 +3109,39 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
     },
     "Volume": {
-      "description": "Volume describes volume",
+      "description": "Volume -- volume representation\nprovided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
       "type": "object",
       "properties": {
-        "active": {
-          "type": "boolean",
-          "x-go-name": "Active"
+        "access": {
+          "type": "string",
+          "x-go-name": "Access"
         },
-        "capacity": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Capacity"
+        "access_change_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "AccessChangeTime"
         },
         "create_time": {
           "type": "string",
           "format": "date-time",
           "x-go-name": "CreateTime"
         },
-        "delete_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "DeleteTime"
-        },
-        "deleted": {
-          "type": "boolean",
-          "x-go-name": "Deleted"
-        },
-        "gluster_name": {
-          "type": "string",
-          "x-go-name": "GlusterName"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
         "label": {
           "type": "string",
           "x-go-name": "Label"
-        },
-        "namespace_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "NamespaceID"
-        },
-        "owner_user_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "OwnerUserID"
         },
         "replicas": {
           "type": "integer",
           "format": "int64",
           "x-go-name": "Replicas"
         },
-        "storage_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "StorageID"
-        },
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
+        "storage": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Storage"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
     },
     "VolumeCreateRequest": {
       "description": "VolumeCreateRequest is a request object for creating volume",
@@ -3226,11 +3186,6 @@
       "description": "VolumeTariff represents billing tariff for (persistent) volume",
       "type": "object",
       "properties": {
-        "billing_id": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "BillingID"
-        },
         "created_at": {
           "type": "string",
           "format": "date-time",
@@ -3270,11 +3225,6 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "StorageLimit"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "UpdatedAt"
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
@@ -3348,6 +3298,11 @@
           "format": "uuid",
           "x-go-name": "OwnerUserID"
         },
+        "owner_user_login": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "OwnerUserLogin"
+        },
         "perm_id": {
           "type": "string",
           "format": "uuid",
@@ -3405,15 +3360,13 @@
       "minimum": 0,
       "type": "integer",
       "name": "page",
-      "in": "query",
-      "required": true
+      "in": "query"
     },
     "PerPageLimit": {
       "minimum": 0,
       "type": "integer",
       "name": "per_page",
-      "in": "query",
-      "required": true
+      "in": "query"
     },
     "ResourceID": {
       "type": "string",

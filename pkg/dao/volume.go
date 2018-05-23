@@ -72,8 +72,11 @@ func (f *VolumeFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	if f.NotPersistent {
 		q = q.Where("?TableAlias.namespace_id IS NOT NULL")
 	}
+	if f.Limit > 0 {
+		q = q.Apply(f.Paginate)
+	}
 
-	return q.Apply(f.Paginate), nil
+	return q, nil
 }
 
 func (dao *DAO) VolumeByID(ctx context.Context, userID, id string) (ret model.VolumeWithPermissions, err error) {
