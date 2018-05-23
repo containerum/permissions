@@ -79,6 +79,7 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 			Resource: model.Resource{
 				OwnerUserID: userID,
 				Label:       req.Label,
+				TariffID:    &req.TariffID,
 			},
 			CPU:            tariff.CPULimit,
 			RAM:            tariff.MemoryLimit,
