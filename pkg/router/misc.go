@@ -16,6 +16,9 @@ func getFilters(values url.Values) []string {
 }
 
 func getPaginationParams(values url.Values) (page, perPage int, err error) {
+	if values.Get("per_page") == "" {
+		return 0, 0, nil
+	}
 	page, err = strconv.Atoi(values.Get("page"))
 	if err != nil {
 		err = fmt.Errorf("page number not integer")

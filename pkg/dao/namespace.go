@@ -65,8 +65,11 @@ func (f *NamespaceFilter) Filter(q *orm.Query) (*orm.Query, error) {
 	if f.NotOwned {
 		q = q.Where("permission.initial_access_level != ?", model.AccessOwner)
 	}
+	if f.Limit > 0 {
+		q = q.Apply(f.Paginate)
+	}
 
-	return q.Apply(f.Paginate), nil
+	return q, nil
 }
 
 func (dao *DAO) NamespaceByID(ctx context.Context, userID, id string) (ret model.NamespaceWithPermissions, err error) {
