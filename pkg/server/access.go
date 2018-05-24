@@ -134,18 +134,24 @@ func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (model.Names
 		return model.NamespaceWithPermissions{}, err
 	}
 	err = s.db.NamespacePermissions(ctx, &ns)
-
-	// TODO: maybe better method for get user login list by id list
-	for i, perm := range ns.Permissions {
-		info, err := s.clients.User.UserInfoByID(ctx, perm.UserID)
-		if err != nil {
-			return model.NamespaceWithPermissions{}, err
-		}
-
-		ns.Permissions[i].UserLogin = info.Login
+	if err != nil {
+		return ns, err
 	}
 
-	return ns, err
+	userIDs := make([]string, len(ns.Permissions))
+	for i := range ns.Permissions {
+		userIDs[i] = ns.Permissions[i].UserID
+	}
+	userLogins, err := s.clients.User.UserLoginIDList(ctx, userIDs...)
+	if err != nil {
+		return ns, err
+	}
+
+	for i := range ns.Permissions {
+		ns.Permissions[i].UserLogin = userLogins[ns.Permissions[i].UserID]
+	}
+
+	return ns, nil
 }
 
 func (s *Server) SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error {
@@ -199,14 +205,17 @@ func (s *Server) GetVolumeAccess(ctx context.Context, id string) (model.VolumeWi
 	}
 	err = s.db.VolumePermissions(ctx, &vol)
 
-	// TODO: maybe better method for get user login list by id list
-	for i, perm := range vol.Permissions {
-		info, err := s.clients.User.UserInfoByID(ctx, perm.UserID)
-		if err != nil {
-			return model.VolumeWithPermissions{}, err
-		}
+	userIDs := make([]string, len(vol.Permissions))
+	for i := range vol.Permissions {
+		userIDs[i] = vol.Permissions[i].UserID
+	}
+	userLogins, err := s.clients.User.UserLoginIDList(ctx, userIDs...)
+	if err != nil {
+		return vol, err
+	}
 
-		vol.Permissions[i].UserLogin = info.Login
+	for i := range vol.Permissions {
+		vol.Permissions[i].UserLogin = userLogins[vol.Permissions[i].UserID]
 	}
 
 	return vol, err

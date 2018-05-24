@@ -18,7 +18,7 @@ import (
 type UserManagerClient interface {
 	UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error)
 	UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error)
-	UserLoginIDList(ctx context.Context) (map[string]string, error)
+	UserLoginIDList(ctx context.Context, userIDs ...string) (map[string]string, error)
 }
 
 type UserManagerHTTPClient struct {
@@ -45,7 +45,7 @@ func NewUserManagerHTTPClient(url *url.URL) *UserManagerHTTPClient {
 }
 
 func (u *UserManagerHTTPClient) UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error) {
-	u.log.WithField("login", login).Info("get user info by login")
+	u.log.WithField("login", login).Debug("get user info by login")
 	resp, err := u.client.R().
 		SetContext(ctx).
 		SetResult(umtypes.User{}).
@@ -61,7 +61,7 @@ func (u *UserManagerHTTPClient) UserInfoByLogin(ctx context.Context, login strin
 }
 
 func (u *UserManagerHTTPClient) UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error) {
-	u.log.WithField("id", userID).Info("get user info by id")
+	u.log.WithField("id", userID).Debug("get user info by id")
 	resp, err := u.client.R().
 		SetContext(ctx).
 		SetResult(umtypes.User{}).
@@ -76,10 +76,11 @@ func (u *UserManagerHTTPClient) UserInfoByID(ctx context.Context, userID string)
 	return resp.Result().(*umtypes.User), nil
 }
 
-func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context) (map[string]string, error) {
-	u.log.Info("get users list")
+func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context, userIDs ...string) (map[string]string, error) {
+	u.log.WithField("user_ids", userIDs).Debug("get users list")
 	resp, err := u.client.R().
 		SetContext(ctx).
+		SetBody(userIDs).
 		SetResult(map[string]string{}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Get("/user/loginid")
@@ -112,7 +113,7 @@ func NewUserManagerDummyClient() *UserManagerDummyClient {
 }
 
 func (u *UserManagerDummyClient) UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error) {
-	u.log.WithField("id", login).Info("get user info by login")
+	u.log.WithField("id", login).Debug("get user info by login")
 	resp, ok := u.givenLogins[login]
 	if !ok {
 		resp = umtypes.User{
@@ -133,7 +134,7 @@ func (u *UserManagerDummyClient) UserInfoByLogin(ctx context.Context, login stri
 }
 
 func (u *UserManagerDummyClient) UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error) {
-	u.log.WithField("id", userID).Info("get user info by id")
+	u.log.WithField("id", userID).Debug("get user info by id")
 	return &umtypes.User{
 		UserLogin: &umtypes.UserLogin{
 			ID:    userID,
@@ -148,10 +149,13 @@ func (u *UserManagerDummyClient) UserInfoByID(ctx context.Context, userID string
 	}, nil
 }
 
-func (u *UserManagerDummyClient) UserLoginIDList(ctx context.Context) (map[string]string, error) {
-	u.log.Info("get user info by id")
-	id := uuid.NewV4().String()
-	return map[string]string{id: "fake-" + id + "@test.com"}, nil
+func (u *UserManagerDummyClient) UserLoginIDList(ctx context.Context, userIDs ...string) (map[string]string, error) {
+	u.log.Debug("get user info by id")
+	ret := make(map[string]string)
+	for _, v := range userIDs {
+		ret[v] = "fake-" + v + "@test.com"
+	}
+	return ret, nil
 }
 
 func (u *UserManagerDummyClient) String() string {
