@@ -1,0 +1,47 @@
+swagger: "2.0"
+definitions:
+  AccessLevel:
+    type: string
+    enum:
+      - none
+      - read
+      - readdelete
+      - write
+      - owner
+  ResourcesAccesses:
+    $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/ResourcesAccess"
+parameters:
+  SubstitutedUserID:
+    $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
+  UserIDHeader:
+    $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserIDHeader"
+  UserRoleHeader:
+    $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserRoleHeader"
+  PageNum:
+    name: page
+    in: query
+    type: integer
+    minimum: 0
+  PerPageLimit:
+    name: per_page
+    in: query
+    type: integer
+    minimum: 0
+  Filters:
+    name: filter
+    in: query
+    type: string
+    required: false
+    description: A set of filters separated with comma. See "dao" package for more information.
+  ResourceID:
+    name: id
+    in: path
+    type: string
+    format: uuid
+    required: true
+    description: Resource ID
+responses:
+  error:
+    description: cherry error
+    schema:
+      $ref: "vendor/github.com/containerum/cherry/swagger.json#/definitions/Err"

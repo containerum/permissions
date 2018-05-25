@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  permissions:
+  - apiVersion: v1
+    appVersion: "1"
+    created: 2018-05-25T17:27:16.424343845Z
+    description: Containerum Permissions service
+    digest: 8f7cbd0f20917cb3646e77cca521976cac2a662082056a5f25b98bb89cd24027
+    name: permissions
+    urls:
+    - https://containerum.github.io/permissions/charts/permissions-v1.0.0-rc2.tgz
+    version: v1.0.0-rc2
+generated: 2018-05-25T17:27:16.422407725Z
