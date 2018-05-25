@@ -17,7 +17,7 @@ service:
 env:
   MODE: "release"
   LOG_LEVEL: 4
-  DB_URL:
+  DB_URL: 
   LISTEN_ADDR: ":4242"
   AUTH_ADDR: "ch-auth:1112"
   USER_ADDR: "user-manager:8111"
