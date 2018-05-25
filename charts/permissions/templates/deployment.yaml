@@ -29,8 +29,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             {{- range $key, $val := .Values.env }}
+            {{ if $val }}
             - name: {{ $key  }}
               value: {{ $val | quote }}
+            {{ end }}
             {{- end }}
             - name: DB_URL
               valueFrom:
