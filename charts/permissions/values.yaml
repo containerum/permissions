@@ -1,0 +1,33 @@
+tags:
+  db: true
+
+replicaCount: 1
+
+image:
+  repository: containerum/permissions
+  tag: v1.0.0
+  pullPolicy: Always
+  secret:
+
+service:
+  port: 4242
+  targetPort: 4242
+  externalIP:
+
+env:
+  MODE: "release"
+  LOG_LEVEL: 4
+  DB_URL:
+  LISTEN_ADDR: ":4242"
+  AUTH_ADDR: "ch-auth:1112"
+  USER_ADDR: "user-manager:8111"
+  KUBE_API_ADDR: "kube-api:1214"
+  RESOURCE_SERVICE_ADDR: "resource-service:1213"
+  BILLING_ADDR: "billing-manager:5000"
+
+postgresql:
+  persistence:
+    enabled: false
+  postgresUser: user
+  postgresDatabase: user
+  postgresPassword: password
