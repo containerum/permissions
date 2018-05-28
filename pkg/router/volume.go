@@ -55,7 +55,7 @@ func (vh *volumeHandlers) getUserVolumesHandler(ctx *gin.Context) {
 		httputil.MaskForNonAdmin(ctx, &ret[i])
 	}
 
-	ctx.JSON(http.StatusOK, ret)
+	ctx.JSON(http.StatusOK, gin.H{"volumes": ret})
 }
 
 func (vh *volumeHandlers) getAllVolumesHandler(ctx *gin.Context) {
@@ -71,7 +71,7 @@ func (vh *volumeHandlers) getAllVolumesHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, ret)
+	ctx.JSON(http.StatusOK, gin.H{"volumes": ret})
 }
 
 func (vh *volumeHandlers) deleteVolumeHandler(ctx *gin.Context) {
@@ -179,9 +179,12 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//   '200':
 	//     description: volumes response
 	//     schema:
-	//       type: array
-	//       items:
-	//         $ref: '#/definitions/VolumeWithPermissions'
+	//       type: object
+	//       properties:
+	//         volumes:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/VolumeWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/volumes", handlers.getUserVolumesHandler)
@@ -202,9 +205,12 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//   '200':
 	//     description: volumes response
 	//     schema:
-	//       type: array
-	//       items:
-	//         $ref: '#/definitions/VolumeWithPermissions'
+	//       type: object
+	//       properties:
+	//         volumes:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/VolumeWithPermissions'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/volumes", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllVolumesHandler)
