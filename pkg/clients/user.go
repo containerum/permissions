@@ -83,7 +83,7 @@ func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context, userIDs ...
 		SetBody(userIDs).
 		SetResult(map[string]string{}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Get("/user/loginid")
+		Post("/user/loginid")
 	if err != nil {
 		return nil, err
 	}
