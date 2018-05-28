@@ -103,6 +103,7 @@ func (s *Server) GetVolume(ctx context.Context, id string) (model.VolumeWithPerm
 	}
 
 	AddOwnerLogin(ctx, &vol.Resource, s.clients.User)
+	AddUserLogins(ctx, vol.Permissions, s.clients.User)
 
 	return vol, nil
 }
@@ -128,6 +129,7 @@ func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]model
 
 	for i := range vols {
 		AddOwnerLogin(ctx, &vols[i].Resource, s.clients.User)
+		AddUserLogins(ctx, vols[i].Permissions, s.clients.User)
 	}
 
 	return vols, nil
@@ -156,6 +158,7 @@ func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters .
 
 	for i := range vols {
 		AddOwnerLogin(ctx, &vols[i].Resource, s.clients.User)
+		AddUserLogins(ctx, vols[i].Permissions, s.clients.User)
 	}
 
 	return vols, nil

@@ -152,6 +152,7 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (model.NamespaceWi
 	}
 
 	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
+	AddUserLogins(ctx, ns.Permissions, s.clients.User)
 
 	return ns, nil
 }
@@ -178,6 +179,7 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]mo
 
 	for i := range namespaces {
 		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
+		AddUserLogins(ctx, namespaces[i].Permissions, s.clients.User)
 	}
 
 	return namespaces, nil
@@ -206,6 +208,7 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 
 	for i := range namespaces {
 		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
+		AddUserLogins(ctx, namespaces[i].Permissions, s.clients.User)
 	}
 
 	return namespaces, nil

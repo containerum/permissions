@@ -58,3 +58,19 @@ func AddOwnerLogin(ctx context.Context, r *model.Resource, client clients.UserMa
 	r.OwnerUserLogin = user.Login
 	return nil
 }
+
+func AddUserLogins(ctx context.Context, permissions []model.Permission, client clients.UserManagerClient) error {
+	userIDs := make([]string, len(permissions))
+	for i := range permissions {
+		userIDs[i] = permissions[i].UserID
+	}
+	userLogins, err := client.UserLoginIDList(ctx, userIDs...)
+	if err != nil {
+		return err
+	}
+
+	for i := range permissions {
+		permissions[i].UserLogin = userLogins[permissions[i].UserID]
+	}
+	return nil
+}
