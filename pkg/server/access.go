@@ -138,18 +138,8 @@ func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (model.Names
 		return ns, err
 	}
 
-	userIDs := make([]string, len(ns.Permissions))
-	for i := range ns.Permissions {
-		userIDs[i] = ns.Permissions[i].UserID
-	}
-	userLogins, err := s.clients.User.UserLoginIDList(ctx, userIDs...)
-	if err != nil {
-		return ns, err
-	}
-
-	for i := range ns.Permissions {
-		ns.Permissions[i].UserLogin = userLogins[ns.Permissions[i].UserID]
-	}
+	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
+	AddUserLogins(ctx, ns.Permissions, s.clients.User)
 
 	return ns, nil
 }
@@ -205,18 +195,8 @@ func (s *Server) GetVolumeAccess(ctx context.Context, id string) (model.VolumeWi
 	}
 	err = s.db.VolumePermissions(ctx, &vol)
 
-	userIDs := make([]string, len(vol.Permissions))
-	for i := range vol.Permissions {
-		userIDs[i] = vol.Permissions[i].UserID
-	}
-	userLogins, err := s.clients.User.UserLoginIDList(ctx, userIDs...)
-	if err != nil {
-		return vol, err
-	}
-
-	for i := range vol.Permissions {
-		vol.Permissions[i].UserLogin = userLogins[vol.Permissions[i].UserID]
-	}
+	AddOwnerLogin(ctx, &vol.Resource, s.clients.User)
+	AddUserLogins(ctx, vol.Permissions, s.clients.User)
 
 	return vol, err
 }
