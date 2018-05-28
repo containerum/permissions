@@ -5,11 +5,11 @@ import (
 	"time"
 
 	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
-	kubeClientModel "git.containerum.net/ch/kube-client/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	billing "github.com/containerum/bill-external/models"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
@@ -38,6 +38,7 @@ func kubeNS(ns model.Namespace) kubeAPIModel.NamespaceWithOwner {
 	maxTraffic := uint(ns.MaxTraffic)
 	return kubeAPIModel.NamespaceWithOwner{
 		Namespace: kubeClientModel.Namespace{
+			ID:            ns.ID,
 			CreatedAt:     &createdAt,
 			Label:         ns.Label,
 			Access:        string(model.AccessOwner),
@@ -51,9 +52,7 @@ func kubeNS(ns model.Namespace) kubeAPIModel.NamespaceWithOwner {
 				},
 			},
 		},
-		Name:   ns.ID,
-		Owner:  ns.OwnerUserID,
-		Access: string(model.AccessOwner),
+		Owner: ns.OwnerUserID,
 	}
 }
 
@@ -285,18 +284,7 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 			return getErr
 		}
 
-		kubeNS := kubeAPIModel.NamespaceWithOwner{
-			Namespace: kubeClientModel.Namespace{
-				Resources: kubeClientModel.Resources{
-					Hard: kubeClientModel.Resource{
-						CPU:    uint(ns.CPU),
-						Memory: uint(ns.RAM),
-					},
-				},
-			},
-			Name:  ns.ID,
-			Owner: ns.OwnerUserID,
-		}
+		kubeNS := kubeNS(ns.Namespace)
 
 		// do not allow resize if usage of namespace greater than new quota
 		if nsWithUsage.Resources.Used.CPU > kubeNS.Resources.Hard.CPU ||
@@ -483,7 +471,7 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return unsubErr
 		}
 
-		if delErr := s.clients.Kube.DeleteNamespace(ctx, kubeAPIModel.NamespaceWithOwner{Name: ns.ID}); delErr != nil {
+		if delErr := s.clients.Kube.DeleteNamespace(ctx, kubeNS(ns.Namespace)); delErr != nil {
 			return delErr
 		}
 
@@ -530,7 +518,7 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 
 		// kube-api don`t have method to delete list of namespaces
 		for _, ns := range deletedNamespaces {
-			if delErr := s.clients.Kube.DeleteNamespace(ctx, kubeAPIModel.NamespaceWithOwner{Name: ns.ID}); delErr != nil {
+			if delErr := s.clients.Kube.DeleteNamespace(ctx, kubeNS(ns)); delErr != nil {
 				return delErr
 			}
 		}

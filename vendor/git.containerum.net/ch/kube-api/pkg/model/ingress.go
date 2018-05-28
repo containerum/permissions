@@ -1,9 +1,8 @@
 package model
 
 import (
-	"errors"
-
-	kube_types "git.containerum.net/ch/kube-client/pkg/model"
+	"git.containerum.net/ch/kube-api/pkg/kubeErrors"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	api_extensions "k8s.io/api/extensions/v1beta1"
 
 	"fmt"
@@ -41,8 +40,6 @@ type IngressWithOwner struct {
 const (
 	ingressKind       = "Ingress"
 	ingressAPIVersion = "extensions/v1beta1"
-
-	ingressHostSuffix = ".hub.containerum.io"
 )
 
 // ParseKubeIngressList parses kubernetes v1beta1.IngressList to more convenient []Ingress struct
@@ -85,7 +82,7 @@ func ParseKubeIngress(ingressi interface{}, parseforuser bool) (*IngressWithOwne
 	}
 
 	if parseforuser {
-		newIngress.Owner = ""
+		newIngress.ParseForUser()
 	}
 
 	return &newIngress, nil
@@ -133,9 +130,8 @@ func (ingress *IngressWithOwner) ToKube(nsName string, labels map[string]string)
 		return nil, err
 	}
 	if labels == nil {
-		labels = make(map[string]string, 0)
+		return nil, []error{kubeErrors.ErrInternalError().AddDetails("invalid namespace labels")}
 	}
-	labels[ownerLabel] = ingress.Owner
 
 	rules, secrets, tls := makeIngressRules(ingress.Rules)
 
@@ -179,7 +175,7 @@ func makeIngressRules(rules []kube_types.Rule) ([]api_extensions.IngressRule, []
 			})
 		}
 		newRules = append(newRules, api_extensions.IngressRule{
-			Host: v.Host + ingressHostSuffix,
+			Host: v.Host,
 			IngressRuleValue: api_extensions.IngressRuleValue{
 				HTTP: &api_extensions.HTTPIngressRuleValue{
 					Paths: paths,
@@ -190,7 +186,7 @@ func makeIngressRules(rules []kube_types.Rule) ([]api_extensions.IngressRule, []
 		if v.TLSSecret != nil {
 			tls = true
 			secrets = append(secrets, api_extensions.IngressTLS{
-				Hosts:      []string{v.Host + ingressHostSuffix},
+				Hosts:      []string{v.Host},
 				SecretName: *v.TLSSecret,
 			})
 		}
@@ -200,26 +196,21 @@ func makeIngressRules(rules []kube_types.Rule) ([]api_extensions.IngressRule, []
 
 func (ingress *IngressWithOwner) Validate() []error {
 	errs := []error{}
-	if ingress.Owner == "" {
-		errs = append(errs, fmt.Errorf(fieldShouldExist, "Owner"))
-	} else if !IsValidUUID(ingress.Owner) {
-		errs = append(errs, errors.New(invalidOwner))
-	}
 	if ingress.Name == "" {
-		errs = append(errs, fmt.Errorf(fieldShouldExist, "Name"))
+		errs = append(errs, fmt.Errorf(fieldShouldExist, "name"))
 	} else if err := api_validation.IsDNS1123Subdomain(ingress.Name); len(err) > 0 {
 		errs = append(errs, fmt.Errorf(invalidName, ingress.Name, strings.Join(err, ",")))
 	}
 	if ingress.Rules == nil || len(ingress.Rules) == 0 {
-		errs = append(errs, fmt.Errorf(fieldShouldExist, "Rules"))
+		errs = append(errs, fmt.Errorf(fieldShouldExist, "rules"))
 	}
 	for _, v := range ingress.Rules {
 		if v.Path == nil || len(v.Path) == 0 {
-			errs = append(errs, fmt.Errorf(fieldShouldExist, "Path"))
+			errs = append(errs, fmt.Errorf(fieldShouldExist, "rules.path"))
 		}
 		for _, p := range v.Path {
 			if p.ServiceName == "" {
-				errs = append(errs, fmt.Errorf(fieldShouldExist, "Name"))
+				errs = append(errs, fmt.Errorf(fieldShouldExist, "rules.path.name"))
 			} else if err := api_validation.IsDNS1035Label(p.ServiceName); len(err) > 0 {
 				errs = append(errs, fmt.Errorf(invalidName, p.ServiceName, strings.Join(err, ",")))
 			}
@@ -227,7 +218,7 @@ func (ingress *IngressWithOwner) Validate() []error {
 				errs = append(errs, fmt.Errorf(invalidPort, p.ServicePort, 1, maxport))
 			}
 			if p.Path == "" {
-				errs = append(errs, fmt.Errorf(fieldShouldExist, "Path"))
+				errs = append(errs, fmt.Errorf(fieldShouldExist, "rules.path.name.path"))
 			}
 		}
 	}
@@ -236,4 +227,9 @@ func (ingress *IngressWithOwner) Validate() []error {
 		return errs
 	}
 	return nil
+}
+
+// ParseForUser removes information not interesting for users
+func (ingress *IngressWithOwner) ParseForUser() {
+	ingress.Owner = ""
 }

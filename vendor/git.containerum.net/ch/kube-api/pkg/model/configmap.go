@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -9,7 +8,8 @@ import (
 
 	"encoding/base64"
 
-	kube_types "git.containerum.net/ch/kube-client/pkg/model"
+	"git.containerum.net/ch/kube-api/pkg/kubeErrors"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	api_core "k8s.io/api/core/v1"
 	api_meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api_validation "k8s.io/apimachinery/pkg/util/validation"
@@ -74,15 +74,14 @@ func ParseKubeConfigMap(cmi interface{}, parseforuser bool) (*ConfigMapWithOwner
 		ConfigMap: kube_types.ConfigMap{
 			Name:      cm.GetName(),
 			CreatedAt: &createdAt,
-			Data:      newData,
+			Data:      kube_types.ConfigMapData(newData),
 		},
 		Owner: owner,
 	}
 
 	if parseforuser {
-		newCm.Owner = ""
+		newCm.ParseForUser()
 	}
-
 	return &newCm, nil
 }
 
@@ -94,9 +93,8 @@ func (cm *ConfigMapWithOwner) ToKube(nsName string, labels map[string]string) (*
 	}
 
 	if labels == nil {
-		labels = make(map[string]string, 0)
+		return nil, []error{kubeErrors.ErrInternalError().AddDetails("invalid namespace labels")}
 	}
-	labels[ownerLabel] = cm.Owner
 
 	for k, v := range cm.Data {
 		dec, err := base64.StdEncoding.DecodeString(v)
@@ -122,23 +120,27 @@ func (cm *ConfigMapWithOwner) ToKube(nsName string, labels map[string]string) (*
 
 func (cm *ConfigMapWithOwner) Validate() []error {
 	errs := []error{}
-	if cm.Owner == "" {
-		errs = append(errs, fmt.Errorf(fieldShouldExist, "Owner"))
-	} else if !IsValidUUID(cm.Owner) {
-		errs = append(errs, errors.New(invalidOwner))
-	}
 	if cm.Name == "" {
-		errs = append(errs, fmt.Errorf(fieldShouldExist, "Name"))
+		errs = append(errs, fmt.Errorf(fieldShouldExist, "name"))
 	} else if err := api_validation.IsDNS1123Label(cm.Name); len(err) > 0 {
 		errs = append(errs, fmt.Errorf(invalidName, cm.Name, strings.Join(err, ",")))
 	}
-	for k := range cm.Data {
-		if err := api_validation.IsConfigMapKey(k); len(err) > 0 {
-			errs = append(errs, fmt.Errorf(invalidName, k, strings.Join(err, ",")))
+	if len(cm.Data) == 0 {
+		errs = append(errs, fmt.Errorf(fieldShouldExist, "data"))
+	} else {
+		for k := range cm.Data {
+			if err := api_validation.IsConfigMapKey(k); len(err) > 0 {
+				errs = append(errs, fmt.Errorf(invalidName, k, strings.Join(err, ",")))
+			}
 		}
 	}
 	if len(errs) > 0 {
 		return errs
 	}
 	return nil
+}
+
+// ParseForUser removes information not interesting for users
+func (cm *ConfigMapWithOwner) ParseForUser() {
+	cm.Owner = ""
 }

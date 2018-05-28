@@ -50,7 +50,7 @@ func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.Names
 		"cpu":    req.Resources.Hard.CPU,
 		"memory": req.Resources.Hard.Memory,
 		"label":  req.Label,
-		"name":   req.Name,
+		"name":   req.ID,
 		"access": req.Access,
 	}).Debug("create namespace")
 
@@ -73,14 +73,14 @@ func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Name
 		"cpu":    ns.Resources.Hard.CPU,
 		"memory": ns.Resources.Hard.Memory,
 		"label":  ns.Label,
-		"name":   ns.Name,
+		"name":   ns.ID,
 	}).Debug("set namespace quota")
 
 	resp, err := k.client.R().
 		SetBody(ns).
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Put("/namespaces/" + ns.Name)
+		Put("/namespaces/" + ns.ID)
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}
@@ -91,12 +91,12 @@ func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Name
 }
 
 func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.NamespaceWithOwner) error {
-	k.log.WithField("name", ns.Name).Debugf("delete namespace")
+	k.log.WithField("name", ns.ID).Debugf("delete namespace")
 
 	resp, err := k.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Delete("/namespaces/" + ns.Name)
+		Delete("/namespaces/" + ns.ID)
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}

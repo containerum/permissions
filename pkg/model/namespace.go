@@ -116,6 +116,9 @@ func (np *NamespaceWithPermissions) Mask() {
 	if np.Namespace.OwnerUserID != np.Permission.UserID {
 		np.Permissions = nil
 	}
+	for i := range np.Permissions {
+		np.Permissions[i].Mask()
+	}
 }
 
 // NamespaceAdminCreateRequest contains parameters for creating namespace without billing
