@@ -19,6 +19,7 @@ type KubeAPIClient interface {
 	CreateNamespace(ctx context.Context, req model.NamespaceWithOwner) error
 	SetNamespaceQuota(ctx context.Context, ns model.NamespaceWithOwner) error
 	DeleteNamespace(ctx context.Context, ns model.NamespaceWithOwner) error
+	GetNamespace(ctx context.Context, name string) (model.NamespaceWithOwner, error)
 }
 
 type KubeAPIHTTPClient struct {
@@ -105,6 +106,25 @@ func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.Namesp
 	return nil
 }
 
+func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, name string) (ret model.NamespaceWithOwner, err error) {
+	k.log.WithField("name", name).Debugf("get namespace")
+
+	resp, err := k.client.R().
+		SetResult(&ret).
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		Get("/namespaces/" + name)
+	if err != nil {
+		err = errors.ErrInternal().Log(err, k.log)
+		return
+	}
+	if resp.Error() != nil {
+		err = resp.Error().(*cherry.Err)
+		return
+	}
+	return
+}
+
 func (k *KubeAPIHTTPClient) String() string {
 	return fmt.Sprintf("kube-api http client: url=%s", k.client.HostURL)
 }
@@ -152,4 +172,10 @@ func (k *KubeAPIDummyClient) DeleteNamespace(ctx context.Context, ns model.Names
 
 func (k *KubeAPIDummyClient) String() string {
 	return "kube-api dummy client"
+}
+
+func (k *KubeAPIDummyClient) GetNamespace(ctx context.Context, name string) (ret model.NamespaceWithOwner, err error) {
+	k.log.WithField("name", name).Debugf("get namespace")
+
+	return
 }
