@@ -5,7 +5,7 @@
   "produces": [
     "application/json"
   ],
-  "swagger": "3.0",
+  "swagger": "2.0",
   "info": {
     "description": "Auth service is an OAuth authentication server that is used to authenticate users.",
     "title": "Auth API"
@@ -360,7 +360,7 @@
           "x-go-name": "StatusHTTP"
         }
       },
-      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/auth/vendor/github.com/containerum/cherry"
     },
     "ErrID": {
       "description": "ErrID -- represents unique error ID",
@@ -373,18 +373,18 @@
           "$ref": "#/definitions/ErrSID"
         }
       },
-      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/auth/vendor/github.com/containerum/cherry"
     },
     "ErrKind": {
       "description": "ErrKind -- represents kind of error",
       "type": "integer",
       "format": "uint64",
-      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/auth/vendor/github.com/containerum/cherry"
     },
     "ErrSID": {
       "description": "ErrSID -- represents service ID of error",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/auth/vendor/github.com/containerum/cherry"
     },
     "ExtendTokenResponse": {
       "description": "ExtendTokenResponse contains new access and refresh tokens",
@@ -407,7 +407,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "x-go-package": "git.containerum.net/ch/auth/vendor/git.containerum.net/ch/cherry"
+      "x-go-package": "git.containerum.net/ch/auth/vendor/github.com/containerum/cherry"
     },
     "GetUserTokensResponse": {
       "description": "GetUserTokensResponse contains user tokens",
@@ -592,26 +592,26 @@
   },
   "parameters": {
     "ClientIPHeader": {
-      "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/ClientIPHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/ClientIPHeader"
     },
     "FingerprintHeader": {
-      "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserClientHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserClientHeader"
     },
     "UserAgentHeader": {
-      "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserAgentHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserAgentHeader"
     },
     "UserIDHeader": {
-      "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserIDHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserIDHeader"
     },
     "UserRoleHeader": {
-      "$ref": "vendor/git.containerum.net/ch/api-gateway/pkg/utils/headers/swagger.json#/parameters/UserRoleHeader"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserRoleHeader"
     }
   },
   "responses": {
     "error": {
       "description": "cherry error",
       "schema": {
-        "$ref": "vendor/git.containerum.net/ch/cherry/swagger.json#/definitions/Err"
+        "$ref": "vendor/github.com/containerum/cherry/swagger.json#/definitions/Err"
       }
     }
   }
