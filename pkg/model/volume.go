@@ -138,6 +138,9 @@ func (vp *VolumeWithPermissions) Mask() {
 	if vp.OwnerUserID != vp.Permission.UserID {
 		vp.Permissions = nil
 	}
+	for i := range vp.Permissions {
+		vp.Permissions[i].Mask()
+	}
 }
 
 // VolumeCreateRequest is a request object for creating volume
