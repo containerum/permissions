@@ -57,6 +57,18 @@ func kubeNS(ns model.Namespace) kubeAPIModel.NamespaceWithOwner {
 	}
 }
 
+func checkResizeNSQuota(nsWithUsage, kubeNS kubeAPIModel.NamespaceWithOwner) error {
+	// do not allow resize if usage of namespace greater than new quota
+	if nsWithUsage.Resources.Used.CPU > kubeNS.Resources.Hard.CPU ||
+		nsWithUsage.Resources.Used.Memory > kubeNS.Resources.Hard.Memory {
+		return errors.ErrQuotaExceeded().
+			AddDetailF("exceeded %d CPU and %d MiB of memory",
+				nsWithUsage.Resources.Used.CPU-kubeNS.Resources.Hard.CPU,
+				nsWithUsage.Resources.Used.Memory-kubeNS.Resources.Hard.Memory)
+	}
+	return nil
+}
+
 func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 
@@ -298,13 +310,8 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 			Owner: ns.OwnerUserID,
 		}
 
-		// do not allow resize if usage of namespace greater than new quota
-		if nsWithUsage.Resources.Used.CPU > kubeNS.Resources.Hard.CPU ||
-			nsWithUsage.Resources.Used.Memory > kubeNS.Resources.Hard.Memory {
-			return errors.ErrQuotaExceeded().
-				AddDetailF("exceeded %d CPU and %d MiB of memory",
-					nsWithUsage.Resources.Used.CPU-kubeNS.Resources.Hard.CPU,
-					nsWithUsage.Resources.Used.Memory-kubeNS.Resources.Hard.Memory)
+		if chkErr := checkResizeNSQuota(nsWithUsage, kubeNS); chkErr != nil {
+			return chkErr
 		}
 
 		if setErr := tx.ResizeNamespace(ctx, ns.Namespace); setErr != nil {
@@ -399,6 +406,17 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		ns.CPU = newTariff.CPULimit
 		ns.RAM = newTariff.MemoryLimit
 
+		nsWithUsage, getErr := s.clients.Kube.GetNamespace(ctx, ns.ID)
+		if getErr != nil {
+			return getErr
+		}
+
+		kubeNS := kubeNS(ns.Namespace)
+
+		if chkErr := checkResizeNSQuota(nsWithUsage, kubeNS); chkErr != nil {
+			return chkErr
+		}
+
 		if resizeErr := tx.ResizeNamespace(ctx, ns.Namespace); resizeErr != nil {
 			return resizeErr
 		}
@@ -435,7 +453,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			}
 		}
 
-		if resizeErr := s.clients.Kube.SetNamespaceQuota(ctx, kubeNS(ns.Namespace)); resizeErr != nil {
+		if resizeErr := s.clients.Kube.SetNamespaceQuota(ctx, kubeNS); resizeErr != nil {
 			return resizeErr
 		}
 
