@@ -314,14 +314,9 @@
           "200": {
             "description": "namespaces response",
             "schema": {
-              "type": "object",
-              "properties": {
-                "namespaces": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/NamespaceWithPermissions"
-                  }
-                }
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NamespaceWithPermissions"
               }
             }
           },

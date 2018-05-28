@@ -37,7 +37,7 @@ func (sh *storageHandlers) getStoragesHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"storages": storages})
+	ctx.JSON(http.StatusOK, storages)
 }
 
 func (sh *storageHandlers) updateStorageHandler(ctx *gin.Context) {
@@ -100,12 +100,9 @@ func (r *Router) SetupStorageRoutes(acts server.StorageActions) {
 	//   '200':
 	//     description: storages list
 	//     schema:
-	//       type: object
-	//       properties:
-	//         storages:
-	//           type: array
-	//           items:
-	//             $ref: '#/definitions/Storage'
+	//       type: array
+	//       items:
+	//         $ref: '#/definitions/Storage'
 	//   default:
 	//     $ref: '#/responses/error'
 	group.GET("/", handlers.getStoragesHandler)
