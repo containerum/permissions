@@ -59,7 +59,7 @@ type Permission struct {
 	UserID string `sql:"user_id,type:uuid,notnull,unique:unique_user_access" json:"user_id,omitempty"`
 
 	// swagger:strfmt email
-	UserLogin string `sql:"-" json:"login,omitempty"`
+	UserLogin string `sql:"-" json:"user_login,omitempty"`
 
 	InitialAccessLevel AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull" json:"access,omitempty"` // WARN: custom type here, do not forget create it
 
