@@ -7,6 +7,7 @@ import (
 	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
 	kubeClientModel "git.containerum.net/ch/kube-client/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/dao"
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	billing "github.com/containerum/bill-external/models"
 	"github.com/containerum/utils/httputil"
@@ -279,8 +280,9 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 			ns.MaxTraffic = *req.MaxTraffic
 		}
 
-		if setErr := tx.ResizeNamespace(ctx, ns.Namespace); setErr != nil {
-			return setErr
+		nsWithUsage, getErr := s.clients.Kube.GetNamespace(ctx, ns.ID)
+		if getErr != nil {
+			return getErr
 		}
 
 		kubeNS := kubeAPIModel.NamespaceWithOwner{
@@ -295,6 +297,20 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 			Name:  ns.ID,
 			Owner: ns.OwnerUserID,
 		}
+
+		// do not allow resize if usage of namespace greater than new quota
+		if nsWithUsage.Resources.Used.CPU > kubeNS.Resources.Hard.CPU ||
+			nsWithUsage.Resources.Used.Memory > kubeNS.Resources.Hard.Memory {
+			return errors.ErrQuotaExceeded().
+				AddDetailF("exceeded %d CPU and %d MiB of memory",
+					nsWithUsage.Resources.Used.CPU-kubeNS.Resources.Hard.CPU,
+					nsWithUsage.Resources.Used.Memory-kubeNS.Resources.Hard.Memory)
+		}
+
+		if setErr := tx.ResizeNamespace(ctx, ns.Namespace); setErr != nil {
+			return setErr
+		}
+
 		if setErr := s.clients.Kube.SetNamespaceQuota(ctx, kubeNS); setErr != nil {
 			return setErr
 		}
