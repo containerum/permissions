@@ -6,6 +6,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/model"
 	billing "github.com/containerum/bill-external/models"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
@@ -14,9 +15,9 @@ type VolumeActions interface {
 	CreateVolume(ctx context.Context, req model.VolumeCreateRequest) error
 	RenameVolume(ctx context.Context, id, newLabel string) error
 	ResizeVolume(ctx context.Context, id string, newTariffID string) error
-	GetVolume(ctx context.Context, id string) (model.VolumeWithPermissions, error)
-	GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error)
-	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error)
+	GetVolume(ctx context.Context, id string) (kubeClientModel.Volume, error)
+	GetUserVolumes(ctx context.Context, filters ...string) ([]kubeClientModel.Volume, error)
+	GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]kubeClientModel.Volume, error)
 	DeleteVolume(ctx context.Context, id string) error
 	DeleteAllUserVolumes(ctx context.Context) error
 }
@@ -42,8 +43,6 @@ func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest
 		return chkErr
 	}
 
-	true := true // so go don`t allows to take address of constant (needed in model.Volume) we use this
-
 	err = s.db.Transactional(func(tx *dao.DAO) error {
 		storage, getErr := tx.LeastUsedStorage(ctx, tariff.StorageLimit)
 		if getErr != nil {
@@ -56,10 +55,8 @@ func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest
 				OwnerUserID: userID,
 				Label:       req.Label,
 			},
-			Active:      &true,
 			Capacity:    tariff.StorageLimit,
-			Replicas:    tariff.ReplicasLimit,
-			NamespaceID: nil,       // because it persistent
+			NamespaceID: "",
 			GlusterName: req.Label, // can be changed in future
 			StorageID:   storage.ID,
 		}
@@ -90,7 +87,7 @@ func (s *Server) CreateVolume(ctx context.Context, req model.VolumeCreateRequest
 	return err
 }
 
-func (s *Server) GetVolume(ctx context.Context, id string) (model.VolumeWithPermissions, error) {
+func (s *Server) GetVolume(ctx context.Context, id string) (kubeClientModel.Volume, error) {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
@@ -99,16 +96,16 @@ func (s *Server) GetVolume(ctx context.Context, id string) (model.VolumeWithPerm
 
 	vol, err := s.db.VolumeByID(ctx, userID, id)
 	if err != nil {
-		return vol, err
+		return vol.ToKube(), err
 	}
 
 	AddOwnerLogin(ctx, &vol.Resource, s.clients.User)
 	AddUserLogins(ctx, vol.Permissions, s.clients.User)
 
-	return vol, nil
+	return vol.ToKube(), nil
 }
 
-func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]model.VolumeWithPermissions, error) {
+func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]kubeClientModel.Volume, error) {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
@@ -124,18 +121,20 @@ func (s *Server) GetUserVolumes(ctx context.Context, filters ...string) ([]model
 
 	vols, err := s.db.UserVolumes(ctx, userID, filter)
 	if err != nil {
-		return vols, err
+		return nil, err
 	}
 
+	ret := make([]kubeClientModel.Volume, len(vols))
 	for i := range vols {
 		AddOwnerLogin(ctx, &vols[i].Resource, s.clients.User)
 		AddUserLogins(ctx, vols[i].Permissions, s.clients.User)
+		ret[i] = vols[i].ToKube()
 	}
 
-	return vols, nil
+	return ret, nil
 }
 
-func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]model.VolumeWithPermissions, error) {
+func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters ...string) ([]kubeClientModel.Volume, error) {
 	s.log.WithFields(logrus.Fields{
 		"page":     page,
 		"per_page": perPage,
@@ -153,15 +152,17 @@ func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters .
 
 	vols, err := s.db.AllVolumes(ctx, filter)
 	if err != nil {
-		return vols, err
+		return nil, err
 	}
 
+	ret := make([]kubeClientModel.Volume, len(vols))
 	for i := range vols {
 		AddOwnerLogin(ctx, &vols[i].Resource, s.clients.User)
 		AddUserLogins(ctx, vols[i].Permissions, s.clients.User)
+		ret[i] = vols[i].ToKube()
 	}
 
-	return vols, nil
+	return ret, nil
 }
 
 func (s *Server) DeleteVolume(ctx context.Context, id string) error {
@@ -297,7 +298,6 @@ func (s *Server) ResizeVolume(ctx context.Context, id string, newTariffID string
 		}
 
 		vol.TariffID = &newTariff.ID
-		vol.Replicas = newTariff.ReplicasLimit
 		vol.Capacity = newTariff.StorageLimit
 
 		if resizeErr := tx.ResizeVolume(ctx, vol.Volume); resizeErr != nil {

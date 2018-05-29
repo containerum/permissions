@@ -160,7 +160,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//   '200':
 	//     description: volume response
 	//     schema:
-	//       $ref: '#/definitions/VolumeWithPermissions'
+	//       $ref: '#/definitions/Volume'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/volumes/:id", handlers.getVolumeHandler)
@@ -181,7 +181,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     schema:
 	//       type: array
 	//       items:
-	//         $ref: '#/definitions/VolumeWithPermissions'
+	//         $ref: '#/definitions/Volume'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/volumes", handlers.getUserVolumesHandler)
@@ -204,7 +204,7 @@ func (r *Router) SetupVolumeHandlers(acts server.VolumeActions) {
 	//     schema:
 	//       type: array
 	//       items:
-	//         $ref: '#/definitions/VolumeWithPermissions'
+	//         $ref: '#/definitions/Volume'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/volumes", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllVolumesHandler)

@@ -309,7 +309,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   '200':
 	//     description: namespace response
 	//     schema:
-	//       $ref: '#/definitions/NamespaceWithPermissions'
+	//       $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/namespaces/:id", handlers.getNamespaceHandler)
@@ -330,7 +330,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     schema:
 	//       type: array
 	//       items:
-	//         $ref: '#/definitions/NamespaceWithPermissions'
+	//         $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/namespaces", handlers.getUserNamespacesHandler)
@@ -353,7 +353,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     schema:
 	//       type: array
 	//       items:
-	//         $ref: '#/definitions/NamespaceWithPermissions'
+	//         $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllNamespacesHandler)

@@ -113,11 +113,10 @@ type VolumeWithPermissions struct {
 
 func (vp *VolumeWithPermissions) ToKube() model.Volume {
 	vol := model.Volume{
-		ID:         vp.ID,
+		Name:       vp.Label,
 		CreatedAt:  new(string),
 		Owner:      vp.OwnerUserID,
 		OwnerLogin: vp.OwnerUserLogin,
-		Label:      vp.Label,
 		Access:     vp.Permission.CurrentAccessLevel,
 		Capacity:   uint(vp.Capacity),
 		Users:      make([]model.UserAccess, len(vp.Permissions)),
