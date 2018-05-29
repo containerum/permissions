@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	kubeAPIModel "git.containerum.net/ch/kube-api/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -31,25 +30,23 @@ var StandardNamespaceFilter = dao.NamespaceFilter{
 	NotDeleted: true,
 }
 
-func kubeNS(ns model.Namespace) kubeAPIModel.NamespaceWithOwner {
+func kubeNS(ns model.Namespace) kubeClientModel.Namespace {
 	createdAt := ns.CreateTime.Format(time.RFC3339)
 	maxExtServices := uint(ns.MaxExtServices)
 	maxIntServices := uint(ns.MaxIntServices)
 	maxTraffic := uint(ns.MaxTraffic)
-	return kubeAPIModel.NamespaceWithOwner{
-		Namespace: kubeClientModel.Namespace{
-			ID:            ns.ID,
-			CreatedAt:     &createdAt,
-			Label:         ns.Label,
-			Access:        string(model.AccessOwner),
-			MaxExtService: &maxExtServices,
-			MaxIntService: &maxIntServices,
-			MaxTraffic:    &maxTraffic,
-			Resources: kubeClientModel.Resources{
-				Hard: kubeClientModel.Resource{
-					CPU:    uint(ns.CPU),
-					Memory: uint(ns.RAM),
-				},
+	return kubeClientModel.Namespace{
+		ID:            ns.ID,
+		CreatedAt:     &createdAt,
+		Label:         ns.Label,
+		Access:        string(model.AccessOwner),
+		MaxExtService: maxExtServices,
+		MaxIntService: maxIntServices,
+		MaxTraffic:    maxTraffic,
+		Resources: kubeClientModel.Resources{
+			Hard: kubeClientModel.Resource{
+				CPU:    uint(ns.CPU),
+				Memory: uint(ns.RAM),
 			},
 		},
 		Owner: ns.OwnerUserID,

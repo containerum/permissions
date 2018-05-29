@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"git.containerum.net/ch/kube-api/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
+	"github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -16,10 +16,10 @@ import (
 )
 
 type KubeAPIClient interface {
-	CreateNamespace(ctx context.Context, req model.NamespaceWithOwner) error
-	SetNamespaceQuota(ctx context.Context, ns model.NamespaceWithOwner) error
-	DeleteNamespace(ctx context.Context, ns model.NamespaceWithOwner) error
-	GetNamespace(ctx context.Context, name string) (model.NamespaceWithOwner, error)
+	CreateNamespace(ctx context.Context, req model.Namespace) error
+	SetNamespaceQuota(ctx context.Context, ns model.Namespace) error
+	DeleteNamespace(ctx context.Context, ns model.Namespace) error
+	GetNamespace(ctx context.Context, name string) (model.Namespace, error)
 }
 
 type KubeAPIHTTPClient struct {
@@ -45,7 +45,7 @@ func NewKubeAPIHTTPClient(url *url.URL) *KubeAPIHTTPClient {
 	}
 }
 
-func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.NamespaceWithOwner) error {
+func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
 		"cpu":    req.Resources.Hard.CPU,
 		"memory": req.Resources.Hard.Memory,
@@ -68,7 +68,7 @@ func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.Names
 	return nil
 }
 
-func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.NamespaceWithOwner) error {
+func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
 		"cpu":    ns.Resources.Hard.CPU,
 		"memory": ns.Resources.Hard.Memory,
@@ -90,7 +90,7 @@ func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Name
 	return nil
 }
 
-func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.NamespaceWithOwner) error {
+func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.Namespace) error {
 	k.log.WithField("name", ns.ID).Debugf("delete namespace")
 
 	resp, err := k.client.R().
@@ -106,7 +106,7 @@ func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.Namesp
 	return nil
 }
 
-func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, name string) (ret model.NamespaceWithOwner, err error) {
+func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, name string) (ret model.Namespace, err error) {
 	k.log.WithField("name", name).Debugf("get namespace")
 
 	resp, err := k.client.R().
@@ -139,7 +139,7 @@ func NewKubeAPIDummyClient() *KubeAPIDummyClient {
 	}
 }
 
-func (k *KubeAPIDummyClient) CreateNamespace(ctx context.Context, req model.NamespaceWithOwner) error {
+func (k *KubeAPIDummyClient) CreateNamespace(ctx context.Context, req model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
 		"cpu":    req.Resources.Hard.CPU,
 		"memory": req.Resources.Hard.Memory,
@@ -150,7 +150,7 @@ func (k *KubeAPIDummyClient) CreateNamespace(ctx context.Context, req model.Name
 	return nil
 }
 
-func (k *KubeAPIDummyClient) SetNamespaceQuota(ctx context.Context, ns model.NamespaceWithOwner) error {
+func (k *KubeAPIDummyClient) SetNamespaceQuota(ctx context.Context, ns model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
 		"cpu":    ns.Resources.Hard.CPU,
 		"memory": ns.Resources.Hard.Memory,
@@ -160,7 +160,7 @@ func (k *KubeAPIDummyClient) SetNamespaceQuota(ctx context.Context, ns model.Nam
 	return nil
 }
 
-func (k *KubeAPIDummyClient) DeleteNamespace(ctx context.Context, ns model.NamespaceWithOwner) error {
+func (k *KubeAPIDummyClient) DeleteNamespace(ctx context.Context, ns model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
 		"cpu":    ns.Resources.Hard.CPU,
 		"memory": ns.Resources.Hard.Memory,
@@ -174,7 +174,7 @@ func (k *KubeAPIDummyClient) String() string {
 	return "kube-api dummy client"
 }
 
-func (k *KubeAPIDummyClient) GetNamespace(ctx context.Context, name string) (ret model.NamespaceWithOwner, err error) {
+func (k *KubeAPIDummyClient) GetNamespace(ctx context.Context, name string) (ret model.Namespace, err error) {
 	k.log.WithField("name", name).Debugf("get namespace")
 
 	return
