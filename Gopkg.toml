@@ -82,4 +82,4 @@ required = [
 
 [[constraint]]
   name = "github.com/containerum/kube-client"
-  version = "~0.16.0"
+  version = "~0.17.1"

@@ -5,14 +5,22 @@ package model
 //swagger:model
 type Volume struct {
 	ID          string                     `json:"id,omitempty"`
+	CreatedAt   *string                    `json:"created_at,omitempty"`
+	Owner       string                     `json:"owner,omitempty"`
 	OwnerLogin  string                     `json:"owner_login,omitempty"`
 	Label       string                     `json:"label,omitempty"`
-	Access      string                     `json:"access,omitempty"`
+	Access      AccessLevel                `json:"access,omitempty"`
 	Capacity    uint                       `json:"capacity,omitempty"`
 	StorageName string                     `json:"storage_name,omitempty"` //AKA StorageClass
 	AccessMode  PersistentVolumeAccessMode `json:"access_mode,omitempty"`
-	CreatedAt   *string                    `json:"created_at,omitempty"`
-	Owner       string                     `json:"owner,omitempty"`
+	Users       []UserAccess               `json:"users,omitempty"`
+}
+
+// VolumesList -- model for volumes list
+//
+// swagger:model
+type VolumesList struct {
+	Volumes []Volume `json:"volumes"`
 }
 
 // CreateVolume --
