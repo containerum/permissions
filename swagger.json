@@ -1411,6 +1411,9 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
     },
+    "CreateVolume": {
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/CreateVolume"
+    },
     "DeleteResourceAccessRequest": {
       "description": "DeleteUserAccessRequest is a request object for deleting access to resource for user",
       "type": "object",
@@ -1843,34 +1846,22 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
     "Namespace": {
-      "description": "Namespace describes namespace",
+      "description": "Namespace -- namespace representation",
       "type": "object",
       "required": [
         "resources"
       ],
       "properties": {
-        "cpu": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CPU"
+        "access": {
+          "$ref": "#/definitions/AccessLevel"
         },
-        "create_time": {
+        "created_at": {
+          "description": "creation date in RFC3339 format",
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "CreateTime"
-        },
-        "delete_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "DeleteTime"
-        },
-        "deleted": {
-          "type": "boolean",
-          "x-go-name": "Deleted"
+          "x-go-name": "CreatedAt"
         },
         "id": {
           "type": "string",
-          "format": "uuid",
           "x-go-name": "ID"
         },
         "label": {
@@ -1878,47 +1869,38 @@
           "type": "string",
           "x-go-name": "Label"
         },
-        "max_external_services": {
+        "max_ext_service": {
           "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxExtServices"
+          "format": "uint64",
+          "x-go-name": "MaxExtService"
         },
-        "max_internal_services": {
+        "max_int_service": {
           "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxIntServices"
+          "format": "uint64",
+          "x-go-name": "MaxIntService"
         },
         "max_traffic": {
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "MaxTraffic"
         },
-        "owner_user_id": {
+        "owner": {
           "type": "string",
-          "format": "uuid",
-          "x-go-name": "OwnerUserID"
+          "x-go-name": "Owner"
         },
-        "owner_user_login": {
+        "owner_login": {
           "type": "string",
-          "format": "email",
-          "x-go-name": "OwnerUserLogin"
+          "x-go-name": "OwnerLogin"
         },
-        "ram": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "RAM"
+        "resources": {
+          "$ref": "#/definitions/Resources"
         },
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
-        },
-        "volumes": {
+        "users": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/VolumeWithPermissions"
+            "$ref": "#/definitions/UserAccess"
           },
-          "x-go-name": "Volumes"
+          "x-go-name": "Users"
         }
       },
       "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Namespace"
@@ -2537,6 +2519,12 @@
     "ResourceType": {
       "type": "string",
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "ResourceUpdateName": {
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateName"
+    },
+    "ResourceUpdateUserAccess": {
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateUserAccess"
     },
     "Resources": {
       "type": "object",
@@ -3324,72 +3312,46 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Volume": {
-      "description": "Volume describes volume",
+      "description": "Volume -- volume representation",
       "type": "object",
       "properties": {
+        "access": {
+          "$ref": "#/definitions/AccessLevel"
+        },
         "access_mode": {
           "$ref": "#/definitions/PersistentVolumeAccessMode"
         },
         "capacity": {
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "Capacity"
         },
-        "create_time": {
+        "created_at": {
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "CreateTime"
+          "x-go-name": "CreatedAt"
         },
-        "delete_time": {
+        "name": {
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "DeleteTime"
+          "x-go-name": "Name"
         },
-        "deleted": {
-          "type": "boolean",
-          "x-go-name": "Deleted"
-        },
-        "gluster_name": {
+        "owner": {
           "type": "string",
-          "x-go-name": "GlusterName"
+          "x-go-name": "Owner"
         },
-        "id": {
+        "owner_login": {
           "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        },
-        "namespace_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "NamespaceID"
-        },
-        "owner_user_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "OwnerUserID"
-        },
-        "owner_user_login": {
-          "type": "string",
-          "format": "email",
-          "x-go-name": "OwnerUserLogin"
-        },
-        "storage_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "StorageID"
+          "x-go-name": "OwnerLogin"
         },
         "storage_name": {
           "type": "string",
           "x-go-name": "StorageName"
         },
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserAccess"
+          },
+          "x-go-name": "Users"
         }
       },
       "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Volume"

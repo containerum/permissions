@@ -14,6 +14,12 @@ definitions:
     $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Namespace"
   Volume:
     $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Volume"
+  ResourceUpdateName:
+    $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateName"
+  ResourceUpdateUserAccess:
+    $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateUserAccess"
+  CreateVolume:
+    $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/CreateVolume"
 parameters:
   SubstitutedUserID:
     $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
