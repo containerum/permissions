@@ -7,6 +7,7 @@ import (
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 	"github.com/sirupsen/logrus"
@@ -60,10 +61,10 @@ func (f *NamespaceFilter) Filter(q *orm.Query) (*orm.Query, error) {
 		q = q.Where("permission.initial_access_level != permissions.initial_access_level")
 	}
 	if f.Owned {
-		q = q.Where("permission.initial_access_level = ?", model.AccessOwner)
+		q = q.Where("permission.initial_access_level = ?", kubeClientModel.Owner)
 	}
 	if f.NotOwned {
-		q = q.Where("permission.initial_access_level != ?", model.AccessOwner)
+		q = q.Where("permission.initial_access_level != ?", kubeClientModel.Owner)
 	}
 	if f.Limit > 0 {
 		q = q.Apply(f.Paginate)
@@ -85,7 +86,7 @@ func (dao *DAO) NamespaceByID(ctx context.Context, userID, id string) (ret model
 		WherePK().
 		Where("permission.resource_id = ?TableAlias.id").
 		Where("permission.user_id = ?", userID).
-		Where("coalesce(permission.current_access_level, ?0) > ?0", model.AccessNone).
+		Where("coalesce(permission.current_access_level, ?0) > ?0", kubeClientModel.None).
 		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
@@ -153,7 +154,7 @@ func (dao *DAO) NamespacePermissions(ctx context.Context, ns *model.NamespaceWit
 		WherePK().
 		Column("Permissions").
 		Relation("Permissions", func(q *orm.Query) (*orm.Query, error) {
-			return q.Where("initial_access_level != ?", model.AccessOwner), nil
+			return q.Where("initial_access_level != ?", kubeClientModel.Owner), nil
 		}).
 		Select()
 	if len(ns.Permissions) == 0 {

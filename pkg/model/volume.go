@@ -5,6 +5,7 @@ import (
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/kube-client/pkg/model"
+	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -82,6 +83,13 @@ func (v *Volume) AfterInsert(db orm.DB) error {
 		InitialAccessLevel: model.Owner,
 		CurrentAccessLevel: model.Owner,
 	})
+}
+
+func (v *Volume) AfterSelect(db orm.DB) error {
+	return db.Model(&Storage{ID: v.StorageID}).
+		Column("name").
+		WherePK().
+		Select(pg.Scan(&v.StorageName))
 }
 
 func (v *Volume) Mask() {
