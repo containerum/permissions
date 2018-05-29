@@ -19,6 +19,10 @@ required = [
     name = "github.com/containerum/cherry"
     non-go = false
 
+  [[prune.project]]
+    name = "github.com/containerum/kube-client"
+    non-go = false
+
 [[constraint]]
   name = "github.com/go-pg/migrations"
   version = "~6.2.0"
@@ -75,11 +79,10 @@ required = [
   name = "github.com/containerum/cherry"
   version = "~1.0.1"
 
-
 [[constraint]]
   name = "github.com/containerum/bill-external"
   version = "~1.0.0"
 
 [[constraint]]
   name = "github.com/containerum/kube-client"
-  version = "~0.17.1"
+  version = "~0.17.4"

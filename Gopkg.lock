@@ -39,8 +39,8 @@
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "05ce358ba8211e7d0b55cfe07c7bf9a2ec3fcbd6"
-  version = "v0.17.1"
+  revision = "262983343732e6686e3b4e06d61f95269127686e"
+  version = "v0.17.4"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -319,6 +319,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3f984a030efa189af17096c043d7a760d8346cf627279bc5e4d7acb09449ff7b"
+  inputs-digest = "7548bcea6156146cb3080ffffc808d4f34fff78620201a1937e58441a5b44ed0"
   solver-name = "gps-cdcl"
   solver-version = 1
