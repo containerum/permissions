@@ -1,36 +1,12 @@
 package model
 
 import (
-	"bytes"
-	"fmt"
 	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/containerum/kube-client/pkg/model"
 	"github.com/go-pg/pg/orm"
 )
-
-// swagger:ignore
-type AccessLevel string // enum
-
-const (
-	AccessNone       AccessLevel = "none"
-	AccessRead       AccessLevel = "read"
-	AccessReadDelete AccessLevel = "readdelete"
-	AccessWrite      AccessLevel = "write"
-	AccessOwner      AccessLevel = "owner"
-)
-
-func (al *AccessLevel) UnmarshalJSON(b []byte) error {
-	str := AccessLevel(bytes.Replace(b, []byte(`"`), []byte(``), -1))
-	switch str {
-	case AccessNone, AccessRead, AccessReadDelete, AccessWrite, AccessOwner:
-		*al = str
-	default:
-		return fmt.Errorf("invalid acess level %s", b)
-	}
-
-	return nil
-}
 
 type ResourceType string
 
@@ -61,20 +37,20 @@ type Permission struct {
 	// swagger:strfmt email
 	UserLogin string `sql:"-" json:"user_login,omitempty"`
 
-	InitialAccessLevel AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull" json:"access,omitempty"` // WARN: custom type here, do not forget create it
+	InitialAccessLevel model.AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull" json:"access,omitempty"` // WARN: custom type here, do not forget create it
 
-	CurrentAccessLevel AccessLevel `sql:"current_access_level,type:ACCESS_LEVEL,notnull" json:"new_access_level,omitempty"` // WARN: custom type here, do not forget create it
+	CurrentAccessLevel model.AccessLevel `sql:"current_access_level,type:ACCESS_LEVEL,notnull" json:"new_access_level,omitempty"` // WARN: custom type here, do not forget create it
 
 	AccessLevelChangeTime *time.Time `sql:"access_level_change_time,default:now(),notnull" json:"access_level_change_time,omitempty"`
 }
 
 func (p *Permission) BeforeInsert(db orm.DB) error {
-	if p.InitialAccessLevel == AccessOwner {
+	if p.InitialAccessLevel == model.Owner {
 		cnt, err := db.Model(p).
 			Column("id").
 			Where("resource_id = ?", p.ResourceID).
 			Where("resource_type = ?", p.ResourceType).
-			Where("initial_access_level = ?", AccessOwner).
+			Where("initial_access_level = ?", model.Owner).
 			Count()
 		if err != nil {
 			return err
@@ -95,7 +71,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 		// that`s our error if we will here
 		return errors.ErrInternal().AddDetails("initial access level must be greater than current access level")
 	}
-	if p.InitialAccessLevel == AccessOwner && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
+	if p.InitialAccessLevel == model.Owner && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
 		_, err := db.Model(p).
 			Where("resource_id = ?resource_id").
 			Set("current_access_level = LEAST(?TableAlias.initial_access_level, ?current_access_level)::ACCESS_LEVEL").
@@ -104,7 +80,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 			return err
 		}
 	}
-	if p.InitialAccessLevel == AccessOwner && p.InitialAccessLevel == p.CurrentAccessLevel { // un-limiting access
+	if p.InitialAccessLevel == model.Owner && p.InitialAccessLevel == p.CurrentAccessLevel { // un-limiting access
 		_, err := db.Model(p).
 			Where("resource_id = ?resource_id").
 			Set("current_access_level = initial_access_level").
@@ -131,17 +107,13 @@ func (p *Permission) Mask() {
 //
 // swagger:model SetResourcesAccessesRequest
 type SetUserAccessesRequest struct {
-	Access AccessLevel `json:"access"`
+	Access model.AccessLevel `json:"access"`
 }
 
 // SetUserAccessRequest is a request object for setting access to resource for user
 //
 // swagger:model SetResourceAccessRequest
-type SetUserAccessRequest struct {
-	// swagger:strfmt email
-	UserName string      `json:"username"`
-	Access   AccessLevel `json:"access"`
-}
+type SetUserAccessRequest = model.ResourceUpdateUserAccess
 
 // DeleteUserAccessRequest is a request object for deleting access to resource for user
 //

@@ -1,9 +1,10 @@
 package model
 
 import (
-	"encoding/json"
+	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/containerum/kube-client/pkg/model"
 	"github.com/go-pg/pg/orm"
 	"github.com/sirupsen/logrus"
 )
@@ -47,14 +48,14 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 		ResourceID:         ns.ID,
 		UserID:             ns.OwnerUserID,
 		ResourceType:       ResourceNamespace,
-		InitialAccessLevel: AccessOwner,
-		CurrentAccessLevel: AccessOwner,
+		InitialAccessLevel: model.Owner,
+		CurrentAccessLevel: model.Owner,
 	})
 }
 
 func (ns *Namespace) BeforeUpdate(db orm.DB) error {
 	if ns.Deleted {
-		cnt, err := db.Model(&Volume{NamespaceID: &ns.ID}).
+		cnt, err := db.Model(&Volume{NamespaceID: ns.ID}).
 			Where("ns_id = ?ns_id").
 			Where("NOT deleted").
 			Count()
@@ -69,7 +70,9 @@ func (ns *Namespace) BeforeUpdate(db orm.DB) error {
 	return nil
 }
 
-// swagger:ignore
+// NamespaceWithPermissions is a response object for get requests
+//
+// swagger:model NamespaceWithPermissions
 type NamespaceWithPermissions struct {
 	Namespace `pg:",override"`
 
@@ -78,47 +81,33 @@ type NamespaceWithPermissions struct {
 	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users"`
 }
 
-// NamespaceWithPermissions is a response object for get requests
-//
-// swagger:model NamespaceWithPermissions
-type NamespaceWithPermissionsJSON struct {
-	Namespace
-	Permission
-	Permissions []Permission `json:"users"`
-}
-
-// Workaround while json "inline" tag not inlines fields on marshal
-func (np NamespaceWithPermissions) MarshalJSON() ([]byte, error) {
-	npJSON := NamespaceWithPermissionsJSON{
-		Namespace:   np.Namespace,
-		Permission:  np.Permission,
-		Permissions: np.Permissions,
+func (np *NamespaceWithPermissions) ToKube() model.Namespace {
+	ns := model.Namespace{
+		ID:            np.ID,
+		CreatedAt:     new(string),
+		Owner:         np.OwnerUserID,
+		OwnerLogin:    np.OwnerUserLogin,
+		Label:         np.Label,
+		Access:        np.Permission.CurrentAccessLevel,
+		MaxExtService: uint(np.MaxExtServices),
+		MaxIntService: uint(np.MaxIntServices),
+		MaxTraffic:    uint(np.MaxTraffic),
+		Resources: model.Resources{
+			Hard: model.Resource{
+				CPU:    uint(np.CPU),
+				Memory: uint(np.RAM),
+			},
+		},
+		Users: make([]model.UserAccess, len(np.Permissions)),
 	}
-
-	return json.Marshal(npJSON)
-}
-
-func (np *NamespaceWithPermissions) UnmarshalJSON(b []byte) error {
-	var npJSON NamespaceWithPermissionsJSON
-	err := json.Unmarshal(b, &npJSON)
-	if err != nil {
-		return err
+	*ns.CreatedAt = np.CreateTime.Format(time.RFC3339)
+	for i, v := range np.Permissions {
+		ns.Users[i] = model.UserAccess{
+			Username:    v.UserLogin,
+			AccessLevel: v.CurrentAccessLevel,
+		}
 	}
-	np.Namespace = npJSON.Namespace
-	np.Permission = npJSON.Permission
-	np.Permissions = npJSON.Permissions
-	return nil
-}
-
-func (np *NamespaceWithPermissions) Mask() {
-	np.Namespace.Mask()
-	np.Permission.Mask()
-	if np.Namespace.OwnerUserID != np.Permission.UserID {
-		np.Permissions = nil
-	}
-	for i := range np.Permissions {
-		np.Permissions[i].Mask()
-	}
+	return ns
 }
 
 // NamespaceAdminCreateRequest contains parameters for creating namespace without billing
@@ -157,9 +146,7 @@ type NamespaceCreateRequest struct {
 // NamespaceRenameRequest contains parameters for renaming namespace
 //
 // swagger:model
-type NamespaceRenameRequest struct {
-	Label string `json:"label" binding:"required"`
-}
+type NamespaceRenameRequest = model.ResourceUpdateName
 
 // NamespaceResizeRequest contains parameters for changing namespace quota
 //
