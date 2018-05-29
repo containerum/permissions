@@ -127,7 +127,10 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.N
 	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
 	AddUserLogins(ctx, ns.Permissions, s.clients.User)
 
-	return ns.ToKube(), nil
+	kubeNS := ns.ToKube()
+	NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
+
+	return kubeNS, nil
 }
 
 func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]kubeClientModel.Namespace, error) {
@@ -155,6 +158,7 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]ku
 		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
 		AddUserLogins(ctx, namespaces[i].Permissions, s.clients.User)
 		ret[i] = namespaces[i].ToKube()
+		NamespaceAddUsage(ctx, &ret[i], s.clients.Kube)
 	}
 
 	return ret, nil
@@ -186,6 +190,7 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
 		AddUserLogins(ctx, namespaces[i].Permissions, s.clients.User)
 		ret[i] = namespaces[i].ToKube()
+		NamespaceAddUsage(ctx, &ret[i], s.clients.Kube)
 	}
 
 	return ret, nil
