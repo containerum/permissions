@@ -10,7 +10,11 @@ COPY --from=builder /bin/permissions /app
 
 ENV MODE="release" \
     LOG_LEVEL=4 \
-    DB_URL="postgres://permissions:vTsnHHnI@postgres:5432/permissions?sslmode=disable" \
+    DB_USER="permissions" \
+    DB_PASSWORD="vTsnHHnI" \
+    DB_HOST="postgres:5432" \
+    DB_SSLMODE="false" \
+    DB_BASE="permissions" \
     LISTEN_ADDR=":4242" \
     AUTH_ADDR="ch-auth:1112" \
     USER_ADDR="user-manager:8111" \

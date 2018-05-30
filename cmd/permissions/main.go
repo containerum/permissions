@@ -62,7 +62,11 @@ func main() {
 		Flags: []cli.Flag{
 			&ModeFlag,
 			&LogLevelFlag,
-			&DBAddrFlag,
+			&DBUserFlag,
+			&DBPassFlag,
+			&DBHostFlag,
+			&DBBaseFlag,
+			&DBSSLModeFlag,
 			&ListenAddrFlag,
 			&AuthAddrFlag,
 			&KubeAPIAddrFlag,
