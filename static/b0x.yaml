@@ -91,6 +91,7 @@ custom:
     - "../vendor/github.com/containerum/utils/httputil/swagger.json"
     - "../vendor/git.containerum.net/ch/auth/swagger.json"
     - "../vendor/github.com/containerum/cherry/swagger.json"
+    - "../vendor/github.com/containerum/kube-client/swagger.json"
 
     # base is the path that will be removed from all files' path
     # type: string

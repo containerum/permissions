@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"git.containerum.net/ch/permissions/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -36,7 +37,7 @@ func (dao *DAO) UserAccesses(ctx context.Context, userID string) ([]AccessWithLa
 	return ret, nil
 }
 
-func (dao *DAO) SetUserAccesses(ctx context.Context, userID string, level model.AccessLevel) error {
+func (dao *DAO) SetUserAccesses(ctx context.Context, userID string, level kubeClientModel.AccessLevel) error {
 	dao.log.WithField("user_id", userID).Debugf("set accesses to %s", level)
 
 	nsIDsQuery := dao.db.Model(&model.Namespace{}).Column("id").Where("owner_user_id = ?", userID)
@@ -70,7 +71,7 @@ func (dao *DAO) setResourceAccess(ctx context.Context, permission model.Permissi
 	return nil
 }
 
-func (dao *DAO) SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel model.AccessLevel, toUserID string) error {
+func (dao *DAO) SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.AccessLevel, toUserID string) error {
 	dao.log.WithField("ns_id", ns.ID).Debugf("set namespace access %s to %s", accessLevel, toUserID)
 
 	return dao.setResourceAccess(ctx, model.Permission{
@@ -82,7 +83,7 @@ func (dao *DAO) SetNamespaceAccess(ctx context.Context, ns model.Namespace, acce
 	})
 }
 
-func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLevel model.AccessLevel, toUserID string) error {
+func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLevel kubeClientModel.AccessLevel, toUserID string) error {
 	dao.log.WithField("vol_id", vol.ID).Debugf("set volume access %s to %s", accessLevel, toUserID)
 
 	return dao.setResourceAccess(ctx, model.Permission{
@@ -99,7 +100,7 @@ func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resourc
 		Where("user_id = ?user_id").
 		Where("resource_type = ?resource_type").
 		Where("resource_id = ?resource_id").
-		Where("initial_access_level < ?", model.AccessOwner). // do not delete owner permission
+		Where("initial_access_level < ?", kubeClientModel.Owner). // do not delete owner permission
 		Delete()
 
 	if err != nil {

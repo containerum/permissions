@@ -7,17 +7,18 @@ import (
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
 
 type AccessActions interface {
 	GetUserAccesses(ctx context.Context) (*authProto.ResourcesAccess, error)
-	SetUserAccesses(ctx context.Context, accessLevel model.AccessLevel) error
-	GetNamespaceAccess(ctx context.Context, id string) (model.NamespaceWithPermissions, error)
-	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error
+	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.AccessLevel) error
+	GetNamespaceAccess(ctx context.Context, id string) (kubeClientModel.Namespace, error)
+	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error
 	GetVolumeAccess(ctx context.Context, id string) (model.VolumeWithPermissions, error)
-	SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error
+	SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error
 	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
 	DeleteVolumeAccess(ctx context.Context, id string, targetUser string) error
 }
@@ -65,7 +66,7 @@ func updateUserAccesses(ctx context.Context, auth clients.AuthClient, db *dao.DA
 	return auth.UpdateUserAccess(ctx, userID, accesses)
 }
 
-func (s *Server) SetUserAccesses(ctx context.Context, access model.AccessLevel) error {
+func (s *Server) SetUserAccesses(ctx context.Context, access kubeClientModel.AccessLevel) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithField("user_id", userID).Infof("Set user accesses to %s", access)
 
@@ -84,7 +85,7 @@ func (s *Server) SetUserAccesses(ctx context.Context, access model.AccessLevel) 
 	return err
 }
 
-func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error {
+func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,
@@ -122,7 +123,7 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, 
 	return err
 }
 
-func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (model.NamespaceWithPermissions, error) {
+func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (kubeClientModel.Namespace, error) {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
@@ -131,20 +132,20 @@ func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (model.Names
 
 	ns, err := s.db.NamespaceByID(ctx, userID, id)
 	if err != nil {
-		return model.NamespaceWithPermissions{}, err
+		return kubeClientModel.Namespace{}, err
 	}
 	err = s.db.NamespacePermissions(ctx, &ns)
 	if err != nil {
-		return ns, err
+		return ns.ToKube(), err
 	}
 
 	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
 	AddUserLogins(ctx, ns.Permissions, s.clients.User)
 
-	return ns, nil
+	return ns.ToKube(), nil
 }
 
-func (s *Server) SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel model.AccessLevel) error {
+func (s *Server) SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,

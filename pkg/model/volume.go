@@ -1,9 +1,11 @@
 package model
 
 import (
-	"encoding/json"
+	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/containerum/kube-client/pkg/model"
+	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -15,19 +17,19 @@ type Volume struct {
 
 	Resource
 
-	Active *bool `sql:"active,notnull" json:"active,omitempty"`
-
 	Capacity int `sql:"capacity,notnull" json:"capacity"`
 
-	Replicas int `sql:"replicas,notnull" json:"replicas"`
-
 	// swagger:strfmt uuid
-	NamespaceID *string `sql:"ns_id,type:uuid" json:"namespace_id,omitempty"`
+	NamespaceID string `sql:"ns_id,type:uuid" json:"namespace_id,omitempty"`
 
 	GlusterName string `sql:"gluster_name,notnull" json:"gluster_name,omitempty"`
 
 	// swagger:strfmt uuid
 	StorageID string `sql:"storage_id,type:uuid,notnull" json:"storage_id,omitempty"`
+
+	StorageName string `sql:"-" json:"storage_name,omitempty"`
+
+	AccessMode model.PersistentVolumeAccessMode `sql:"access_mode,notnull" json:"access_mode,omitempty"`
 }
 
 func (v *Volume) BeforeInsert(db orm.DB) error {
@@ -78,21 +80,29 @@ func (v *Volume) AfterInsert(db orm.DB) error {
 		ResourceID:         v.ID,
 		UserID:             v.OwnerUserID,
 		ResourceType:       ResourceVolume,
-		InitialAccessLevel: AccessOwner,
-		CurrentAccessLevel: AccessOwner,
+		InitialAccessLevel: model.Owner,
+		CurrentAccessLevel: model.Owner,
 	})
+}
+
+func (v *Volume) AfterSelect(db orm.DB) error {
+	return db.Model(&Storage{ID: v.StorageID}).
+		Column("name").
+		WherePK().
+		Select(pg.Scan(&v.StorageName))
 }
 
 func (v *Volume) Mask() {
 	v.Resource.Mask()
-	v.Active = nil
-	v.Replicas = 0
-	v.NamespaceID = nil
+	v.NamespaceID = ""
 	v.GlusterName = ""
 	v.StorageID = ""
+	v.AccessMode = ""
 }
 
-// swagger:ignore
+// VolumeWithPermissions is a response object for get requests
+//
+// swagger:model VolumeWithPermissions
 type VolumeWithPermissions struct {
 	Volume `pg:",override"`
 
@@ -101,35 +111,24 @@ type VolumeWithPermissions struct {
 	Permissions []Permission `pg:"polymorphic:resource_" sql:"-" json:"users"`
 }
 
-// VolumeWithPermissions is a response object for get requests
-//
-// swagger:model VolumeWithPermissions
-type VolumeWithPermissionsJSON struct {
-	Volume
-	Permission
-	Permissions []Permission `json:"users"`
-}
-
-// Workaround while json "inline" tag not inlines fields on marshal
-func (vp VolumeWithPermissions) MarshalJSON() ([]byte, error) {
-	npJSON := VolumeWithPermissionsJSON{
-		Volume:      vp.Volume,
-		Permission:  vp.Permission,
-		Permissions: vp.Permissions,
+func (vp *VolumeWithPermissions) ToKube() model.Volume {
+	vol := model.Volume{
+		Name:       vp.Label,
+		CreatedAt:  new(string),
+		Owner:      vp.OwnerUserID,
+		OwnerLogin: vp.OwnerUserLogin,
+		Access:     vp.Permission.CurrentAccessLevel,
+		Capacity:   uint(vp.Capacity),
+		Users:      make([]model.UserAccess, len(vp.Permissions)),
 	}
-
-	return json.Marshal(npJSON)
-}
-
-func (vp *VolumeWithPermissions) UnmarshalJSON(b []byte) error {
-	var vpJSON VolumeWithPermissionsJSON
-	if err := json.Unmarshal(b, &vpJSON); err != nil {
-		return err
+	*vol.CreatedAt = vp.CreateTime.Format(time.RFC3339)
+	for i, v := range vp.Permissions {
+		vol.Users[i] = model.UserAccess{
+			Username:    v.UserLogin,
+			AccessLevel: v.CurrentAccessLevel,
+		}
 	}
-	vp.Volume = vpJSON.Volume
-	vp.Permissions = vpJSON.Permissions
-	vp.Permission = vpJSON.Permission
-	return nil
+	return vol
 }
 
 func (vp *VolumeWithPermissions) Mask() {
@@ -146,19 +145,12 @@ func (vp *VolumeWithPermissions) Mask() {
 // VolumeCreateRequest is a request object for creating volume
 //
 // swagger:model
-type VolumeCreateRequest struct {
-	// swagger:strfmt uuid
-	TariffID string `json:"tariff_id" binding:"required,uuid"`
-
-	Label string `json:"label" binding:"required"`
-}
+type VolumeCreateRequest = model.CreateVolume
 
 // VolumeRenameRequest is a request object for renaming volume
 //
 // swagger:model
-type VolumeRenameRequest struct {
-	Label string `json:"label" binding:"required"`
-}
+type VolumeRenameRequest = model.ResourceUpdateName
 
 // VolumeResizeRequest contains parameters for changing volume size
 //

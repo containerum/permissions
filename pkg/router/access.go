@@ -47,7 +47,7 @@ func (ah *accessHandlers) setNamespaceAccessHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := ah.acts.SetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"), req.UserName, req.Access); err != nil {
+	if err := ah.acts.SetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"), req.Username, req.Access); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -62,7 +62,7 @@ func (ah *accessHandlers) setVolumeAccessHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := ah.acts.SetVolumeAccess(ctx.Request.Context(), ctx.Param("id"), req.UserName, req.Access); err != nil {
+	if err := ah.acts.SetVolumeAccess(ctx.Request.Context(), ctx.Param("id"), req.Username, req.Access); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -269,7 +269,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//   '200':
 	//     description: namespace response
 	//     schema:
-	//       $ref: '#/definitions/NamespaceWithPermissions'
+	//       $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/namespaces/:id/accesses", handlers.getNamespaceAccessHandler)
@@ -288,7 +288,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//   '200':
 	//     description: volume response
 	//     schema:
-	//       $ref: '#/definitions/VolumeWithPermissions'
+	//       $ref: '#/definitions/Volume'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/volumes/:id/accesses", handlers.getVolumeAccessHandler)

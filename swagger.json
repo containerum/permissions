@@ -111,7 +111,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/NamespaceWithPermissions"
+                "$ref": "#/definitions/Namespace"
               }
             }
           },
@@ -253,7 +253,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/VolumeWithPermissions"
+                "$ref": "#/definitions/Volume"
               }
             }
           },
@@ -316,7 +316,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/NamespaceWithPermissions"
+                "$ref": "#/definitions/Namespace"
               }
             }
           },
@@ -385,7 +385,7 @@
           "200": {
             "description": "namespace response",
             "schema": {
-              "$ref": "#/definitions/NamespaceWithPermissions"
+              "$ref": "#/definitions/Namespace"
             }
           },
           "default": {
@@ -561,7 +561,7 @@
           "200": {
             "description": "namespace response",
             "schema": {
-              "$ref": "#/definitions/NamespaceWithPermissions"
+              "$ref": "#/definitions/Namespace"
             }
           },
           "default": {
@@ -778,7 +778,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/VolumeWithPermissions"
+                "$ref": "#/definitions/Volume"
               }
             }
           },
@@ -848,7 +848,7 @@
           "200": {
             "description": "volume response",
             "schema": {
-              "$ref": "#/definitions/VolumeWithPermissions"
+              "$ref": "#/definitions/Volume"
             }
           },
           "default": {
@@ -1027,7 +1027,7 @@
           "200": {
             "description": "volume response",
             "schema": {
-              "$ref": "#/definitions/VolumeWithPermissions"
+              "$ref": "#/definitions/Volume"
             }
           },
           "default": {
@@ -1118,6 +1118,20 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
     },
+    "Accounts": {
+      "description": "Accounts -- list of bound accounts",
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Accounts"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
     "AuthClient": {
       "type": "object",
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
@@ -1125,6 +1139,75 @@
     "AuthServer": {
       "type": "object",
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
+    },
+    "AvailableSolution": {
+      "description": "AvailableSolution -- solution which user can run",
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Images"
+        },
+        "limits": {
+          "$ref": "#/definitions/SolutionLimits"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "AvailableSolutionsList": {
+      "description": "AvailableSolutionsList -- list of available solutions",
+      "type": "object",
+      "properties": {
+        "solutions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AvailableSolution"
+          },
+          "x-go-name": "Solutions"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "BoundAccountDeleteRequest": {
+      "description": "BoundAccountDeleteRequest -- request to remove bound account",
+      "type": "object",
+      "required": [
+        "resource"
+      ],
+      "properties": {
+        "resource": {
+          "type": "string",
+          "x-go-name": "Resource"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "BoundAccounts": {
+      "description": "BoundAccounts -- bound accounts list for user",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
     },
     "ChangeTariffRequest": {
       "description": "ChangeTariffRequest contains parameters needed for tariff changing",
@@ -1136,6 +1219,20 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
+    },
+    "ConfigFile": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ConfigMap": {
       "description": "ConfigMap -- model for config map",
@@ -1151,41 +1248,7 @@
           "x-go-name": "CreatedAt"
         },
         "data": {
-          "description": "key-value data",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "x-go-name": "Data"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
-    },
-    "ConfigMapWithOwner": {
-      "description": "ConfigMapWithOwner -- model for config map with owner",
-      "type": "object",
-      "required": [
-        "name",
-        "data",
-        "owner"
-      ],
-      "properties": {
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "data": {
-          "description": "key-value data",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "x-go-name": "Data"
+          "$ref": "#/definitions/ConfigMapData"
         },
         "name": {
           "type": "string",
@@ -1196,7 +1259,15 @@
           "x-go-name": "Owner"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "ConfigMapData": {
+      "description": "ConfigMapData -- model for config map data",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ConfigMapsList": {
       "description": "ConfigMapsList -- model for config maps list",
@@ -1205,12 +1276,12 @@
         "configmaps": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ConfigMapWithOwner"
+            "$ref": "#/definitions/ConfigMap"
           },
           "x-go-name": "ConfigMaps"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Container": {
       "description": "Container -- model for container in deployment",
@@ -1268,7 +1339,7 @@
           "x-go-name": "VolumeMounts"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ContainerPort": {
       "description": "ContainerPort -- model for port in container",
@@ -1292,7 +1363,7 @@
           "$ref": "#/definitions/Protocol"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ContainerVolume": {
       "description": "ContainerVolume -- volume (or config map) mounted in container",
@@ -1314,12 +1385,16 @@
           "type": "string",
           "x-go-name": "Name"
         },
+        "pvc_name": {
+          "type": "string",
+          "x-go-name": "PersistentVolumeClaimName"
+        },
         "sub_path": {
           "type": "string",
           "x-go-name": "SubPath"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "CreateTokenResponse": {
       "type": "object",
@@ -1335,6 +1410,9 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
+    },
+    "CreateVolume": {
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/CreateVolume"
     },
     "DeleteResourceAccessRequest": {
       "description": "DeleteUserAccessRequest is a request object for deleting access to resource for user",
@@ -1369,6 +1447,10 @@
           "type": "string",
           "x-go-name": "Name"
         },
+        "owner": {
+          "type": "string",
+          "x-go-name": "Owner"
+        },
         "replicas": {
           "type": "integer",
           "format": "int64",
@@ -1390,7 +1472,7 @@
           "x-go-name": "TotalMemory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "DeploymentStatus": {
       "description": "DeploymentStatus -- kubernetes status of deployment",
@@ -1432,55 +1514,7 @@
           "x-go-name": "UpdatedReplicas"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
-    },
-    "DeploymentWithOwner": {
-      "description": "DeploymentWithOwner -- model for deployment with owner",
-      "type": "object",
-      "required": [
-        "containers",
-        "name",
-        "replicas",
-        "owner"
-      ],
-      "properties": {
-        "containers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Container"
-          },
-          "x-go-name": "Containers"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "owner": {
-          "type": "string",
-          "x-go-name": "Owner"
-        },
-        "replicas": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Replicas"
-        },
-        "status": {
-          "$ref": "#/definitions/DeploymentStatus"
-        },
-        "total_cpu": {
-          "description": "total CPU usage by all containers in this deployment",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "TotalCPU"
-        },
-        "total_memory": {
-          "description": "total RAM usage by all containers in this deployment",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "TotalMemory"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "DeploymentsList": {
       "description": "DeploymentsList -- model for deployments list",
@@ -1489,12 +1523,49 @@
         "deployments": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/DeploymentWithOwner"
+            "$ref": "#/definitions/Deployment"
           },
           "x-go-name": "Deployments"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "Domain": {
+      "description": "DomainListResponse -- domains list",
+      "type": "object",
+      "required": [
+        "domain"
+      ],
+      "properties": {
+        "added_by": {
+          "type": "string",
+          "x-go-name": "AddedBy"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "domain": {
+          "type": "string",
+          "x-go-name": "Domain"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "DomainListResponse": {
+      "description": "DomainListResponse -- domains list",
+      "type": "object",
+      "properties": {
+        "domain_list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Domain"
+          },
+          "x-go-name": "DomainList"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
     },
     "Duration": {
       "description": "# Examples\n\nExample 1: Compute Duration from two Timestamps in pseudo code.\n\nTimestamp start = ...;\nTimestamp end = ...;\nDuration duration = ...;\n\nduration.seconds = end.seconds - start.seconds;\nduration.nanos = end.nanos - start.nanos;\n\nif (duration.seconds \u003c 0 \u0026\u0026 duration.nanos \u003e 0) {\nduration.seconds += 1;\nduration.nanos -= 1000000000;\n} else if (durations.seconds \u003e 0 \u0026\u0026 duration.nanos \u003c 0) {\nduration.seconds -= 1;\nduration.nanos += 1000000000;\n}\n\nExample 2: Compute Timestamp from Timestamp + Duration in pseudo code.\n\nTimestamp start = ...;\nDuration duration = ...;\nTimestamp end = ...;\n\nend.seconds = start.seconds + duration.seconds;\nend.nanos = start.nanos + duration.nanos;\n\nif (end.nanos \u003c 0) {\nend.seconds -= 1;\nend.nanos += 1000000000;\n} else if (end.nanos \u003e= 1000000000) {\nend.seconds += 1;\nend.nanos -= 1000000000;\n}\n\nExample 3: Compute Duration from datetime.timedelta in Python.\n\ntd = datetime.timedelta(days=3, minutes=10)\nduration = Duration()\nduration.FromTimedelta(td)\n\n# JSON Mapping\n\nIn JSON format, the Duration type is encoded as a string rather than an\nobject, where the string ends in the suffix \"s\" (indicating seconds) and\nis preceded by the number of seconds, with nanoseconds expressed as\nfractional seconds. For example, 3 seconds with 0 nanoseconds should be\nencoded in JSON format as \"3s\", while 3 seconds and 1 nanosecond should\nbe expressed in JSON format as \"3.000000001s\", and 3 seconds and 1\nmicrosecond should be expressed in JSON format as \"3.000001s\".",
@@ -1516,61 +1587,8 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/golang/protobuf/ptypes/duration"
     },
-    "Endpoint": {
-      "description": "Endpoint -- model for endpoint",
-      "type": "object",
-      "required": [
-        "name",
-        "addresses",
-        "ports"
-      ],
-      "properties": {
-        "addresses": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Addresses"
-        },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "owner": {
-          "type": "string",
-          "x-go-name": "Owner"
-        },
-        "ports": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Port"
-          },
-          "x-go-name": "Ports"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
-    },
-    "EndpointsList": {
-      "description": "EndpointsList -- model for endpoints list",
-      "type": "object",
-      "properties": {
-        "endpoints": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Endpoint"
-          },
-          "x-go-name": "Endpoints"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
-    },
     "Env": {
-      "description": "Env -- key-value pair of enviroment variables",
+      "description": "Env -- key-value pair of environment variables",
       "type": "object",
       "required": [
         "value",
@@ -1586,7 +1604,7 @@
           "x-go-name": "Value"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Err": {
       "description": "Err -- standard serializable API error\nMessage -- constant error message:\n+ \"invalid username\"\n+ \"quota exceeded\"\n+ \"validation error\"\n...etc...\nID -- unique error identification code\nDetails -- optional context error messages kinda\n+ \"field 'Replicas' must be non-zero value\"\n+ \"not enough tights to feed gopher\"\n+ \"resource 'God' does't exist\"\nFields -- optional set of key-value pairs",
@@ -1678,40 +1696,20 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
     },
+    "IDList": {
+      "description": "IDList -- ids list",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
     "Ingress": {
       "description": "Ingress -- model for ingress",
       "type": "object",
       "required": [
         "name",
         "rules"
-      ],
-      "properties": {
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "rules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Rule"
-          },
-          "x-go-name": "Rules"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
-    },
-    "IngressWithOwner": {
-      "description": "IngressWithOwner -- model for ingress with owner",
-      "type": "object",
-      "required": [
-        "name",
-        "rules",
-        "owner"
       ],
       "properties": {
         "created_at": {
@@ -1735,7 +1733,7 @@
           "x-go-name": "Rules"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "IngressesList": {
       "description": "IngressesList -- model for ingresses list",
@@ -1744,12 +1742,94 @@
         "ingresses": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/IngressWithOwner"
+            "$ref": "#/definitions/Ingress"
           },
           "x-go-name": "Ingress"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "Link": {
+      "description": "Link -- link (for registration/activation/etc)",
+      "type": "object",
+      "required": [
+        "link"
+      ],
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "expired_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "ExpiredAt"
+        },
+        "is_active": {
+          "type": "boolean",
+          "x-go-name": "IsActive"
+        },
+        "link": {
+          "type": "string",
+          "x-go-name": "Link"
+        },
+        "sent_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "SentAt"
+        },
+        "type": {
+          "$ref": "#/definitions/LinkType"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "LinkType": {
+      "description": "LinkType -- link type",
+      "type": "string",
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "Links": {
+      "description": "Links -- links list",
+      "type": "object",
+      "properties": {
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "x-go-name": "Links"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "LoginID": {
+      "description": "LoginID -- logins and user ID",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "LoginRequest": {
+      "description": "LoginRequest -- login request (for basic login)",
+      "type": "object",
+      "required": [
+        "login",
+        "password"
+      ],
+      "properties": {
+        "login": {
+          "type": "string",
+          "x-go-name": "Login"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
     },
     "MassiveUnsubscribeTariffRequest": {
       "description": "MassiveUnsubscribeTariffRequest contains parameters needed for all tariffs unsubscribing",
@@ -1766,20 +1846,23 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
     "Namespace": {
-      "description": "Namespace -- namespace representation provided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
+      "description": "Namespace -- namespace representation",
       "type": "object",
       "required": [
         "resources"
       ],
       "properties": {
         "access": {
-          "type": "string",
-          "x-go-name": "Access"
+          "$ref": "#/definitions/AccessLevel"
         },
         "created_at": {
           "description": "creation date in RFC3339 format",
           "type": "string",
           "x-go-name": "CreatedAt"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
         },
         "label": {
           "description": "user-visible label for the namespace",
@@ -1801,18 +1884,26 @@
           "format": "uint64",
           "x-go-name": "MaxTraffic"
         },
+        "owner": {
+          "type": "string",
+          "x-go-name": "Owner"
+        },
+        "owner_login": {
+          "type": "string",
+          "x-go-name": "OwnerLogin"
+        },
         "resources": {
           "$ref": "#/definitions/Resources"
         },
-        "volumes": {
+        "users": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Volume"
+            "$ref": "#/definitions/UserAccess"
           },
-          "x-go-name": "Volumes"
+          "x-go-name": "Users"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Namespace"
     },
     "NamespaceAdminCreateRequest": {
       "description": "NamespaceAdminCreateRequest contains parameters for creating namespace without billing",
@@ -1900,14 +1991,7 @@
     },
     "NamespaceRenameRequest": {
       "description": "NamespaceRenameRequest contains parameters for renaming namespace",
-      "type": "object",
-      "properties": {
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+      "$ref": "#/definitions/ResourceUpdateName"
     },
     "NamespaceResizeRequest": {
       "description": "NamespaceResizeRequest contains parameters for changing namespace quota",
@@ -1993,76 +2077,12 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
-    "NamespaceWithOwner": {
-      "description": "NamespaceWithOwner -- model for namespace with owner",
-      "type": "object",
-      "required": [
-        "resources"
-      ],
-      "properties": {
-        "access": {
-          "description": "access from X-User-Namespace header",
-          "type": "string",
-          "x-go-name": "Access"
-        },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "label": {
-          "description": "user-visible label for the namespace",
-          "type": "string",
-          "x-go-name": "Label"
-        },
-        "max_ext_service": {
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxExtService"
-        },
-        "max_int_service": {
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxIntService"
-        },
-        "max_traffic": {
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxTraffic"
-        },
-        "name": {
-          "description": "hosting-internal name",
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "owner": {
-          "type": "string",
-          "x-go-name": "Owner"
-        },
-        "resources": {
-          "$ref": "#/definitions/Resources"
-        },
-        "volumes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Volume"
-          },
-          "x-go-name": "Volumes"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
-    },
     "NamespaceWithPermissions": {
       "description": "NamespaceWithPermissions is a response object for get requests",
       "type": "object",
       "properties": {
-        "access": {
-          "$ref": "#/definitions/AccessLevel"
-        },
-        "access_level_change_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "AccessLevelChangeTime"
+        "Permission": {
+          "$ref": "#/definitions/Permission"
         },
         "cpu": {
           "type": "integer",
@@ -2088,17 +2108,9 @@
           "format": "uuid",
           "x-go-name": "ID"
         },
-        "kind": {
-          "$ref": "#/definitions/ResourceType"
-        },
         "label": {
           "type": "string",
           "x-go-name": "Label"
-        },
-        "login": {
-          "type": "string",
-          "format": "email",
-          "x-go-name": "UserLogin"
         },
         "max_external_services": {
           "type": "integer",
@@ -2115,9 +2127,6 @@
           "format": "int64",
           "x-go-name": "MaxTraffic"
         },
-        "new_access_level": {
-          "$ref": "#/definitions/AccessLevel"
-        },
         "owner_user_id": {
           "type": "string",
           "format": "uuid",
@@ -2128,30 +2137,15 @@
           "format": "email",
           "x-go-name": "OwnerUserLogin"
         },
-        "perm_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
         "ram": {
           "type": "integer",
           "format": "int64",
           "x-go-name": "RAM"
         },
-        "resource_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ResourceID"
-        },
         "tariff_id": {
           "type": "string",
           "format": "uuid",
           "x-go-name": "TariffID"
-        },
-        "user_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "UserID"
         },
         "users": {
           "type": "array",
@@ -2168,7 +2162,6 @@
           "x-go-name": "Volumes"
         }
       },
-      "x-go-name": "NamespaceWithPermissionsJSON",
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "NamespacesList": {
@@ -2178,12 +2171,86 @@
         "namespaces": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/NamespaceWithOwner"
+            "$ref": "#/definitions/Namespace"
           },
           "x-go-name": "Namespaces"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "OAuthLoginRequest": {
+      "description": "LoginRequest -- login request (for oauth login)",
+      "type": "object",
+      "required": [
+        "resource",
+        "access_token"
+      ],
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "x-go-name": "AccessToken"
+        },
+        "resource": {
+          "$ref": "#/definitions/OAuthResource"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "OAuthResource": {
+      "type": "string",
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "OneTimeTokenLoginRequest": {
+      "description": "LoginRequest -- login request (for token login)",
+      "type": "object",
+      "required": [
+        "token"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "x-go-name": "Token"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "PasswordChangeRequest": {
+      "description": "PasswordChangeRequest -- password change request",
+      "type": "object",
+      "required": [
+        "current_password",
+        "new_password"
+      ],
+      "properties": {
+        "current_password": {
+          "type": "string",
+          "x-go-name": "CurrentPassword"
+        },
+        "new_password": {
+          "type": "string",
+          "x-go-name": "NewPassword"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "PasswordRestoreRequest": {
+      "description": "PasswordRestoreRequest -- password restore request",
+      "type": "object",
+      "required": [
+        "link",
+        "new_password"
+      ],
+      "properties": {
+        "link": {
+          "type": "string",
+          "x-go-name": "Link"
+        },
+        "new_password": {
+          "type": "string",
+          "x-go-name": "NewPassword"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
     },
     "Path": {
       "description": "Path -- ingress path",
@@ -2208,7 +2275,7 @@
           "x-go-name": "ServicePort"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Permission": {
       "description": "Permission represents information about user permission to resource",
@@ -2230,11 +2297,6 @@
         "kind": {
           "$ref": "#/definitions/ResourceType"
         },
-        "login": {
-          "type": "string",
-          "format": "email",
-          "x-go-name": "UserLogin"
-        },
         "new_access_level": {
           "$ref": "#/definitions/AccessLevel"
         },
@@ -2252,9 +2314,18 @@
           "type": "string",
           "format": "uuid",
           "x-go-name": "UserID"
+        },
+        "user_login": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "UserLogin"
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "PersistentVolumeAccessMode": {
+      "type": "string",
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Pod": {
       "description": "Pod -- model for pod",
@@ -2291,80 +2362,6 @@
           "type": "string",
           "x-go-name": "Name"
         },
-        "status": {
-          "$ref": "#/definitions/PodStatus"
-        },
-        "total_cpu": {
-          "description": "total CPU usage by all containers in this pod",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "TotalCPU"
-        },
-        "total_memory": {
-          "description": "total RAM usage by all containers in this pod",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "TotalMemory"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
-    },
-    "PodStatus": {
-      "description": "PodStatus -- kubernetes status of pod",
-      "type": "object",
-      "properties": {
-        "phase": {
-          "type": "string",
-          "x-go-name": "Phase"
-        },
-        "restart_count": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "RestartCount"
-        },
-        "start_at": {
-          "description": "pod start date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "StartAt"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
-    },
-    "PodWithOwner": {
-      "description": "PodWithOwner -- model for pod with owner",
-      "type": "object",
-      "properties": {
-        "containers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Container"
-          },
-          "x-go-name": "Containers"
-        },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "deploy": {
-          "type": "string",
-          "x-go-name": "Deploy"
-        },
-        "hostname": {
-          "type": "string",
-          "x-go-name": "Hostname"
-        },
-        "image_pull_secret": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "x-go-name": "ImagePullSecret"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
         "owner": {
           "type": "string",
           "x-go-name": "Owner"
@@ -2385,7 +2382,28 @@
           "x-go-name": "TotalMemory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "PodStatus": {
+      "description": "PodStatus -- kubernetes status of pod",
+      "type": "object",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "x-go-name": "Phase"
+        },
+        "restart_count": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RestartCount"
+        },
+        "start_at": {
+          "description": "pod start date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "StartAt"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "PodsList": {
       "description": "PodsList -- model for pods list",
@@ -2394,41 +2412,75 @@
         "pods": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/PodWithOwner"
+            "$ref": "#/definitions/Pod"
           },
           "x-go-name": "Pods"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
-    "Port": {
-      "description": "Port -- model for endpoint port",
+    "Profile": {
+      "description": "Profile -- additional user information",
       "type": "object",
-      "required": [
-        "name",
-        "port",
-        "protocol"
-      ],
       "properties": {
-        "name": {
+        "access": {
           "type": "string",
-          "x-go-name": "Name"
+          "x-go-name": "Access"
         },
-        "port": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Port"
+        "blacklisted_at": {
+          "type": "string",
+          "x-go-name": "BlacklistedAt"
         },
-        "protocol": {
-          "$ref": "#/definitions/Protocol"
+        "created_at": {
+          "type": "string",
+          "x-go-name": "CreatedAt"
+        },
+        "data": {
+          "$ref": "#/definitions/UserData"
+        },
+        "deleted_at": {
+          "type": "string",
+          "x-go-name": "DeletedAt"
+        },
+        "referral": {
+          "type": "string",
+          "x-go-name": "Referral"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
     },
     "Protocol": {
       "description": "represents port protocol type (TCP or UDP)",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "RegisterRequest": {
+      "description": "RegisterRequest -- request to create new user",
+      "type": "object",
+      "required": [
+        "login",
+        "password",
+        "recaptcha"
+      ],
+      "properties": {
+        "login": {
+          "type": "string",
+          "x-go-name": "Login"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "recaptcha": {
+          "type": "string",
+          "x-go-name": "ReCaptcha"
+        },
+        "referral": {
+          "type": "string",
+          "x-go-name": "Referral"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
     },
     "RenameRequest": {
       "description": "RenameRequest contains parameters needed for resource renaming",
@@ -2462,15 +2514,21 @@
           "x-go-name": "Memory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ResourceType": {
       "type": "string",
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
+    "ResourceUpdateName": {
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateName"
+    },
+    "ResourceUpdateUserAccess": {
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateUserAccess"
+    },
     "Resources": {
       "type": "object",
-      "title": "Resources -- represents namespace limits and user resources,",
+      "title": "Resources -- represents namespace limits and user resources.",
       "required": [
         "hard"
       ],
@@ -2482,7 +2540,7 @@
           "$ref": "#/definitions/Resource"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ResourcesAccess": {
       "description": "ResourceAccesses contains user accesses to resources",
@@ -2532,7 +2590,31 @@
           "x-go-name": "TLSSecret"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "RunSolutionResponse": {
+      "description": "RunSolutionResponse -- response to run solution request",
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Created"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Errors"
+        },
+        "not_created": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "NotCreated"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Secret": {
       "description": "model for secret",
@@ -2557,41 +2639,13 @@
         "name": {
           "type": "string",
           "x-go-name": "Name"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
-    },
-    "SecretWithOwner": {
-      "description": "SecretWithOwner -- model for secret with owner",
-      "type": "object",
-      "required": [
-        "name",
-        "data",
-        "owner"
-      ],
-      "properties": {
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "data": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "x-go-name": "Data"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
         },
         "owner": {
           "type": "string",
           "x-go-name": "Owner"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "SecretsList": {
       "description": "SecretsList -- model for secrets list",
@@ -2600,12 +2654,12 @@
         "secrets": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/SecretWithOwner"
+            "$ref": "#/definitions/Secret"
           },
           "x-go-name": "Secrets"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "SelectedConfigMapsList": {
       "description": "SelectedConfigMapsList -- model for config maps list from all namespaces",
@@ -2613,7 +2667,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/ConfigMapsList"
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "SelectedIngressesList": {
       "description": "SelectedIngressesList -- model for ingresses list from all namespaces",
@@ -2621,7 +2675,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/IngressesList"
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Service": {
       "description": "represents service",
@@ -2655,6 +2709,10 @@
           "type": "string",
           "x-go-name": "Name"
         },
+        "owner": {
+          "type": "string",
+          "x-go-name": "Owner"
+        },
         "ports": {
           "type": "array",
           "items": {
@@ -2663,7 +2721,7 @@
           "x-go-name": "Ports"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ServicePort": {
       "description": "represent service port",
@@ -2692,69 +2750,12 @@
           "x-go-name": "TargetPort"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ServiceType": {
       "description": "represents service type",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
-    },
-    "ServiceWithOwner": {
-      "description": "ServiceWithOwner -- model for service with owner",
-      "type": "object",
-      "required": [
-        "name",
-        "ports",
-        "owner"
-      ],
-      "properties": {
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "deploy": {
-          "type": "string",
-          "x-go-name": "Deploy"
-        },
-        "domain": {
-          "type": "string",
-          "x-go-name": "Domain"
-        },
-        "hidden": {
-          "description": "hide service from users",
-          "type": "boolean",
-          "x-go-name": "Hidden"
-        },
-        "ips": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "IPs"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "no_selector": {
-          "description": "don't add selectors to service (so don't create endpoint)",
-          "type": "boolean",
-          "x-go-name": "NoSelector"
-        },
-        "owner": {
-          "type": "string",
-          "x-go-name": "Owner"
-        },
-        "ports": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ServicePort"
-          },
-          "x-go-name": "Ports"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ServicesList": {
       "description": "ServicesList -- model for services list",
@@ -2763,28 +2764,16 @@
         "services": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ServiceWithOwner"
+            "$ref": "#/definitions/Service"
           },
           "x-go-name": "Services"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "SetResourceAccessRequest": {
       "description": "SetUserAccessRequest is a request object for setting access to resource for user",
-      "type": "object",
-      "properties": {
-        "access": {
-          "$ref": "#/definitions/AccessLevel"
-        },
-        "username": {
-          "type": "string",
-          "format": "email",
-          "x-go-name": "UserName"
-        }
-      },
-      "x-go-name": "SetUserAccessRequest",
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+      "$ref": "#/definitions/ResourceUpdateUserAccess"
     },
     "SetResourcesAccessesRequest": {
       "description": "SetUserAccessRequest is a request object for setting user accesses",
@@ -2796,6 +2785,50 @@
       },
       "x-go-name": "SetUserAccessesRequest",
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "SolutionEnv": {
+      "description": "SolutionEnv -- solution environment variables",
+      "type": "object",
+      "properties": {
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Env"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "SolutionLimits": {
+      "description": "SolutionLimits -- solution resources limits",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "string",
+          "x-go-name": "CPU"
+        },
+        "ram": {
+          "type": "string",
+          "x-go-name": "RAM"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "SolutionResources": {
+      "description": "SolutionResources -- list of solution resources",
+      "type": "object",
+      "properties": {
+        "resources": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "x-go-name": "Resources"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Storage": {
       "description": "Storage describes volumes storage",
@@ -2957,7 +2990,7 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
     "Timestamp": {
-      "description": "# Examples\n\nExample 1: Compute Timestamp from POSIX `time()`.\n\nTimestamp timestamp;\ntimestamp.set_seconds(time(NULL));\ntimestamp.set_nanos(0);\n\nExample 2: Compute Timestamp from POSIX `gettimeofday()`.\n\nstruct timeval tv;\ngettimeofday(\u0026tv, NULL);\n\nTimestamp timestamp;\ntimestamp.set_seconds(tv.tv_sec);\ntimestamp.set_nanos(tv.tv_usec * 1000);\n\nExample 3: Compute Timestamp from Win32 `GetSystemTimeAsFileTime()`.\n\nFILETIME ft;\nGetSystemTimeAsFileTime(\u0026ft);\nUINT64 ticks = (((UINT64)ft.dwHighDateTime) \u003c\u003c 32) | ft.dwLowDateTime;\n\nA Windows tick is 100 nanoseconds. Windows epoch 1601-01-01T00:00:00Z\nis 11644473600 seconds before Unix epoch 1970-01-01T00:00:00Z.\nTimestamp timestamp;\ntimestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));\ntimestamp.set_nanos((INT32) ((ticks % 10000000) * 100));\n\nExample 4: Compute Timestamp from Java `System.currentTimeMillis()`.\n\nlong millis = System.currentTimeMillis();\n\nTimestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)\n.setNanos((int) ((millis % 1000) * 1000000)).build();\n\n\nExample 5: Compute Timestamp from current time in Python.\n\ntimestamp = Timestamp()\ntimestamp.GetCurrentTime()\n\n# JSON Mapping\n\nIn JSON format, the Timestamp type is encoded as a string in the\n[RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. That is, the\nformat is \"{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z\"\nwhere {year} is always expressed using four digits while {month}, {day},\n{hour}, {min}, and {sec} are zero-padded to two digits each. The fractional\nseconds, which can go up to 9 digits (i.e. up to 1 nanosecond resolution),\nare optional. The \"Z\" suffix indicates the timezone (\"UTC\"); the timezone\nis required, though only UTC (as indicated by \"Z\") is presently supported.\n\nFor example, \"2017-01-15T01:30:15.01Z\" encodes 15.01 seconds past\n01:30 UTC on January 15, 2017.\n\nIn JavaScript, one can convert a Date object to this format using the\nstandard [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString]\nmethod. In Python, a standard `datetime.datetime` object can be converted\nto this format using [`strftime`](https://docs.python.org/2/library/time.html#time.strftime)\nwith the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one\ncan use the Joda Time's [`ISODateTimeFormat.dateTime()`](\nhttp://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime())\nto obtain a formatter capable of generating timestamps in this format.",
+      "description": "# Examples\n\nExample 1: Compute Timestamp from POSIX `time()`.\n\nTimestamp timestamp;\ntimestamp.set_seconds(time(NULL));\ntimestamp.set_nanos(0);\n\nExample 2: Compute Timestamp from POSIX `gettimeofday()`.\n\nstruct timeval tv;\ngettimeofday(\u0026tv, NULL);\n\nTimestamp timestamp;\ntimestamp.set_seconds(tv.tv_sec);\ntimestamp.set_nanos(tv.tv_usec * 1000);\n\nExample 3: Compute Timestamp from Win32 `GetSystemTimeAsFileTime()`.\n\nFILETIME ft;\nGetSystemTimeAsFileTime(\u0026ft);\nUINT64 ticks = (((UINT64)ft.dwHighDateTime) \u003c\u003c 32) | ft.dwLowDateTime;\n\nA Windows tick is 100 nanoseconds. Windows epoch 1601-01-01T00:00:00Z\nis 11644473600 seconds before Unix epoch 1970-01-01T00:00:00Z.\nTimestamp timestamp;\ntimestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));\ntimestamp.set_nanos((INT32) ((ticks % 10000000) * 100));\n\nExample 4: Compute Timestamp from Java `System.currentTimeMillis()`.\n\nlong millis = System.currentTimeMillis();\n\nTimestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)\n.setNanos((int) ((millis % 1000) * 1000000)).build();\n\n\nExample 5: Compute Timestamp from current time in Python.\n\ntimestamp = Timestamp()\ntimestamp.GetCurrentTime()\n\n# JSON Mapping\n\nIn JSON format, the Timestamp type is encoded as a string in the\n[RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. That is, the\nformat is \"{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z\"\nwhere {year} is always expressed using four digits while {month}, {day},\n{hour}, {min}, and {sec} are zero-padded to two digits each. The fractional\nseconds, which can go up to 9 digits (i.e. up to 1 nanosecond resolution),\nare optional. The \"Z\" suffix indicates the timezone (\"UTC\"); the timezone\nis required, though only UTC (as indicated by \"Z\") is presently supported.\n\nFor example, \"2017-01-15T01:30:15.01Z\" encodes 15.01 seconds past\n01:30 UTC on January 15, 2017.\n\nIn JavaScript, one can convert a Date object to this format using the\nstandard [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString]\nmethod. In Python, a standard `datetime.datetime` object can be converted\nto this format using [`strftime`](https://docs.python.org/2/library/time.html#time.strftime)\nwith the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one\ncan use the Joda Time's [`ISODateTimeFormat.dateTime()`](\nhttp://www.joda.org/joda-time/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime--)\nto obtain a formatter capable of generating timestamps in this format.",
       "type": "object",
       "title": "A Timestamp represents a point in time independent of any time zone\nor calendar, represented as seconds and fractions of seconds at\nnanosecond resolution in UTC Epoch time. It is encoded using the\nProleptic Gregorian Calendar which extends the Gregorian calendar\nbackwards to year one. It is encoded assuming all minutes are 60\nseconds long, i.e. leap seconds are \"smeared\" so that no leap second\ntable is needed for interpretation. Range is from\n0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z.\nBy restricting to that range, we ensure that we can convert to\nand from  RFC 3339 date strings.\nSee [https://www.ietf.org/rfc/rfc3339.txt](https://www.ietf.org/rfc/rfc3339.txt).",
       "properties": {
@@ -3022,7 +3055,7 @@
           "x-go-name": "Image"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UpdateNamespaceName": {
       "description": "UpdateNamespaceName -- contains new namespace label",
@@ -3036,7 +3069,7 @@
           "x-go-name": "Label"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UpdateReplicas": {
       "description": "UpdateReplicas -- contains new number of replicas",
@@ -3051,7 +3084,7 @@
           "x-go-name": "Replicas"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UpdateStorageRequest": {
       "description": "UpdateStorageRequest represents request object for updating storage",
@@ -3081,6 +3114,92 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
+    "User": {
+      "description": "User -- user model",
+      "type": "object",
+      "properties": {
+        "access": {
+          "type": "string",
+          "x-go-name": "Access"
+        },
+        "accounts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Accounts"
+        },
+        "blacklisted_at": {
+          "type": "string",
+          "x-go-name": "BlacklistedAt"
+        },
+        "created_at": {
+          "type": "string",
+          "x-go-name": "CreatedAt"
+        },
+        "data": {
+          "$ref": "#/definitions/UserData"
+        },
+        "deleted_at": {
+          "type": "string",
+          "x-go-name": "DeletedAt"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "is_active": {
+          "type": "boolean",
+          "x-go-name": "IsActive"
+        },
+        "is_deleted": {
+          "type": "boolean",
+          "x-go-name": "IsDeleted"
+        },
+        "is_in_blacklist": {
+          "type": "boolean",
+          "x-go-name": "IsInBlacklist"
+        },
+        "login": {
+          "type": "string",
+          "x-go-name": "Login"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "referral": {
+          "type": "string",
+          "x-go-name": "Referral"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "UserAccess": {
+      "type": "object",
+      "properties": {
+        "access_level": {
+          "$ref": "#/definitions/AccessLevel"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "UserData": {
+      "description": "UserData -- user profile data",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
     "UserHeaderData": {
       "description": "represents header data for X-User-Namespace and X-User-Volume headers (encoded in base64)",
       "type": "object",
@@ -3091,9 +3210,7 @@
       ],
       "properties": {
         "access": {
-          "description": "one of: \"owner\", \"read\", \"write\", \"read-delete\", \"none\"",
-          "type": "string",
-          "x-go-name": "Access"
+          "$ref": "#/definitions/AccessLevel"
         },
         "id": {
           "description": "hosting-internal name",
@@ -3106,69 +3223,146 @@
           "x-go-name": "Label"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "UserList": {
+      "description": "UserList -- users list",
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/User"
+          },
+          "x-go-name": "Users"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "UserLogin": {
+      "description": "UserList -- model for user login, password and id",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "login": {
+          "type": "string",
+          "x-go-name": "Login"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "UserSolution": {
+      "description": "UserSolution -- running solution",
+      "type": "object",
+      "required": [
+        "template",
+        "name",
+        "namespace"
+      ],
+      "properties": {
+        "branch": {
+          "type": "string",
+          "x-go-name": "Branch"
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Env"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "namespace": {
+          "type": "string",
+          "x-go-name": "Namespace"
+        },
+        "template": {
+          "type": "string",
+          "x-go-name": "Template"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "UserSolutionsList": {
+      "description": "UserSolutionsList -- list of running solution",
+      "type": "object",
+      "properties": {
+        "solutions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserSolution"
+          },
+          "x-go-name": "Solutions"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Volume": {
-      "description": "Volume -- volume representation\nprovided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
+      "description": "Volume -- volume representation",
       "type": "object",
       "properties": {
         "access": {
-          "type": "string",
-          "x-go-name": "Access"
+          "$ref": "#/definitions/AccessLevel"
         },
-        "access_change_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "AccessChangeTime"
+        "access_mode": {
+          "$ref": "#/definitions/PersistentVolumeAccessMode"
         },
-        "create_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "CreateTime"
-        },
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        },
-        "replicas": {
+        "capacity": {
           "type": "integer",
-          "format": "int64",
-          "x-go-name": "Replicas"
+          "format": "uint64",
+          "x-go-name": "Capacity"
         },
-        "storage": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Storage"
+        "created_at": {
+          "type": "string",
+          "x-go-name": "CreatedAt"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "owner": {
+          "type": "string",
+          "x-go-name": "Owner"
+        },
+        "owner_login": {
+          "type": "string",
+          "x-go-name": "OwnerLogin"
+        },
+        "storage_name": {
+          "type": "string",
+          "x-go-name": "StorageName"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserAccess"
+          },
+          "x-go-name": "Users"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/kube-client/pkg/model"
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Volume"
     },
     "VolumeCreateRequest": {
       "description": "VolumeCreateRequest is a request object for creating volume",
-      "type": "object",
-      "properties": {
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        },
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+      "$ref": "#/definitions/CreateVolume"
     },
     "VolumeRenameRequest": {
       "description": "VolumeRenameRequest is a request object for renaming volume",
-      "type": "object",
-      "properties": {
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+      "$ref": "#/definitions/ResourceUpdateName"
     },
     "VolumeResizeRequest": {
       "description": "VolumeResizeRequest contains parameters for changing volume size",
@@ -3233,17 +3427,11 @@
       "description": "VolumeWithPermissions is a response object for get requests",
       "type": "object",
       "properties": {
-        "access": {
-          "$ref": "#/definitions/AccessLevel"
+        "Permission": {
+          "$ref": "#/definitions/Permission"
         },
-        "access_level_change_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "AccessLevelChangeTime"
-        },
-        "active": {
-          "type": "boolean",
-          "x-go-name": "Active"
+        "access_mode": {
+          "$ref": "#/definitions/PersistentVolumeAccessMode"
         },
         "capacity": {
           "type": "integer",
@@ -3273,25 +3461,14 @@
           "format": "uuid",
           "x-go-name": "ID"
         },
-        "kind": {
-          "$ref": "#/definitions/ResourceType"
-        },
         "label": {
           "type": "string",
           "x-go-name": "Label"
-        },
-        "login": {
-          "type": "string",
-          "format": "email",
-          "x-go-name": "UserLogin"
         },
         "namespace_id": {
           "type": "string",
           "format": "uuid",
           "x-go-name": "NamespaceID"
-        },
-        "new_access_level": {
-          "$ref": "#/definitions/AccessLevel"
         },
         "owner_user_id": {
           "type": "string",
@@ -3303,35 +3480,19 @@
           "format": "email",
           "x-go-name": "OwnerUserLogin"
         },
-        "perm_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "replicas": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Replicas"
-        },
-        "resource_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ResourceID"
-        },
         "storage_id": {
           "type": "string",
           "format": "uuid",
           "x-go-name": "StorageID"
         },
+        "storage_name": {
+          "type": "string",
+          "x-go-name": "StorageName"
+        },
         "tariff_id": {
           "type": "string",
           "format": "uuid",
           "x-go-name": "TariffID"
-        },
-        "user_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "UserID"
         },
         "users": {
           "type": "array",
@@ -3341,8 +3502,21 @@
           "x-go-name": "Permissions"
         }
       },
-      "x-go-name": "VolumeWithPermissionsJSON",
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+    },
+    "VolumesList": {
+      "description": "VolumesList -- model for volumes list",
+      "type": "object",
+      "properties": {
+        "volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Volume"
+          },
+          "x-go-name": "Volumes"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "authClient": {
       "type": "object",
