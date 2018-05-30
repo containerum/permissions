@@ -306,7 +306,6 @@ func (dao *DAO) DeleteNamespaceVolumes(ctx context.Context, namespace model.Name
 	_, err = dao.db.Model(&deleted).
 		Where("ns_id = ?", namespace.ID).
 		Where("NOT deleted").
-		Set("active = FALSE").
 		Set("deleted = TRUE").
 		Set("delete_time = now()").
 		Returning("*").
@@ -347,7 +346,6 @@ func (dao *DAO) DeleteAllUserNamespaceVolumes(ctx context.Context, userID string
 	_, err = dao.db.Model(&deleted).
 		Where("owner_user_id = ?", userID).
 		Where("NOT deleted").
-		Set("active = FALSE").
 		Set("deleted = TRUE").
 		Set("delete_time = now()").
 		Returning("*").

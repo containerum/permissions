@@ -243,7 +243,6 @@ func (dao *DAO) ResizeVolume(ctx context.Context, vol model.Volume) error {
 	result, err := dao.db.Model(&vol).
 		WherePK().
 		Set("capacity = ?capacity").
-		Set("replicas = ?replicas").
 		Set("tariff_id = ?tariff_id").
 		Update()
 	if err != nil {
@@ -261,7 +260,6 @@ func (dao *DAO) DeleteVolume(ctx context.Context, vol *model.Volume) error {
 
 	result, err := dao.db.Model(vol).
 		WherePK().
-		Set("active = FALSE").
 		Set("deleted = TRUE").
 		Set("delete_time = now()").
 		Returning("*").
@@ -286,7 +284,6 @@ func (dao *DAO) DeleteAllVolumes(ctx context.Context, userID string) (deletedVol
 		Where("owner_user_id = ?", userID).
 		Where("ns_id IS NULL").
 		Where("NOT deleted").
-		Set("active = FALSE").
 		Set("deleted = TRUE").
 		Set("delete_time = now()").
 		Returning("*").
