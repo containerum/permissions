@@ -179,14 +179,13 @@ func (dao *DAO) UserVolumes(ctx context.Context, userID string, filter VolumeFil
 	return
 }
 
-func (dao *DAO) AllVolumes(ctx context.Context, filter VolumeFilter) (ret []model.VolumeWithPermissions, err error) {
+func (dao *DAO) AllVolumes(ctx context.Context, filter VolumeFilter) (ret []model.Volume, err error) {
 	dao.log.WithField("fields", filter).Debugf("get all volumes")
 
-	ret = make([]model.VolumeWithPermissions, 0)
+	ret = make([]model.Volume, 0)
 
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("Permission").
 		Apply(filter.Filter).
 		Select()
 	switch err {

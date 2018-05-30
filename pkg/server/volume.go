@@ -158,8 +158,7 @@ func (s *Server) GetAllVolumes(ctx context.Context, page, perPage int, filters .
 	ret := make([]kubeClientModel.Volume, len(vols))
 	for i := range vols {
 		AddOwnerLogin(ctx, &vols[i].Resource, s.clients.User)
-		AddUserLogins(ctx, vols[i].Permissions, s.clients.User)
-		ret[i] = vols[i].ToKube()
+		ret[i] = (&model.VolumeWithPermissions{Volume: vols[i]}).ToKube()
 	}
 
 	return ret, nil
