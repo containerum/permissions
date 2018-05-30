@@ -8,8 +8,7 @@ import (
 func init() {
 	migrations.Register(func(db migrations.DB) error {
 		_, err := db.Model(&model.Volume{}).Exec( /* language=sql */
-			`UPDATE "?TableName" 
-			SET "ns_id" = '00000000-0000-0000-0000-000000000000'
+			`DELETE FROM "?TableName" 
 			WHERE "ns_id" IS NULL;
 		ALTER TABLE "?TableName" 
 			DROP COLUMN IF EXISTS "replicas",
@@ -23,10 +22,7 @@ func init() {
 				ADD COLUMN IF NOT EXISTS "replicas" INTEGER,
 				ADD COLUMN IF NOT EXISTS "active" BOOLEAN,
 				ALTER COLUMN "ns_id" DROP NOT NULL,
-				DROP COLUMN IF EXISTS "access_mode";
-			UPDATE "?TableName"
-				SET "ns_id" = NULL
-				WHERE "ns_id" = '00000000-0000-0000-0000-000000000000'`)
+				DROP COLUMN IF EXISTS "access_mode"`)
 		return err
 	})
 }
