@@ -193,14 +193,14 @@ func (dao *DAO) UserNamespaces(ctx context.Context, userID string, filter Namesp
 	return
 }
 
-func (dao *DAO) AllNamespaces(ctx context.Context, filter NamespaceFilter) (ret []model.NamespaceWithPermissions, err error) {
+func (dao *DAO) AllNamespaces(ctx context.Context, filter NamespaceFilter) (ret []model.Namespace, err error) {
 	dao.log.Debugf("get all namespaces")
 
-	ret = make([]model.NamespaceWithPermissions, 0)
+	ret = make([]model.Namespace, 0)
 
 	err = dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("Volumes", "Permission").
+		Column("Volumes").
 		Relation("Volumes").
 		Apply(filter.Filter).
 		Select()

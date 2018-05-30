@@ -198,8 +198,7 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 	ret := make([]kubeClientModel.Namespace, len(namespaces))
 	for i := range namespaces {
 		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
-		AddUserLogins(ctx, namespaces[i].Permissions, s.clients.User)
-		ret[i] = namespaces[i].ToKube()
+		ret[i] = (&model.NamespaceWithPermissions{Namespace: namespaces[i]}).ToKube()
 		NamespaceAddUsage(ctx, &ret[i], s.clients.Kube)
 	}
 
