@@ -1,9 +1,0 @@
-env:
-  MODE: debug
-  LOG_LEVEL: 5
-  DB_URL: "postgres://permissions:vTsnHHnI@postgres-master.postgres.svc:5432/permissions?sslmode=disable"
-  LISTEN_ADDR: ":4242"
-  AUTH_ADDR: "ch-auth:1112"
-  USER_ADDR: "user-manager:8111"
-  KUBE_API_ADDR: "kube-api:1214"
-  BILLING_ADDR: "billing-manager:5000"
