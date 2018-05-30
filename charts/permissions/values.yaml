@@ -15,19 +15,25 @@ service:
   externalIP:
 
 env:
-  MODE: "release"
-  LOG_LEVEL: 4
-  DB_URL: 
-  LISTEN_ADDR: ":4242"
-  AUTH_ADDR: "ch-auth:1112"
-  USER_ADDR: "user-manager:8111"
-  KUBE_API_ADDR: "kube-api:1214"
-  RESOURCE_SERVICE_ADDR: "resource-service:1213"
-  BILLING_ADDR: "billing-manager:5000"
+  global:
+    MODE: "release"
+    LOG_LEVEL: 4
+    LISTEN_ADDR: ":4242"
+    DB_BASE: "permissions"
+    DB_USER: "permissions"
+    DB_SSLMODE: "false"
+  local:
+    DB_PASSWORD: "vTsnHHnI"
+    DB_HOST: "postgres:5432"
+    AUTH_ADDR: "ch-auth:1112"
+    USER_ADDR: "user-manager:8111"
+    KUBE_API_ADDR: "kube-api:1214"
+    RESOURCE_SERVICE_ADDR: "resource-service:1213"
+    BILLING_ADDR: "billing-manager:5000"
 
 postgresql:
   persistence:
     enabled: false
-  postgresUser: user
-  postgresDatabase: user
-  postgresPassword: password
+  postgresDatabase: permissions
+  # postgresUser: postgres
+  # postgresPassword: password
