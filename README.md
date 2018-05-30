@@ -5,7 +5,7 @@
 ### Using Helm
 
 ```
-  helm repo add containerum https://containerum.github.io/permissions/charts
+  helm repo add containerum https://charts.containerum.io
   helm repo update
   helm install containerum/permissions
 ```
