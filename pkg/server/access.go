@@ -6,6 +6,7 @@ import (
 	"git.containerum.net/ch/auth/proto"
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/dao"
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
@@ -105,6 +106,10 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, 
 			return getErr
 		}
 
+		if targetUserInfo.ID == ns.OwnerUserID {
+			return errors.ErrSetOwnerAccess()
+		}
+
 		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
 			return chkErr
 		}
@@ -163,6 +168,10 @@ func (s *Server) SetVolumeAccess(ctx context.Context, id, targetUser string, acc
 		vol, getErr := tx.VolumeByID(ctx, ownerID, id)
 		if getErr != nil {
 			return getErr
+		}
+
+		if targetUserInfo.ID == vol.OwnerUserID {
+			return errors.ErrSetOwnerAccess()
 		}
 
 		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
