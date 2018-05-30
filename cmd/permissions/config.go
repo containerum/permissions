@@ -50,7 +50,17 @@ func setupLogger(ctx *cli.Context) error {
 }
 
 func setupDB(ctx *cli.Context) (*dao.DAO, error) {
-	return dao.SetupDAO(ctx.String(DBAddrFlag.Name))
+	return dao.SetupDAO(fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+		ctx.String(DBUserFlag.Name),
+		ctx.String(DBPassFlag.Name),
+		ctx.String(DBHostFlag.Name),
+		ctx.String(DBBaseFlag.Name),
+		func() string {
+			if ctx.Bool(DBSSLModeFlag.Name) {
+				return "enable"
+			}
+			return "disable"
+		}()))
 }
 
 func getListenAddr(ctx *cli.Context) (string, error) {

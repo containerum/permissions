@@ -18,10 +18,33 @@ var (
 		Value:   int(logrus.InfoLevel),
 	}
 
-	DBAddrFlag = cli.StringFlag{
-		Name:    "db_url",
-		EnvVars: []string{"DB_URL"},
-		Value:   "postgres://postgres@localhost:5432/postgres?sslmode=disabled",
+	DBUserFlag = cli.StringFlag{
+		Name:    "db_user",
+		EnvVars: []string{"DB_USER"},
+		Value:   "postgres",
+	}
+
+	DBPassFlag = cli.StringFlag{
+		Name:    "db_pass",
+		EnvVars: []string{"DB_PASSWORD"},
+		Value:   "postgres",
+	}
+
+	DBHostFlag = cli.StringFlag{
+		Name:    "db_host",
+		EnvVars: []string{"DB_HOST"},
+		Value:   "localhost:5432",
+	}
+
+	DBBaseFlag = cli.StringFlag{
+		Name:    "db_base",
+		EnvVars: []string{"DB_BASE"},
+		Value:   "permissions",
+	}
+
+	DBSSLModeFlag = cli.BoolFlag{
+		Name:    "db_sslmode",
+		EnvVars: []string{"DB_SSLMODE"},
 	}
 
 	ListenAddrFlag = cli.StringFlag{
