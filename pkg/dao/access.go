@@ -20,14 +20,12 @@ func (dao *DAO) UserAccesses(ctx context.Context, userID string) ([]AccessWithLa
 	var ret []AccessWithLabel
 	err := dao.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		ColumnExpr("coalesce(ns.label, vol.label) AS label").
+		ColumnExpr("ns.label AS label").
 		Join("LEFT JOIN namespaces AS ns").JoinOn("?TableAlias.resource_id = ns.id").JoinOn("?TableAlias.resource_type = ?", model.ResourceNamespace).
-		Join("LEFT JOIN volumes AS vol").JoinOn("?TableAlias.resource_id = vol.id").JoinOn("?TableAlias.resource_type = ?", model.ResourceVolume).
 		Where("?TableAlias.user_id = ?", userID).
 		WhereGroup(func(query *orm.Query) (*orm.Query, error) {
 			return query.
-				Where("ns.label IS NOT NULL").
-				WhereOr("vol.label IS NOT NULL"), nil
+				Where("ns.label IS NOT NULL"), nil
 		}).
 		Select()
 	if err != nil {
@@ -83,18 +81,6 @@ func (dao *DAO) SetNamespaceAccess(ctx context.Context, ns model.Namespace, acce
 	})
 }
 
-func (dao *DAO) SetVolumeAccess(ctx context.Context, vol model.Volume, accessLevel kubeClientModel.AccessLevel, toUserID string) error {
-	dao.log.WithField("vol_id", vol.ID).Debugf("set volume access %s to %s", accessLevel, toUserID)
-
-	return dao.setResourceAccess(ctx, model.Permission{
-		ResourceType:       model.ResourceVolume,
-		ResourceID:         vol.ID,
-		UserID:             toUserID,
-		InitialAccessLevel: accessLevel,
-		CurrentAccessLevel: accessLevel,
-	})
-}
-
 func (dao *DAO) deleteResourceAccess(ctx context.Context, resource model.Resource, kind model.ResourceType, userID string) error {
 	_, err := dao.db.Model(&model.Permission{UserID: userID, ResourceID: resource.ID, ResourceType: kind}).
 		Where("user_id = ?user_id").
@@ -114,10 +100,4 @@ func (dao *DAO) DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, u
 	dao.log.WithField("ns_id", ns.ID).Debugf("delete namespace access to user %s", userID)
 
 	return dao.deleteResourceAccess(ctx, ns.Resource, model.ResourceNamespace, userID)
-}
-
-func (dao *DAO) DeleteVolumeAccess(ctx context.Context, vol model.Volume, userID string) error {
-	dao.log.WithField("vol_id", vol.ID).Debugf("delete volume access to user %s", userID)
-
-	return dao.deleteResourceAccess(ctx, vol.Resource, model.ResourceVolume, userID)
 }

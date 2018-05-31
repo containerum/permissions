@@ -55,21 +55,6 @@ func (ah *accessHandlers) setNamespaceAccessHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (ah *accessHandlers) setVolumeAccessHandler(ctx *gin.Context) {
-	var req model.SetUserAccessRequest
-	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
-		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
-		return
-	}
-
-	if err := ah.acts.SetVolumeAccess(ctx.Request.Context(), ctx.Param("id"), req.Username, req.Access); err != nil {
-		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
-		return
-	}
-
-	ctx.Status(http.StatusOK)
-}
-
 func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
 	var req model.DeleteUserAccessRequest
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
@@ -85,34 +70,8 @@ func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (ah *accessHandlers) deleteVolumeAccessHandler(ctx *gin.Context) {
-	var req model.DeleteUserAccessRequest
-	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
-		ctx.AbortWithStatusJSON(ah.tv.BadRequest(ctx, err))
-		return
-	}
-
-	if err := ah.acts.DeleteVolumeAccess(ctx.Request.Context(), ctx.Param("id"), req.UserName); err != nil {
-		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
-		return
-	}
-
-	ctx.Status(http.StatusOK)
-}
-
 func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
 	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"))
-	if err != nil {
-		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
-		return
-	}
-
-	httputil.MaskForNonAdmin(ctx, &ret)
-	ctx.JSON(http.StatusOK, ret)
-}
-
-func (ah *accessHandlers) getVolumeAccessHandler(ctx *gin.Context) {
-	ret, err := ah.acts.GetVolumeAccess(ctx.Request.Context(), ctx.Param("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
@@ -186,31 +145,6 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	   $ref: '#/responses/error'
 	r.engine.PUT("/namespaces/:id/access", handlers.setNamespaceAccessHandler)
 
-	// swagger:operation PUT /volumes/{id}/access Permissions SetVolumeAccess
-	//
-	// Grant volume permission to user.
-	//
-	// ---
-	// parameters:
-	//  - $ref: '#/parameters/UserIDHeader'
-	//  - $ref: '#/parameters/UserRoleHeader'
-	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: body
-	//    in: body
-	//    required: true
-	//    schema:
-	//      $ref: "#/definitions/SetResourceAccessRequest"
-	//  - name: id
-	//    in: path
-	//    required: true
-	//    description: Volume ID
-	// responses:
-	//	 '200':
-	//	   description: access set
-	//	 default:
-	//	   $ref: '#/responses/error'
-	r.engine.PUT("/volumes/:id/access", handlers.setVolumeAccessHandler)
-
 	// swagger:operation DELETE /namespaces/{id}/access Permissions DeleteNamespaceAccess
 	//
 	// Delete namespace permission to user.
@@ -233,28 +167,6 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	   $ref: '#/responses/error'
 	r.engine.DELETE("/namespaces/:id/access", handlers.deleteNamespaceAccessHandler)
 
-	// swagger:operation DELETE /volumes/{id}/access Permissions DeleteVolumeAccess
-	//
-	// Delete volume permission to user.
-	//
-	// ---
-	// parameters:
-	//  - $ref: '#/parameters/UserIDHeader'
-	//  - $ref: '#/parameters/UserRoleHeader'
-	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: body
-	//    in: body
-	//    required: true
-	//    schema:
-	//      $ref: "#/definitions/DeleteResourceAccessRequest"
-	//  - $ref: '#/parameters/ResourceID'
-	// responses:
-	//	 '200':
-	//	   description: access deleted
-	//	 default:
-	//	   $ref: '#/responses/error'
-	r.engine.DELETE("/volumes/:id/accesses", handlers.deleteVolumeAccessHandler)
-
 	// swagger:operation GET /namespaces/{id}/accesses Permissions GetNamespaceWithPermissions
 	//
 	// Get namespace with user permissions.
@@ -273,23 +185,4 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/namespaces/:id/accesses", handlers.getNamespaceAccessHandler)
-
-	// swagger:operation GET /volumes/{id}/accesses Permissions GetVolumeWithPermissions
-	//
-	// Get volume with user permissions.
-	//
-	// ---
-	// parameters:
-	//  - $ref: '#/parameters/UserIDHeader'
-	//  - $ref: '#/parameters/UserRoleHeader'
-	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - $ref: '#/parameters/ResourceID'
-	// responses:
-	//   '200':
-	//     description: volume response
-	//     schema:
-	//       $ref: '#/definitions/Volume'
-	//   default:
-	//     $ref: '#/responses/error'
-	r.engine.GET("/volumes/:id/accesses", handlers.getVolumeAccessHandler)
 }

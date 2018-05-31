@@ -18,10 +18,7 @@ type AccessActions interface {
 	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.AccessLevel) error
 	GetNamespaceAccess(ctx context.Context, id string) (kubeClientModel.Namespace, error)
 	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error
-	GetVolumeAccess(ctx context.Context, id string) (model.VolumeWithPermissions, error)
-	SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error
 	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
-	DeleteVolumeAccess(ctx context.Context, id string, targetUser string) error
 }
 
 func extractAccessesFromDB(ctx context.Context, db *dao.DAO, userID string) (*authProto.ResourcesAccess, error) {
@@ -150,67 +147,6 @@ func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (kubeClientM
 	return ns.ToKube(), nil
 }
 
-func (s *Server) SetVolumeAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error {
-	ownerID := httputil.MustGetUserID(ctx)
-	s.log.WithFields(logrus.Fields{
-		"owner_id":     ownerID,
-		"target_user":  targetUser,
-		"id":           id,
-		"access_level": accessLevel,
-	}).Debugf("set volume access")
-
-	err := s.db.Transactional(func(tx *dao.DAO) error {
-		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
-		if err != nil {
-			return err
-		}
-
-		vol, getErr := tx.VolumeByID(ctx, ownerID, id)
-		if getErr != nil {
-			return getErr
-		}
-
-		if targetUserInfo.ID == vol.OwnerUserID {
-			return errors.ErrSetOwnerAccess()
-		}
-
-		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
-			return chkErr
-		}
-
-		if setErr := tx.SetVolumeAccess(ctx, vol.Volume, accessLevel, targetUserInfo.ID); setErr != nil {
-			return setErr
-		}
-
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, targetUserInfo.ID); updErr != nil {
-			return updErr
-		}
-
-		return nil
-	})
-
-	return err
-}
-
-func (s *Server) GetVolumeAccess(ctx context.Context, id string) (model.VolumeWithPermissions, error) {
-	userID := httputil.MustGetUserID(ctx)
-	s.log.WithFields(logrus.Fields{
-		"user_id": userID,
-		"id":      id,
-	}).Infof("get volume access")
-
-	vol, err := s.db.VolumeByID(ctx, userID, id)
-	if err != nil {
-		return model.VolumeWithPermissions{}, err
-	}
-	err = s.db.VolumePermissions(ctx, &vol)
-
-	AddOwnerLogin(ctx, &vol.Resource, s.clients.User)
-	AddUserLogins(ctx, vol.Permissions, s.clients.User)
-
-	return vol, err
-}
-
 func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
@@ -235,43 +171,6 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUse
 		}
 
 		if delErr := tx.DeleteNamespaceAccess(ctx, ns.Namespace, targetUserInfo.ID); delErr != nil {
-			return delErr
-		}
-
-		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, targetUserInfo.ID); updErr != nil {
-			return updErr
-		}
-
-		return nil
-	})
-
-	return err
-}
-
-func (s *Server) DeleteVolumeAccess(ctx context.Context, id string, targetUser string) error {
-	ownerID := httputil.MustGetUserID(ctx)
-	s.log.WithFields(logrus.Fields{
-		"owner_id":    ownerID,
-		"id":          id,
-		"target_user": targetUser,
-	}).Debugf("delete volume access")
-
-	err := s.db.Transactional(func(tx *dao.DAO) error {
-		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
-		if err != nil {
-			return err
-		}
-
-		vol, getErr := tx.VolumeByID(ctx, ownerID, id)
-		if getErr != nil {
-			return getErr
-		}
-
-		if chkErr := OwnerCheck(ctx, vol.Resource); chkErr != nil {
-			return chkErr
-		}
-
-		if delErr := tx.DeleteVolumeAccess(ctx, vol.Volume, targetUserInfo.ID); delErr != nil {
 			return delErr
 		}
 

@@ -6,7 +6,6 @@ import (
 	"git.containerum.net/ch/permissions/pkg/dao"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
-	billing "github.com/containerum/bill-external/models"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
@@ -75,31 +74,6 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 
 		if createErr := tx.CreateNamespace(ctx, &ns.Namespace); createErr != nil {
 			return createErr
-		}
-
-		if tariff.VolumeSize > 0 {
-			storage, getErr := tx.LeastUsedStorage(ctx, tariff.VolumeSize)
-			if getErr != nil {
-				return getErr
-			}
-
-			vol := model.Volume{
-				Resource: model.Resource{
-					OwnerUserID: userID,
-					Label:       NamespaceVolumeGlusterLabel(ns.Label),
-				},
-				Capacity:    tariff.VolumeSize,
-				NamespaceID: ns.ID,
-				GlusterName: VolumeGlusterName(ns.Label, userID),
-				StorageID:   storage.ID,
-			}
-
-			createErr := tx.CreateVolume(ctx, &vol)
-			if createErr != nil {
-				return createErr
-			}
-
-			// TODO: create it actually
 		}
 
 		if createErr := s.clients.Kube.CreateNamespace(ctx, ns.ToKube()); createErr != nil {
@@ -363,14 +337,6 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			return chkErr
 		}
 
-		var oldTariff billing.NamespaceTariff
-		if ns.TariffID != nil {
-			oldTariff, getErr = s.clients.Billing.GetNamespaceTariff(ctx, *ns.TariffID)
-			if getErr != nil {
-				return getErr
-			}
-		}
-
 		ns.TariffID = &newTariff.ID
 		ns.MaxIntServices = newTariff.ExternalServices
 		ns.MaxIntServices = newTariff.InternalServices
@@ -391,36 +357,6 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 
 		if resizeErr := tx.ResizeNamespace(ctx, ns.Namespace); resizeErr != nil {
 			return resizeErr
-		}
-
-		if oldTariff.VolumeSize == 0 && newTariff.VolumeSize > 0 {
-			storage, getErr := tx.LeastUsedStorage(ctx, newTariff.VolumeSize)
-			if getErr != nil {
-				return getErr
-			}
-
-			vol := model.Volume{
-				Resource: model.Resource{
-					OwnerUserID: userID,
-					Label:       NamespaceVolumeGlusterLabel(ns.Label),
-				},
-				Capacity:    newTariff.VolumeSize,
-				NamespaceID: ns.ID,
-				GlusterName: VolumeGlusterName(ns.Label, userID),
-				StorageID:   storage.ID,
-			}
-
-			createErr := tx.CreateVolume(ctx, &vol)
-			if createErr != nil {
-				return createErr
-			}
-		}
-
-		if oldTariff.VolumeSize > 0 && newTariff.VolumeSize == 0 {
-			_, delErr := tx.DeleteNamespaceVolumes(ctx, ns.Namespace)
-			if delErr != nil {
-				return delErr
-			}
 		}
 
 		if resizeErr := s.clients.Kube.SetNamespaceQuota(ctx, ns.ToKube()); resizeErr != nil {
