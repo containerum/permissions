@@ -7,7 +7,7 @@ import (
 
 // Storage describes volumes storage
 //
-// swagger:model
+// swagger:ignore
 type Storage struct {
 	tableName struct{} `sql:"storages"`
 
@@ -61,7 +61,7 @@ func (s *Storage) BeforeDelete(db orm.DB) error {
 
 // UpdateStorageRequest represents request object for updating storage
 //
-// swagger:model
+// swagger:ignore
 type UpdateStorageRequest struct {
 	Name     *string  `json:"name,omitempty"`
 	Size     *int     `json:"size,omitempty"`

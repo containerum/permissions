@@ -11,7 +11,7 @@ import (
 
 // Volume describes volume
 //
-// swagger:model
+// swagger:ignore
 type Volume struct {
 	tableName struct{} `sql:"volumes"`
 
@@ -102,7 +102,7 @@ func (v *Volume) Mask() {
 
 // VolumeWithPermissions is a response object for get requests
 //
-// swagger:model VolumeWithPermissions
+// swagger:ignore
 type VolumeWithPermissions struct {
 	Volume `pg:",override"`
 
@@ -144,17 +144,17 @@ func (vp *VolumeWithPermissions) Mask() {
 
 // VolumeCreateRequest is a request object for creating volume
 //
-// swagger:model
+// swagger:ignore
 type VolumeCreateRequest = model.CreateVolume
 
 // VolumeRenameRequest is a request object for renaming volume
 //
-// swagger:model
+// swagger:ignore
 type VolumeRenameRequest = model.ResourceUpdateName
 
 // VolumeResizeRequest contains parameters for changing volume size
 //
-// swagger:model
+// swagger:ignore
 type VolumeResizeRequest struct {
 	// swagger:strfmt uuid
 	TariffID string `json:"tariff_id" binding:"required,uuid"`
