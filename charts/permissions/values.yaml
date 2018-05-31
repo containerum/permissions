@@ -1,5 +1,6 @@
 tags:
   db: true
+  platformdb: false
 
 replicaCount: 1
 
@@ -23,13 +24,13 @@ env:
     DB_USER: "permissions"
     DB_SSLMODE: "false"
   local:
-    DB_PASSWORD: "vTsnHHnI"
-    DB_HOST: "postgres:5432"
+    DB_HOST: "postgres-master.postgres.svc.cluster.local:5432"
     AUTH_ADDR: "ch-auth:1112"
     USER_ADDR: "user-manager:8111"
     KUBE_API_ADDR: "kube-api:1214"
     RESOURCE_SERVICE_ADDR: "resource-service:1213"
     BILLING_ADDR: "billing-manager:5000"
+    DB_PASSWORD:
 
 postgresql:
   persistence:

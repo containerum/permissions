@@ -34,21 +34,13 @@ spec:
               value: {{ $val | quote }}
             {{ end }}
             {{- end }}
-            - name: DB_PASSWORD
-            {{- if .Values.env.local.DB_PASSWORD }}
-              value: {{ .Values.env.local.DB_PASSWORD }}
-            {{- else }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}-postgresql
-                  key: postgres-password
-            {{- end }}
+
             {{- if .Values.env.local.DB_HOST }}
             - name: DB_HOST
               value: "{{ .Values.env.local.DB_HOST }}"
             {{- else }}
             - name: DB_HOST
-              value: "{{ .Release.Name }}-postgres:5432"
+              value: "{{ .Release.Name }}-postgresl:5432"
             {{- end }}
 
             {{- if .Values.env.local.AUTH_ADDR }}
@@ -82,8 +74,22 @@ spec:
             - name: RESOURCE_SERVICE_ADDR
               value: "{{ .Release.Name }}-resource:1213"
             {{- end }}
-            
+
             {{- if .Values.env.local.BILLING_ADDR }}
             - name: BILLING_ADDR
               value: "{{ .Values.env.local.BILLING_ADDR }}"
+            {{- end }}
+
+            {{- if .Values.env.local.DB_PASSWORD }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: pg-password
+            {{- else if .Values.tags.platformdb }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql
+                  key: postgres-password
             {{- end }}
