@@ -2,9 +2,6 @@ package server
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
 
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -32,16 +29,6 @@ func CheckTariff(tariff billing.Tariff, isAdmin bool) error {
 	}
 
 	return nil
-}
-
-func NamespaceVolumeGlusterLabel(nsLabel string) string {
-	return fmt.Sprintf("%s-volume", nsLabel)
-}
-
-// VolumeGlusterName generates volume name for glusterfs (non-persistent volumes)
-func VolumeGlusterName(nsLabel, userID string) string {
-	glusterName := sha256.Sum256([]byte(fmt.Sprintf("%s-volume%s", nsLabel, userID)))
-	return hex.EncodeToString(glusterName[:])
 }
 
 func OwnerCheck(ctx context.Context, resource model.Resource) error {

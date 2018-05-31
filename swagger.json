@@ -109,9 +109,14 @@
           "200": {
             "description": "namespaces response",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Namespace"
+              "type": "object",
+              "properties": {
+                "namespaces": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Namespace"
+                  }
+                }
               }
             }
           },
@@ -220,75 +225,6 @@
         }
       }
     },
-    "/admin/volumes": {
-      "get": {
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Get all volumes (admin only).",
-        "operationId": "GetAllVolumes",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "$ref": "#/parameters/Filters"
-          },
-          {
-            "$ref": "#/parameters/PageNum"
-          },
-          {
-            "$ref": "#/parameters/PerPageLimit"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volumes response",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Volume"
-              }
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Delete all user volumes (admin only).",
-        "operationId": "DeleteAllUserVolumes",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volumes deleted"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
     "/namespaces": {
       "get": {
         "tags": [
@@ -314,9 +250,14 @@
           "200": {
             "description": "namespaces response",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Namespace"
+              "type": "object",
+              "properties": {
+                "namespaces": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Namespace"
+                  }
+                }
               }
             }
           },
@@ -602,472 +543,6 @@
         "responses": {
           "200": {
             "description": "namespace renamed"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/storages": {
-      "get": {
-        "tags": [
-          "Storages"
-        ],
-        "summary": "Get storage list.",
-        "operationId": "GetStorages",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "storages list",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Storage"
-              }
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Storages"
-        ],
-        "summary": "Create storage.",
-        "operationId": "CreateStorage",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Storage"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "storage created"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/storages/{name}": {
-      "put": {
-        "tags": [
-          "Storages"
-        ],
-        "summary": "Update storage.",
-        "operationId": "UpdateStorage",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateStorageRequest"
-            }
-          },
-          {
-            "type": "string",
-            "name": "name",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "storage updated"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Storages"
-        ],
-        "summary": "Delete storage.",
-        "operationId": "DeleteStorage",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "type": "string",
-            "name": "name",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "storage deleted"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/volumes": {
-      "get": {
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Get user volumes.",
-        "operationId": "GetUserVolumes",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "$ref": "#/parameters/Filters"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volumes response",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Volume"
-              }
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      },
-      "post": {
-        "description": "Should be chosen first storage, where free space allows to create volume with provided capacity.",
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Create Volume for User by Tariff.",
-        "operationId": "CreateVolume",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/VolumeCreateRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "volume created"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/volumes/{id}": {
-      "get": {
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Get volume.",
-        "operationId": "GetVolume",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "$ref": "#/parameters/ResourceID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volume response",
-            "schema": {
-              "$ref": "#/definitions/Volume"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Resize volume.",
-        "operationId": "ResizeVolume",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/VolumeResizeRequest"
-            }
-          },
-          {
-            "$ref": "#/parameters/ResourceID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volume resized"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Delete volume.",
-        "operationId": "DeleteVolume",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "$ref": "#/parameters/ResourceID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volume deleted"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/volumes/{id}/access": {
-      "put": {
-        "tags": [
-          "Permissions"
-        ],
-        "summary": "Grant volume permission to user.",
-        "operationId": "SetVolumeAccess",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/SetResourceAccessRequest"
-            }
-          },
-          {
-            "description": "Volume ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "access set"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Permissions"
-        ],
-        "summary": "Delete volume permission to user.",
-        "operationId": "DeleteVolumeAccess",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/DeleteResourceAccessRequest"
-            }
-          },
-          {
-            "$ref": "#/parameters/ResourceID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "access deleted"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/volumes/{id}/accesses": {
-      "get": {
-        "tags": [
-          "Permissions"
-        ],
-        "summary": "Get volume with user permissions.",
-        "operationId": "GetVolumeWithPermissions",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "$ref": "#/parameters/ResourceID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volume response",
-            "schema": {
-              "$ref": "#/definitions/Volume"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/volumes/{id}/rename": {
-      "put": {
-        "tags": [
-          "Volumes"
-        ],
-        "summary": "Rename volume.",
-        "operationId": "RenameVolume",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/VolumeRenameRequest"
-            }
-          },
-          {
-            "$ref": "#/parameters/ResourceID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "volume renamed"
           },
           "default": {
             "$ref": "#/responses/error"
@@ -1410,9 +885,6 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/auth/proto"
-    },
-    "CreateVolume": {
-      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/CreateVolume"
     },
     "DeleteResourceAccessRequest": {
       "description": "DeleteUserAccessRequest is a request object for deleting access to resource for user",
@@ -1846,22 +1318,34 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
     "Namespace": {
-      "description": "Namespace -- namespace representation",
+      "description": "Namespace describes namespace",
       "type": "object",
       "required": [
         "resources"
       ],
       "properties": {
-        "access": {
-          "$ref": "#/definitions/AccessLevel"
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
         },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
+        "create_time": {
           "type": "string",
-          "x-go-name": "CreatedAt"
+          "format": "date-time",
+          "x-go-name": "CreateTime"
+        },
+        "delete_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
+        },
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
         },
         "id": {
           "type": "string",
+          "format": "uuid",
           "x-go-name": "ID"
         },
         "label": {
@@ -1869,38 +1353,40 @@
           "type": "string",
           "x-go-name": "Label"
         },
-        "max_ext_service": {
+        "max_external_services": {
           "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxExtService"
+          "format": "int64",
+          "x-go-name": "MaxExtServices"
         },
-        "max_int_service": {
+        "max_internal_services": {
           "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxIntService"
+          "format": "int64",
+          "x-go-name": "MaxIntServices"
         },
         "max_traffic": {
           "type": "integer",
-          "format": "uint64",
+          "format": "int64",
           "x-go-name": "MaxTraffic"
         },
-        "owner": {
+        "owner_user_id": {
           "type": "string",
-          "x-go-name": "Owner"
+          "format": "uuid",
+          "x-go-name": "OwnerUserID"
         },
-        "owner_login": {
+        "owner_user_login": {
           "type": "string",
-          "x-go-name": "OwnerLogin"
+          "format": "email",
+          "x-go-name": "OwnerUserLogin"
         },
-        "resources": {
-          "$ref": "#/definitions/Resources"
+        "ram": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RAM"
         },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserAccess"
-          },
-          "x-go-name": "Users"
+        "tariff_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "TariffID"
         }
       },
       "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Namespace"
@@ -2153,13 +1639,6 @@
             "$ref": "#/definitions/Permission"
           },
           "x-go-name": "Permissions"
-        },
-        "volumes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/VolumeWithPermissions"
-          },
-          "x-go-name": "Volumes"
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
@@ -2830,51 +2309,6 @@
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
-    "Storage": {
-      "description": "Storage describes volumes storage",
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "ips": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "IPs"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "replicas": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Replicas"
-        },
-        "size": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Size"
-        },
-        "used": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Used"
-        },
-        "volumes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Volume"
-          },
-          "x-go-name": "Volumes"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
-    },
     "StoredToken": {
       "description": "StoredToken is a representaion of token database record",
       "type": "object",
@@ -3085,34 +2519,6 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
-    },
-    "UpdateStorageRequest": {
-      "description": "UpdateStorageRequest represents request object for updating storage",
-      "type": "object",
-      "properties": {
-        "ips": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "IPs"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "replicas": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Replicas"
-        },
-        "size": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Size"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "User": {
       "description": "User -- user model",
@@ -3354,27 +2760,7 @@
           "x-go-name": "Users"
         }
       },
-      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Volume"
-    },
-    "VolumeCreateRequest": {
-      "description": "VolumeCreateRequest is a request object for creating volume",
-      "$ref": "#/definitions/CreateVolume"
-    },
-    "VolumeRenameRequest": {
-      "description": "VolumeRenameRequest is a request object for renaming volume",
-      "$ref": "#/definitions/ResourceUpdateName"
-    },
-    "VolumeResizeRequest": {
-      "description": "VolumeResizeRequest contains parameters for changing volume size",
-      "type": "object",
-      "properties": {
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "VolumeTariff": {
       "description": "VolumeTariff represents billing tariff for (persistent) volume",
@@ -3422,87 +2808,6 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
-    },
-    "VolumeWithPermissions": {
-      "description": "VolumeWithPermissions is a response object for get requests",
-      "type": "object",
-      "properties": {
-        "Permission": {
-          "$ref": "#/definitions/Permission"
-        },
-        "access_mode": {
-          "$ref": "#/definitions/PersistentVolumeAccessMode"
-        },
-        "capacity": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Capacity"
-        },
-        "create_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "CreateTime"
-        },
-        "delete_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "DeleteTime"
-        },
-        "deleted": {
-          "type": "boolean",
-          "x-go-name": "Deleted"
-        },
-        "gluster_name": {
-          "type": "string",
-          "x-go-name": "GlusterName"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
-        },
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        },
-        "namespace_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "NamespaceID"
-        },
-        "owner_user_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "OwnerUserID"
-        },
-        "owner_user_login": {
-          "type": "string",
-          "format": "email",
-          "x-go-name": "OwnerUserLogin"
-        },
-        "storage_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "StorageID"
-        },
-        "storage_name": {
-          "type": "string",
-          "x-go-name": "StorageName"
-        },
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
-        },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Permission"
-          },
-          "x-go-name": "Permissions"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "VolumesList": {
       "description": "VolumesList -- model for volumes list",

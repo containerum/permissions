@@ -118,7 +118,7 @@ func (nh *namespaceHandlers) getUserNamespacesHandler(ctx *gin.Context) {
 	for i := range ret {
 		httputil.MaskForNonAdmin(ctx, &ret[i])
 	}
-	ctx.JSON(http.StatusOK, ret)
+	ctx.JSON(http.StatusOK, gin.H{"namespaces": ret})
 }
 
 func (nh *namespaceHandlers) getAllNamespacesHandler(ctx *gin.Context) {
@@ -132,7 +132,7 @@ func (nh *namespaceHandlers) getAllNamespacesHandler(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, ret)
+	ctx.JSON(http.StatusOK, gin.H{"namespaces": ret})
 }
 
 func (nh *namespaceHandlers) resizeNamespaceHandler(ctx *gin.Context) {
@@ -328,9 +328,12 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   '200':
 	//     description: namespaces response
 	//     schema:
-	//       type: array
-	//       items:
-	//         $ref: '#/definitions/Namespace'
+	//       type: object
+	//       properties:
+	//         namespaces:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/namespaces", handlers.getUserNamespacesHandler)
@@ -351,9 +354,12 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   '200':
 	//     description: namespaces response
 	//     schema:
-	//       type: array
-	//       items:
-	//         $ref: '#/definitions/Namespace'
+	//       type: object
+	//       properties:
+	//         namespaces:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllNamespacesHandler)

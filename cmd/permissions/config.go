@@ -7,7 +7,8 @@ import (
 	"reflect"
 
 	"git.containerum.net/ch/permissions/pkg/clients"
-	"git.containerum.net/ch/permissions/pkg/dao"
+	"git.containerum.net/ch/permissions/pkg/database"
+	"git.containerum.net/ch/permissions/pkg/database/postgres"
 	"git.containerum.net/ch/permissions/pkg/server"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/locales/en"
@@ -49,8 +50,8 @@ func setupLogger(ctx *cli.Context) error {
 	return nil
 }
 
-func setupDB(ctx *cli.Context) (*dao.DAO, error) {
-	return dao.SetupDAO(fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+func setupDB(ctx *cli.Context) (database.DB, error) {
+	return postgres.Connect(fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 		ctx.String(DBUserFlag.Name),
 		ctx.String(DBPassFlag.Name),
 		ctx.String(DBHostFlag.Name),

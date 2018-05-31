@@ -3,10 +3,9 @@ package server
 import (
 	"context"
 
-	"git.containerum.net/ch/permissions/pkg/dao"
+	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
-	billing "github.com/containerum/bill-external/models"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
@@ -25,7 +24,7 @@ type NamespaceActions interface {
 	DeleteAllUserNamespaces(ctx context.Context) error
 }
 
-var StandardNamespaceFilter = dao.NamespaceFilter{
+var StandardNamespaceFilter = database.NamespaceFilter{
 	NotDeleted: true,
 }
 
@@ -57,7 +56,7 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 		return chkErr
 	}
 
-	err = s.db.Transactional(func(tx *dao.DAO) error {
+	err = s.db.Transactional(func(tx database.DB) error {
 		ns := model.NamespaceWithPermissions{
 			Namespace: model.Namespace{
 				Resource: model.Resource{
@@ -75,31 +74,6 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 
 		if createErr := tx.CreateNamespace(ctx, &ns.Namespace); createErr != nil {
 			return createErr
-		}
-
-		if tariff.VolumeSize > 0 {
-			storage, getErr := tx.LeastUsedStorage(ctx, tariff.VolumeSize)
-			if getErr != nil {
-				return getErr
-			}
-
-			vol := model.Volume{
-				Resource: model.Resource{
-					OwnerUserID: userID,
-					Label:       NamespaceVolumeGlusterLabel(ns.Label),
-				},
-				Capacity:    tariff.VolumeSize,
-				NamespaceID: ns.ID,
-				GlusterName: VolumeGlusterName(ns.Label, userID),
-				StorageID:   storage.ID,
-			}
-
-			createErr := tx.CreateVolume(ctx, &vol)
-			if createErr != nil {
-				return createErr
-			}
-
-			// TODO: create it actually
 		}
 
 		if createErr := s.clients.Kube.CreateNamespace(ctx, ns.ToKube()); createErr != nil {
@@ -129,11 +103,6 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.N
 		return kubeClientModel.Namespace{}, err
 	}
 
-	err = s.db.NamespaceVolumes(ctx, &ns.Namespace)
-	if err != nil {
-		return ns.ToKube(), err
-	}
-
 	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
 	AddUserLogins(ctx, ns.Permissions, s.clients.User)
 
@@ -151,11 +120,11 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]ku
 		"filters": filters,
 	}).Infof("get user namespaces")
 
-	var filter dao.NamespaceFilter
+	var filter database.NamespaceFilter
 	if !IsAdminRole(ctx) {
 		filter = StandardNamespaceFilter
 	} else {
-		filter = dao.ParseNamespaceFilter(filters...)
+		filter = database.ParseNamespaceFilter(filters...)
 	}
 
 	namespaces, err := s.db.UserNamespaces(ctx, userID, filter)
@@ -181,9 +150,9 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 		"filters":  filters,
 	}).Infof("get all namespaces")
 
-	var filter dao.NamespaceFilter
+	var filter database.NamespaceFilter
 	if len(filters) > 0 {
-		filter = dao.ParseNamespaceFilter(filters...)
+		filter = database.ParseNamespaceFilter(filters...)
 	} else {
 		filter = StandardNamespaceFilter
 	}
@@ -212,7 +181,7 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 		WithField("user_id", userID).
 		Infof("admin create namespace %+v", req)
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
+	err := s.db.Transactional(func(tx database.DB) error {
 		ns := model.NamespaceWithPermissions{
 			Namespace: model.Namespace{
 				Resource: model.Resource{
@@ -253,7 +222,7 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 		WithField("id", id).
 		Infof("admin resize namespace %+v", req)
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
+	err := s.db.Transactional(func(tx database.DB) error {
 		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
@@ -308,7 +277,7 @@ func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error
 		"new_id":  newLabel,
 	}).Infof("rename namespace")
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
+	err := s.db.Transactional(func(tx database.DB) error {
 		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
@@ -353,7 +322,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		return chkErr
 	}
 
-	err = s.db.Transactional(func(tx *dao.DAO) error {
+	err = s.db.Transactional(func(tx database.DB) error {
 		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
@@ -361,14 +330,6 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 
 		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
 			return chkErr
-		}
-
-		var oldTariff billing.NamespaceTariff
-		if ns.TariffID != nil {
-			oldTariff, getErr = s.clients.Billing.GetNamespaceTariff(ctx, *ns.TariffID)
-			if getErr != nil {
-				return getErr
-			}
 		}
 
 		ns.TariffID = &newTariff.ID
@@ -393,36 +354,6 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			return resizeErr
 		}
 
-		if oldTariff.VolumeSize == 0 && newTariff.VolumeSize > 0 {
-			storage, getErr := tx.LeastUsedStorage(ctx, newTariff.VolumeSize)
-			if getErr != nil {
-				return getErr
-			}
-
-			vol := model.Volume{
-				Resource: model.Resource{
-					OwnerUserID: userID,
-					Label:       NamespaceVolumeGlusterLabel(ns.Label),
-				},
-				Capacity:    newTariff.VolumeSize,
-				NamespaceID: ns.ID,
-				GlusterName: VolumeGlusterName(ns.Label, userID),
-				StorageID:   storage.ID,
-			}
-
-			createErr := tx.CreateVolume(ctx, &vol)
-			if createErr != nil {
-				return createErr
-			}
-		}
-
-		if oldTariff.VolumeSize > 0 && newTariff.VolumeSize == 0 {
-			_, delErr := tx.DeleteNamespaceVolumes(ctx, ns.Namespace)
-			if delErr != nil {
-				return delErr
-			}
-		}
-
 		if resizeErr := s.clients.Kube.SetNamespaceQuota(ctx, ns.ToKube()); resizeErr != nil {
 			return resizeErr
 		}
@@ -440,7 +371,7 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 		"id":      id,
 	}).Infof("delete namespace")
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
+	err := s.db.Transactional(func(tx database.DB) error {
 		ns, getErr := tx.NamespaceByID(ctx, userID, id)
 		if getErr != nil {
 			return getErr
@@ -448,11 +379,6 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 
 		if chkErr := OwnerCheck(ctx, ns.Resource); chkErr != nil {
 			return chkErr
-		}
-
-		deletedVols, delErr := tx.DeleteNamespaceVolumes(ctx, ns.Namespace)
-		if delErr != nil {
-			return delErr
 		}
 
 		if delErr := tx.DeleteNamespace(ctx, &ns.Namespace); delErr != nil {
@@ -464,9 +390,6 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 		}
 
 		resourceIDs := []string{ns.ID}
-		for _, v := range deletedVols {
-			resourceIDs = append(resourceIDs, v.ID)
-		}
 		if unsubErr := s.clients.Billing.MassiveUnsubscribe(ctx, resourceIDs); unsubErr != nil {
 			return unsubErr
 		}
@@ -489,12 +412,7 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithField("user_id", userID).Infof("delete all user namespaces")
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
-		deletedVols, delErr := tx.DeleteAllUserNamespaceVolumes(ctx, userID)
-		if delErr != nil {
-			return delErr
-		}
-
+	err := s.db.Transactional(func(tx database.DB) error {
 		deletedNamespaces, delErr := tx.DeleteAllUserNamespaces(ctx, userID)
 		if delErr != nil {
 			return delErr
@@ -502,9 +420,6 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 
 		var resourceIDs []string
 		for _, v := range deletedNamespaces {
-			resourceIDs = append(resourceIDs, v.ID)
-		}
-		for _, v := range deletedVols {
 			resourceIDs = append(resourceIDs, v.ID)
 		}
 

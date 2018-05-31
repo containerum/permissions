@@ -51,7 +51,7 @@ SID = "permissions"
 [[error]]
     Name = "ErrSetOwnerAccess"
     StatusHTTP = 400
-    Message = "Owner can`t set access to its resource"
+    Message = "Owner can`t change own permissions"
     Kind = 8
 
 [[error]]
