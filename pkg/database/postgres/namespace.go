@@ -99,10 +99,9 @@ func (pgdb *PgDB) UserNamespaces(ctx context.Context, userID string, filter data
 	f := NamespaceFilter(filter)
 	err = pgdb.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("Volumes", "Permission").
+		Column("Permission").
 		Where("permission.user_id = ?", userID).
 		Apply(f.Filter).
-		Relation("Volumes").
 		Select()
 	switch err {
 	case pg.ErrNoRows:
@@ -122,8 +121,6 @@ func (pgdb *PgDB) AllNamespaces(ctx context.Context, filter database.NamespaceFi
 	f := NamespaceFilter(filter)
 	err = pgdb.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
-		Column("Volumes").
-		Relation("Volumes").
 		Apply(f.Filter).
 		Select()
 	switch err {
