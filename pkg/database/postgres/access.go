@@ -34,11 +34,9 @@ func (pgdb *PgDB) SetUserAccesses(ctx context.Context, userID string, level kube
 	pgdb.log.WithField("user_id", userID).Debugf("set accesses to %s", level)
 
 	nsIDsQuery := pgdb.db.Model(&model.Namespace{}).Column("id").Where("owner_user_id = ?", userID)
-	volIDsQuery := pgdb.db.Model(&model.Volume{}).Column("id").Where("owner_user_id = ?", userID)
-
 	// We can lower initial access lever, upper current access level (but not greater then initial) or set to initial
 	_, err := pgdb.db.Model(&model.Permission{}).
-		Where("resource_id IN (? UNION ALL ?)", nsIDsQuery, volIDsQuery).
+		Where("resource_id IN (?)", nsIDsQuery).
 		Set(`current_access_level = CASE WHEN current_access_level > ?0 THEN ?0
 											WHEN current_access_level <= ?0 AND initial_access_level > ?0 THEN ?0
 											ELSE initial_access_level END`, level).
