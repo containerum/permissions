@@ -1,9 +1,11 @@
-package dao
+package postgres
 
 import (
+	"io"
 	"strings"
 	"time"
 
+	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
@@ -15,12 +17,12 @@ import (
 	_ "git.containerum.net/ch/permissions/pkg/migrations" // to run migrations
 )
 
-type DAO struct {
+type PgDB struct {
 	db  orm.DB
 	log *cherrylog.LogrusAdapter
 }
 
-func SetupDAO(dbURL string) (*DAO, error) {
+func Connect(dbURL string) (*PgDB, error) {
 	options, err := pg.ParseURL(dbURL)
 	if err != nil {
 		return nil, err
@@ -48,7 +50,7 @@ func SetupDAO(dbURL string) (*DAO, error) {
 		"new_ver": newVer,
 	}).Info("migrate up")
 
-	return &DAO{
+	return &PgDB{
 		db:  db,
 		log: cherrylog.NewLogrusAdapter(entry),
 	}, err
@@ -58,7 +60,7 @@ type transactional interface {
 	RunInTransaction(fn func(*pg.Tx) error) error
 }
 
-func (dao *DAO) handleError(err error) error {
+func (pgdb *PgDB) handleError(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -67,17 +69,24 @@ func (dao *DAO) handleError(err error) error {
 	case *cherry.Err:
 		return err
 	default:
-		return errors.ErrInternal().Log(err, dao.log)
+		return errors.ErrInternal().Log(err, pgdb.log)
 	}
 }
 
-func (dao *DAO) Transactional(fn func(tx *DAO) error) error {
-	entry := cherrylog.NewLogrusAdapter(dao.log.WithField("transaction_id", time.Now().UTC().Unix()))
-	dtx := &DAO{log: entry}
-	err := dao.db.(transactional).RunInTransaction(func(tx *pg.Tx) error {
+func (pgdb *PgDB) Transactional(fn func(tx database.DB) error) error {
+	entry := cherrylog.NewLogrusAdapter(pgdb.log.WithField("transaction_id", time.Now().UTC().Unix()))
+	dtx := &PgDB{log: entry}
+	err := pgdb.db.(transactional).RunInTransaction(func(tx *pg.Tx) error {
 		dtx.db = tx
 		return fn(dtx)
 	})
 
 	return dtx.handleError(err)
+}
+
+func (pgdb *PgDB) Close() error {
+	if cl, ok := pgdb.db.(io.Closer); ok {
+		return cl.Close()
+	}
+	return nil
 }

@@ -5,7 +5,7 @@ import (
 
 	"git.containerum.net/ch/auth/proto"
 	"git.containerum.net/ch/permissions/pkg/clients"
-	"git.containerum.net/ch/permissions/pkg/dao"
+	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
@@ -21,7 +21,7 @@ type AccessActions interface {
 	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
 }
 
-func extractAccessesFromDB(ctx context.Context, db *dao.DAO, userID string) (*authProto.ResourcesAccess, error) {
+func extractAccessesFromDB(ctx context.Context, db database.DB, userID string) (*authProto.ResourcesAccess, error) {
 	userPermissions, err := db.UserAccesses(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (s *Server) GetUserAccesses(ctx context.Context) (*authProto.ResourcesAcces
 	return extractAccessesFromDB(ctx, s.db, userID)
 }
 
-func updateUserAccesses(ctx context.Context, auth clients.AuthClient, db *dao.DAO, userID string) error {
+func updateUserAccesses(ctx context.Context, auth clients.AuthClient, db database.DB, userID string) error {
 	accesses, err := extractAccessesFromDB(ctx, db, userID)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (s *Server) SetUserAccesses(ctx context.Context, access kubeClientModel.Acc
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithField("user_id", userID).Infof("Set user accesses to %s", access)
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
+	err := s.db.Transactional(func(tx database.DB) error {
 		if err := tx.SetUserAccesses(ctx, userID, access); err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, 
 		"access_level": accessLevel,
 	}).Debugf("set namespace access")
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
+	err := s.db.Transactional(func(tx database.DB) error {
 		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
 		if err != nil {
 			return err
@@ -155,7 +155,7 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUse
 		"target_user": targetUser,
 	}).Debugf("delete namespace access")
 
-	err := s.db.Transactional(func(tx *dao.DAO) error {
+	err := s.db.Transactional(func(tx database.DB) error {
 		targetUserInfo, err := s.clients.User.UserInfoByLogin(ctx, targetUser)
 		if err != nil {
 			return err
