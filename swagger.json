@@ -11,7 +11,7 @@
     "title": "Permissions API"
   },
   "paths": {
-    "/access": {
+    "/accesses": {
       "get": {
         "tags": [
           "Permissions"
@@ -401,7 +401,39 @@
         }
       }
     },
-    "/namespaces/{id}/access": {
+    "/namespaces/{id}/accesses": {
+      "get": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Get namespace with user permissions.",
+        "operationId": "GetNamespaceWithPermissions",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/SubstitutedUserID"
+          },
+          {
+            "$ref": "#/parameters/ResourceID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace response",
+            "schema": {
+              "$ref": "#/definitions/Namespace"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        }
+      },
       "put": {
         "tags": [
           "Permissions"
@@ -470,40 +502,6 @@
         "responses": {
           "200": {
             "description": "access deleted"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        }
-      }
-    },
-    "/namespaces/{id}/accesses": {
-      "get": {
-        "tags": [
-          "Permissions"
-        ],
-        "summary": "Get namespace with user permissions.",
-        "operationId": "GetNamespaceWithPermissions",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/SubstitutedUserID"
-          },
-          {
-            "$ref": "#/parameters/ResourceID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "namespace response",
-            "schema": {
-              "$ref": "#/definitions/Namespace"
-            }
           },
           "default": {
             "$ref": "#/responses/error"
@@ -1318,34 +1316,22 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
     "Namespace": {
-      "description": "Namespace describes namespace",
+      "description": "Namespace -- namespace representation",
       "type": "object",
       "required": [
         "resources"
       ],
       "properties": {
-        "cpu": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "CPU"
+        "access": {
+          "$ref": "#/definitions/AccessLevel"
         },
-        "create_time": {
+        "created_at": {
+          "description": "creation date in RFC3339 format",
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "CreateTime"
-        },
-        "delete_time": {
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "DeleteTime"
-        },
-        "deleted": {
-          "type": "boolean",
-          "x-go-name": "Deleted"
+          "x-go-name": "CreatedAt"
         },
         "id": {
           "type": "string",
-          "format": "uuid",
           "x-go-name": "ID"
         },
         "label": {
@@ -1353,40 +1339,38 @@
           "type": "string",
           "x-go-name": "Label"
         },
-        "max_external_services": {
+        "max_ext_service": {
           "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxExtServices"
+          "format": "uint64",
+          "x-go-name": "MaxExtService"
         },
-        "max_internal_services": {
+        "max_int_service": {
           "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxIntServices"
+          "format": "uint64",
+          "x-go-name": "MaxIntService"
         },
         "max_traffic": {
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "MaxTraffic"
         },
-        "owner_user_id": {
+        "owner": {
           "type": "string",
-          "format": "uuid",
-          "x-go-name": "OwnerUserID"
+          "x-go-name": "Owner"
         },
-        "owner_user_login": {
+        "owner_login": {
           "type": "string",
-          "format": "email",
-          "x-go-name": "OwnerUserLogin"
+          "x-go-name": "OwnerLogin"
         },
-        "ram": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "RAM"
+        "resources": {
+          "$ref": "#/definitions/Resources"
         },
-        "tariff_id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "TariffID"
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserAccess"
+          },
+          "x-go-name": "Users"
         }
       },
       "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Namespace"

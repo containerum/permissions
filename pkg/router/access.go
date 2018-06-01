@@ -84,7 +84,7 @@ func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
 func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	handlers := &accessHandlers{acts: acts, tv: r.tv}
 
-	// swagger:operation GET /access Permissions GetResourcesAccesses
+	// swagger:operation GET /accesses Permissions GetResourcesAccesses
 	//
 	// Returns user accesses to resources.
 	//
@@ -100,7 +100,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//       $ref: '#/definitions/ResourcesAccesses'
 	//	 default:
 	//	   $ref: '#/responses/error'
-	r.engine.GET("/access", handlers.getUserAccessesHandler)
+	r.engine.GET("/accesses", handlers.getUserAccessesHandler)
 
 	// swagger:operation PUT /admin/accesses Permissions SetResourcesAccesses
 	//
@@ -123,7 +123,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	   $ref: '#/responses/error'
 	r.engine.PUT("/admin/accesses", handlers.setUserAccessesHandler)
 
-	// swagger:operation PUT /namespaces/{id}/access Permissions SetNamespaceAccess
+	// swagger:operation PUT /namespaces/{id}/accesses Permissions SetNamespaceAccess
 	//
 	// Grant namespace permission to user.
 	//
@@ -143,9 +143,9 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	   description: access set
 	//	 default:
 	//	   $ref: '#/responses/error'
-	r.engine.PUT("/namespaces/:id/access", handlers.setNamespaceAccessHandler)
+	r.engine.PUT("/namespaces/:id/accesses", handlers.setNamespaceAccessHandler)
 
-	// swagger:operation DELETE /namespaces/{id}/access Permissions DeleteNamespaceAccess
+	// swagger:operation DELETE /namespaces/{id}/accesses Permissions DeleteNamespaceAccess
 	//
 	// Delete namespace permission to user.
 	//
@@ -165,7 +165,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//	   description: access deleted
 	//	 default:
 	//	   $ref: '#/responses/error'
-	r.engine.DELETE("/namespaces/:id/access", handlers.deleteNamespaceAccessHandler)
+	r.engine.DELETE("/namespaces/:id/accesses", handlers.deleteNamespaceAccessHandler)
 
 	// swagger:operation GET /namespaces/{id}/accesses Permissions GetNamespaceWithPermissions
 	//
