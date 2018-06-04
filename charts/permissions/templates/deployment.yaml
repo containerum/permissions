@@ -40,7 +40,7 @@ spec:
               value: "{{ .Values.env.local.DB_HOST }}"
             {{- else }}
             - name: DB_HOST
-              value: "{{ .Release.Name }}-postgresl:5432"
+              value: "{{ .Release.Name }}-postgresql:5432"
             {{- end }}
 
             {{- if .Values.env.local.AUTH_ADDR }}
