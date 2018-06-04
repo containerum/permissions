@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/url"
 
+	"git.containerum.net/ch/permissions/pkg/errors"
 	umtypes "git.containerum.net/ch/user-manager/pkg/models"
 	"github.com/containerum/cherry"
+	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/satori/go.uuid"
@@ -22,7 +24,7 @@ type UserManagerClient interface {
 }
 
 type UserManagerHTTPClient struct {
-	log    *logrus.Entry
+	log    *cherrylog.LogrusAdapter
 	client *resty.Client
 }
 
@@ -39,7 +41,7 @@ func NewUserManagerHTTPClient(url *url.URL) *UserManagerHTTPClient {
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &UserManagerHTTPClient{
-		log:    log,
+		log:    cherrylog.NewLogrusAdapter(log),
 		client: client,
 	}
 }
@@ -50,9 +52,12 @@ func (u *UserManagerHTTPClient) UserInfoByLogin(ctx context.Context, login strin
 		SetContext(ctx).
 		SetResult(umtypes.User{}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Get("/user/info/login/" + login)
+		SetPathParams(map[string]string{
+			"login": login,
+		}).
+		Get("/user/info/login/{login}")
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternal().Log(err, u.log)
 	}
 	if resp.Error() != nil {
 		return nil, resp.Error().(*cherry.Err)
@@ -66,9 +71,12 @@ func (u *UserManagerHTTPClient) UserInfoByID(ctx context.Context, userID string)
 		SetContext(ctx).
 		SetResult(umtypes.User{}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Get("/user/info/id/" + userID)
+		SetPathParams(map[string]string{
+			"id": userID,
+		}).
+		Get("/user/info/id/{id}")
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternal().Log(err, u.log)
 	}
 	if resp.Error() != nil {
 		return nil, resp.Error().(*cherry.Err)
@@ -85,7 +93,7 @@ func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context, userIDs ...
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post("/user/loginid")
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternal().Log(err, u.log)
 	}
 	if resp.Error() != nil {
 		return nil, resp.Error().(*cherry.Err)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"git.containerum.net/ch/permissions/pkg/errors"
 	berrors "github.com/containerum/bill-external/errors"
 	btypes "github.com/containerum/bill-external/models"
 	"github.com/containerum/cherry"
@@ -139,7 +140,7 @@ func (b *BillingHTTPClient) Subscribe(ctx context.Context, req btypes.SubscribeT
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post("/isp/subscription")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -159,9 +160,12 @@ func (b *BillingHTTPClient) Rename(ctx context.Context, resourceID, newLabel str
 		SetBody(btypes.RenameRequest{
 			ResourceLabel: newLabel,
 		}).
-		Put(fmt.Sprintf("/resource/%s", resourceID))
+		SetPathParams(map[string]string{
+			"resource": resourceID,
+		}).
+		Put("/resource/{resource}")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -179,7 +183,7 @@ func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) 
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Delete(fmt.Sprintf("/isp/subscription/%s", resourceID))
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -198,7 +202,7 @@ func (b *BillingHTTPClient) MassiveUnsubscribe(ctx context.Context, resourceIDs 
 		}).
 		Delete("/isp/subscription")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -214,9 +218,12 @@ func (b *BillingHTTPClient) GetNamespaceTariff(ctx context.Context, tariffID str
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetResult(btypes.NamespaceTariff{}).
-		Get(fmt.Sprintf("/tariffs/namespace/%s", tariffID))
+		SetPathParams(map[string]string{
+			"tariff": tariffID,
+		}).
+		Get("/tariffs/namespace/{tariff}")
 	if err != nil {
-		return btypes.NamespaceTariff{}, err
+		return btypes.NamespaceTariff{}, errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return btypes.NamespaceTariff{}, resp.Error().(*cherry.Err)
@@ -232,9 +239,12 @@ func (b *BillingHTTPClient) GetVolumeTariff(ctx context.Context, tariffID string
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetResult(btypes.VolumeTariff{}).
-		Get(fmt.Sprintf("/tariffs/volume/%s", tariffID))
+		SetPathParams(map[string]string{
+			"tariff": tariffID,
+		}).
+		Get("/tariffs/volume/{tariff}")
 	if err != nil {
-		return btypes.VolumeTariff{}, err
+		return btypes.VolumeTariff{}, errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return btypes.VolumeTariff{}, resp.Error().(*cherry.Err)

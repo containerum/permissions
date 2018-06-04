@@ -80,7 +80,10 @@ func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Name
 		SetBody(ns).
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Put("/namespaces/" + ns.ID)
+		SetPathParams(map[string]string{
+			"namespace": ns.ID,
+		}).
+		Put("/namespaces/{namespace}")
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}
@@ -96,7 +99,10 @@ func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.Namesp
 	resp, err := k.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Delete("/namespaces/" + ns.ID)
+		SetPathParams(map[string]string{
+			"namespace": ns.ID,
+		}).
+		Delete("/namespaces/{namespace}")
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}
@@ -113,7 +119,10 @@ func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, name string) (ret 
 		SetResult(&ret).
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Get("/namespaces/" + name)
+		SetPathParams(map[string]string{
+			"namespace": name,
+		}).
+		Get("/namespaces/{namespace}")
 	if err != nil {
 		err = errors.ErrInternal().Log(err, k.log)
 		return
