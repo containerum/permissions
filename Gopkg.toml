@@ -1,5 +1,6 @@
 required = [
-  "git.containerum.net/ch/auth"
+  "git.containerum.net/ch/auth",
+  "github.com/containerum/kube-client",
 ]
 
 [prune]
@@ -29,7 +30,7 @@ required = [
 
 [[constraint]]
   name = "github.com/go-pg/pg"
-  version = "~6.11.2"
+  version = "~6.13.5"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
@@ -61,7 +62,7 @@ required = [
 
 [[constraint]]
   name = "gopkg.in/resty.v1"
-  version = "~1.3.0"
+  version = "~1.6.0"
 
 [[constraint]]
   name = "github.com/satori/go.uuid"
@@ -85,4 +86,8 @@ required = [
 
 [[constraint]]
   name = "github.com/containerum/kube-client"
-  version = "~0.17.4"
+  version = "~0.19.1"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/volume-manager"

@@ -17,6 +17,15 @@
   revision = "9a9cb6024efb51db6a6672b9492091ec3685e34f"
 
 [[projects]]
+  branch = "develop"
+  name = "git.containerum.net/ch/volume-manager"
+  packages = [
+    "pkg/errors",
+    "pkg/models"
+  ]
+  revision = "98035866475ff45881c44ad4a5312cf70be74c6b"
+
+[[projects]]
   name = "github.com/containerum/bill-external"
   packages = [
     "errors",
@@ -38,9 +47,12 @@
 
 [[projects]]
   name = "github.com/containerum/kube-client"
-  packages = ["pkg/model"]
-  revision = "262983343732e6686e3b4e06d61f95269127686e"
-  version = "v0.17.4"
+  packages = [
+    ".",
+    "pkg/model"
+  ]
+  revision = "2b8f5ddce4423867372d607726e241df69b96f73"
+  version = "v0.19.6"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -92,8 +104,8 @@
     "orm",
     "types"
   ]
-  revision = "5b73ce88484575f3480edf393237f6bf79d5f166"
-  version = "v6.11.2"
+  revision = "8c7fa0eed0d9e9d07fca2cc9e08e3171da0521d5"
+  version = "v6.13.5"
 
 [[projects]]
   name = "github.com/go-playground/locales"
@@ -301,8 +313,8 @@
 [[projects]]
   name = "gopkg.in/resty.v1"
   packages = ["."]
-  revision = "65798e030a35b911602b4d1d743d6f50ac93b665"
-  version = "v1.3"
+  revision = "fc3ad735b5565cada42d34bc298573fd3fe5adc6"
+  version = "v1.6"
 
 [[projects]]
   branch = "v2"
@@ -319,6 +331,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7548bcea6156146cb3080ffffc808d4f34fff78620201a1937e58441a5b44ed0"
+  inputs-digest = "6ab5de70c63726c9a4a7bd38781c915e356bcc2cb247295cdba2ef63b04a6d67"
   solver-name = "gps-cdcl"
   solver-version = 1
