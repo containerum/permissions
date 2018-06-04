@@ -301,8 +301,8 @@
 [[projects]]
   name = "gopkg.in/resty.v1"
   packages = ["."]
-  revision = "65798e030a35b911602b4d1d743d6f50ac93b665"
-  version = "v1.3"
+  revision = "fc3ad735b5565cada42d34bc298573fd3fe5adc6"
+  version = "v1.6"
 
 [[projects]]
   branch = "v2"
@@ -319,6 +319,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7548bcea6156146cb3080ffffc808d4f34fff78620201a1937e58441a5b44ed0"
+  inputs-digest = "843a85e342ae52bfb5887f79efe056be10fede1dcf2971daceb3d87999d3a569"
   solver-name = "gps-cdcl"
   solver-version = 1

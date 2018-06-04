@@ -159,7 +159,10 @@ func (b *BillingHTTPClient) Rename(ctx context.Context, resourceID, newLabel str
 		SetBody(btypes.RenameRequest{
 			ResourceLabel: newLabel,
 		}).
-		Put(fmt.Sprintf("/resource/%s", resourceID))
+		SetPathParams(map[string]string{
+			"resource": resourceID,
+		}).
+		Put("/resource/{resource}")
 	if err != nil {
 		return err
 	}
@@ -177,7 +180,10 @@ func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) 
 
 	resp, err := b.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Delete(fmt.Sprintf("/isp/subscription/%s", resourceID))
+		SetPathParams(map[string]string{
+			"resource": resourceID,
+		}).
+		Delete("/isp/subscription/{resource}")
 	if err != nil {
 		return err
 	}
@@ -214,7 +220,10 @@ func (b *BillingHTTPClient) GetNamespaceTariff(ctx context.Context, tariffID str
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetResult(btypes.NamespaceTariff{}).
-		Get(fmt.Sprintf("/tariffs/namespace/%s", tariffID))
+		SetPathParams(map[string]string{
+			"tariff": tariffID,
+		}).
+		Get("/tariffs/namespace/{tariff}")
 	if err != nil {
 		return btypes.NamespaceTariff{}, err
 	}
@@ -232,7 +241,10 @@ func (b *BillingHTTPClient) GetVolumeTariff(ctx context.Context, tariffID string
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetResult(btypes.VolumeTariff{}).
-		Get(fmt.Sprintf("/tariffs/volume/%s", tariffID))
+		SetPathParams(map[string]string{
+			"tariff": tariffID,
+		}).
+		Get("/tariffs/volume/{tariff}")
 	if err != nil {
 		return btypes.VolumeTariff{}, err
 	}

@@ -50,7 +50,10 @@ func (u *UserManagerHTTPClient) UserInfoByLogin(ctx context.Context, login strin
 		SetContext(ctx).
 		SetResult(umtypes.User{}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Get("/user/info/login/" + login)
+		SetPathParams(map[string]string{
+			"login": login,
+		}).
+		Get("/user/info/login/{login}")
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +69,10 @@ func (u *UserManagerHTTPClient) UserInfoByID(ctx context.Context, userID string)
 		SetContext(ctx).
 		SetResult(umtypes.User{}).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Get("/user/info/id/" + userID)
+		SetPathParams(map[string]string{
+			"id": userID,
+		}).
+		Get("/user/info/id/{id}")
 	if err != nil {
 		return nil, err
 	}
