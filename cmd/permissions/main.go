@@ -73,6 +73,7 @@ func main() {
 			&UserAddrFlag,
 			&BillingAddrFlag,
 			&ResourceServiceAddrFlag,
+			&VolumeManagerAddrFlag,
 			&CORSFlag,
 		},
 		Before: func(ctx *cli.Context) error {
