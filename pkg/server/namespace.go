@@ -81,12 +81,6 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 			return createErr
 		}
 
-		if tariff.VolumeSize > 0 {
-			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, StandardNamespaceVolumeName(ns.Namespace), tariff.VolumeSize); createErr != nil {
-				return createErr
-			}
-		}
-
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
 			return updErr
 		}
