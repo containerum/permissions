@@ -16,6 +16,8 @@ import (
 
 type VolumeManagerClient interface {
 	CreateVolume(ctx context.Context, nsID, label string, capacity int) error
+	DeleteNamespaceVolumes(ctx context.Context, nsID string) error
+	DeleteAllUserVolumes(ctx context.Context) error
 }
 
 type VolumeManagerHTTPClient struct {
@@ -67,6 +69,41 @@ func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, nsID, label 
 	return nil
 }
 
+func (v *VolumeManagerHTTPClient) DeleteNamespaceVolumes(ctx context.Context, nsID string) error {
+	v.log.WithField("namespace_id", nsID)
+
+	resp, err := v.client.R().
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetPathParams(map[string]string{
+			"namespace": nsID,
+		}).
+		Delete("/namespaces/{ns_id}/volumes")
+	if err != nil {
+		return errors.ErrInternal().Log(err, v.log)
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+	return nil
+}
+
+func (v *VolumeManagerHTTPClient) DeleteAllUserVolumes(ctx context.Context) error {
+	v.log.Debugf("delete all user volumes")
+
+	resp, err := v.client.R().
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		Delete("/volumes")
+	if err != nil {
+		return errors.ErrInternal().Log(err, v.log)
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+	return nil
+}
+
 type VolumeManagerDummyClient struct {
 	log *logrus.Entry
 }
@@ -83,6 +120,18 @@ func (v *VolumeManagerDummyClient) CreateVolume(ctx context.Context, nsID, label
 		"label":        label,
 		"capacity":     capacity,
 	}).Debugf("create volume")
+
+	return nil
+}
+
+func (v *VolumeManagerDummyClient) DeleteNamespaceVolumes(ctx context.Context, nsID string) error {
+	v.log.WithField("namespace_id", nsID)
+
+	return nil
+}
+
+func (v *VolumeManagerDummyClient) DeleteAllUserVolumes(ctx context.Context) error {
+	v.log.Debugf("delete all user volumes")
 
 	return nil
 }

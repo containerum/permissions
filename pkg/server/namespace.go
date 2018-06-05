@@ -410,6 +410,10 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return delErr
 		}
 
+		if delErr := s.clients.Volume.DeleteNamespaceVolumes(ctx, ns.ID); delErr != nil {
+			return delErr
+		}
+
 		resourceIDs := []string{ns.ID}
 		if unsubErr := s.clients.Billing.MassiveUnsubscribe(ctx, resourceIDs); unsubErr != nil {
 			return unsubErr
@@ -458,6 +462,10 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 			if delErr := s.clients.Kube.DeleteNamespace(ctx, nsPerm.ToKube()); delErr != nil {
 				return delErr
 			}
+		}
+
+		if delErr := s.clients.Volume.DeleteAllUserVolumes(ctx); delErr != nil {
+			return delErr
 		}
 
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
