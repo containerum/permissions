@@ -162,6 +162,9 @@ func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
 	if clients.Billing, err = setupBillingClient(ctx.String(BillingAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
 	}
+	if clients.Volume, err = SetupVolumeClient(ctx.String(VolumeManagerAddrFlag.Name)); err != nil {
+		errs = append(errs, err)
+	}
 
 	if len(errs) > 0 {
 		return nil, fmt.Errorf("clients setup errors: %v", errs)
