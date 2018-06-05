@@ -127,6 +127,17 @@ func setupBillingClient(addr string) (clients.BillingClient, error) {
 	}
 }
 
+func SetupVolumeClient(addr string) (clients.VolumeManagerClient, error) {
+	switch {
+	case opMode == modeDebug && addr == "":
+		return clients.NewVolumeManagerDummyClient(), nil
+	case addr != "":
+		return clients.NewVolumeManagerHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
+	default:
+		return nil, errors.New("missing configuration for volume-manager service")
+	}
+}
+
 func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
 	var errs []error
 	var clients server.Clients

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -70,4 +71,8 @@ func NamespaceAddUsage(ctx context.Context, ns *kubeAPIModel.Namespace, client c
 	}
 	ns.Resources.Used = kubeNS.Resources.Used
 	return nil
+}
+
+func StandardNamespaceVolumeName(ns model.Namespace) string {
+	return fmt.Sprintf("namespace-%s-defaultvolume", ns.ID)
 }
