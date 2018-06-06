@@ -6,6 +6,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	billing "github.com/containerum/bill-external/models"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
@@ -332,6 +333,14 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			return chkErr
 		}
 
+		var oldTariff billing.NamespaceTariff
+		if ns.TariffID != nil {
+			oldTariff, getErr = s.clients.Billing.GetNamespaceTariff(ctx, *ns.TariffID)
+			if getErr != nil {
+				return getErr
+			}
+		}
+
 		ns.TariffID = &newTariff.ID
 		ns.MaxIntServices = newTariff.ExternalServices
 		ns.MaxIntServices = newTariff.InternalServices
@@ -356,6 +365,12 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 
 		if resizeErr := s.clients.Kube.SetNamespaceQuota(ctx, ns.ToKube()); resizeErr != nil {
 			return resizeErr
+		}
+
+		if oldTariff.VolumeSize <= 0 && newTariff.VolumeSize > 0 {
+			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, StandardNamespaceVolumeName(ns.Namespace), newTariff.VolumeSize); createErr != nil {
+				return createErr
+			}
 		}
 
 		return nil
@@ -386,6 +401,10 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 		}
 
 		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.ID); delErr != nil {
+			return delErr
+		}
+
+		if delErr := s.clients.Volume.DeleteNamespaceVolumes(ctx, ns.ID); delErr != nil {
 			return delErr
 		}
 
@@ -437,6 +456,10 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 			if delErr := s.clients.Kube.DeleteNamespace(ctx, nsPerm.ToKube()); delErr != nil {
 				return delErr
 			}
+		}
+
+		if delErr := s.clients.Volume.DeleteAllUserVolumes(ctx); delErr != nil {
+			return delErr
 		}
 
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {

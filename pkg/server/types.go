@@ -17,6 +17,7 @@ type Clients struct {
 	Kube     clients.KubeAPIClient
 	Resource clients.ResourceServiceClient
 	Billing  clients.BillingClient
+	Volume   clients.VolumeManagerClient
 }
 
 func (c *Clients) Close() error {

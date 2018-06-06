@@ -30,22 +30,22 @@ type Query struct {
 	model       tableModel
 	ignoreModel bool
 
-	with       []withQuery
-	tables     []FormatAppender
-	columns    []FormatAppender
-	set        []FormatAppender
-	values     map[string]*queryParamsAppender
-	where      []sepFormatAppender
-	updWhere   []sepFormatAppender
-	joins      []*joinQuery
-	group      []FormatAppender
-	having     []*queryParamsAppender
-	order      []FormatAppender
-	onConflict *queryParamsAppender
-	returning  []*queryParamsAppender
-	limit      int
-	offset     int
-	selFor     FormatAppender
+	with        []withQuery
+	tables      []FormatAppender
+	columns     []FormatAppender
+	set         []FormatAppender
+	modelValues map[string]*queryParamsAppender
+	where       []sepFormatAppender
+	updWhere    []sepFormatAppender
+	joins       []*joinQuery
+	group       []FormatAppender
+	having      []*queryParamsAppender
+	order       []FormatAppender
+	onConflict  *queryParamsAppender
+	returning   []*queryParamsAppender
+	limit       int
+	offset      int
+	selFor      *queryParamsAppender
 }
 
 var _ queryAppender = (*Query)(nil)
@@ -69,6 +69,14 @@ func (q *Query) AppendQuery(b []byte) ([]byte, error) {
 
 // Copy returns copy of the Query.
 func (q *Query) Copy() *Query {
+	var modelValues map[string]*queryParamsAppender
+	if len(q.modelValues) > 0 {
+		modelValues = make(map[string]*queryParamsAppender, len(q.modelValues))
+		for k, v := range q.modelValues {
+			modelValues[k] = v
+		}
+	}
+
 	copy := &Query{
 		db:        q.db,
 		stickyErr: q.stickyErr,
@@ -76,19 +84,21 @@ func (q *Query) Copy() *Query {
 		model:       q.model,
 		ignoreModel: q.ignoreModel,
 
-		tables:     q.tables[:len(q.tables):len(q.tables)],
-		columns:    q.columns[:len(q.columns):len(q.columns)],
-		set:        q.set[:len(q.set):len(q.set)],
-		where:      q.where[:len(q.where):len(q.where)],
-		updWhere:   q.updWhere[:len(q.updWhere):len(q.updWhere)],
-		joins:      q.joins[:len(q.joins):len(q.joins)],
-		group:      q.group[:len(q.group):len(q.group)],
-		having:     q.having[:len(q.having):len(q.having)],
-		order:      q.order[:len(q.order):len(q.order)],
-		onConflict: q.onConflict,
-		returning:  q.returning[:len(q.returning):len(q.returning)],
-		limit:      q.limit,
-		offset:     q.offset,
+		tables:      q.tables[:len(q.tables):len(q.tables)],
+		columns:     q.columns[:len(q.columns):len(q.columns)],
+		set:         q.set[:len(q.set):len(q.set)],
+		modelValues: modelValues,
+		where:       q.where[:len(q.where):len(q.where)],
+		updWhere:    q.updWhere[:len(q.updWhere):len(q.updWhere)],
+		joins:       q.joins[:len(q.joins):len(q.joins)],
+		group:       q.group[:len(q.group):len(q.group)],
+		having:      q.having[:len(q.having):len(q.having)],
+		order:       q.order[:len(q.order):len(q.order)],
+		onConflict:  q.onConflict,
+		returning:   q.returning[:len(q.returning):len(q.returning)],
+		limit:       q.limit,
+		offset:      q.offset,
+		selFor:      q.selFor,
 	}
 	for _, with := range q.with {
 		copy = copy.With(with.name, with.query.Copy())
@@ -158,8 +168,11 @@ func (q *Query) TableExpr(expr string, params ...interface{}) *Query {
 	return q
 }
 
-// Column adds column to the Query quoting it according to PostgreSQL rules.
-// ColumnExpr can be used to bypass quoting restriction.
+// Column adds a column to the Query quoting it according to PostgreSQL rules.
+// ColumnExpr can be used to bypass quoting restriction. Column name can be:
+//   - column_name,
+//   - table_alias.column_name,
+//   - table_alias.*.
 func (q *Query) Column(columns ...string) *Query {
 	for _, column := range columns {
 		if column == "_" {
@@ -186,6 +199,33 @@ func (q *Query) ColumnExpr(expr string, params ...interface{}) *Query {
 	return q
 }
 
+// ExcludeColumn excludes a column from the list of to be selected columns.
+func (q *Query) ExcludeColumn(columns ...string) *Query {
+	if q.columns == nil {
+		for _, f := range q.model.Table().Fields {
+			q.columns = append(q.columns, fieldAppender{f.SQLName})
+		}
+	}
+
+	for _, col := range columns {
+		if !q.excludeColumn(col) {
+			return q.err(fmt.Errorf("pg: can't find column=%q", col))
+		}
+	}
+	return q
+}
+
+func (q *Query) excludeColumn(column string) bool {
+	for i := 0; i < len(q.columns); i++ {
+		app, ok := q.columns[i].(fieldAppender)
+		if ok && app.field == column {
+			q.columns = append(q.columns[:i], q.columns[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
 func (q *Query) getFields() ([]*Field, error) {
 	return q._getFields(false)
 }
@@ -196,7 +236,6 @@ func (q *Query) getDataFields() ([]*Field, error) {
 
 func (q *Query) _getFields(omitPKs bool) ([]*Field, error) {
 	table := q.model.Table()
-
 	var columns []*Field
 	for _, col := range q.columns {
 		f, ok := col.(fieldAppender)
@@ -218,6 +257,10 @@ func (q *Query) _getFields(omitPKs bool) ([]*Field, error) {
 	return columns, nil
 }
 
+// Relation adds a relation to the query. Relation name can be:
+//   - RelationName to select all columns,
+//   - RelationName.column_name,
+//   - RelationName._ to join relation without selecting relation columns.
 func (q *Query) Relation(name string, apply ...func(*Query) (*Query, error)) *Query {
 	var fn func(*Query) (*Query, error)
 	if len(apply) == 1 {
@@ -227,10 +270,8 @@ func (q *Query) Relation(name string, apply ...func(*Query) (*Query, error)) *Qu
 	}
 	_, join := q.model.Join(name, fn)
 	if join == nil {
-		return q.err(fmt.Errorf(
-			"model=%s does not have relation=%s",
-			q.model.Table().Type.Name(), name,
-		))
+		return q.err(fmt.Errorf("%s does not have relation=%q",
+			q.model.Table(), name))
 	}
 	return q
 }
@@ -240,11 +281,23 @@ func (q *Query) Set(set string, params ...interface{}) *Query {
 	return q
 }
 
+// Value overwrites model value for the column in INSERT and UPDATE queries.
 func (q *Query) Value(column string, value string, params ...interface{}) *Query {
-	if q.values == nil {
-		q.values = make(map[string]*queryParamsAppender)
+	if !q.hasModel() {
+		q.err(errors.New("pg: Model(nil)"))
+		return q
 	}
-	q.values[column] = &queryParamsAppender{value, params}
+
+	table := q.model.Table()
+	if _, ok := table.FieldsMap[column]; !ok {
+		q.err(fmt.Errorf("%s does not have column=%q", table, column))
+		return q
+	}
+
+	if q.modelValues == nil {
+		q.modelValues = make(map[string]*queryParamsAppender)
+	}
+	q.modelValues[column] = &queryParamsAppender{value, params}
 	return q
 }
 
@@ -306,6 +359,11 @@ func (q *Query) whereGroup(conj string, fn func(*Query) (*Query, error)) *Query 
 		return q
 	}
 
+	if len(newq.where) == 0 {
+		newq.where = saved
+		return newq
+	}
+
 	f := &condGroupAppender{
 		sep:  conj,
 		cond: newq.where,
@@ -337,15 +395,15 @@ func (q *Query) addWhere(f sepFormatAppender) {
 //    Where("id = ?id")
 func (q *Query) WherePK() *Query {
 	if !q.hasModel() {
-		q.stickyErr = errors.New("pg: Model(nil)")
+		q.err(errors.New("pg: Model(nil)"))
 		return q
 	}
 	if q.model.Kind() == reflect.Slice {
-		q.stickyErr = errors.New("pg: WherePK requires struct Model")
+		q.err(errors.New("pg: WherePK requires struct Model"))
 		return q
 	}
 	if err := q.model.Table().checkPKs(); err != nil {
-		q.stickyErr = err
+		q.err(err)
 		return q
 	}
 	q.where = append(q.where, wherePKQuery{q})
@@ -596,6 +654,15 @@ func (q *Query) SelectAndCount(values ...interface{}) (count int, err error) {
 	return count, err
 }
 
+// ForEach calls the function for each row returned by the query
+// without loading all rows into the memory.
+// Function accepts a struct, pointer to a struct, orm.Model,
+// or values for columns in a row. Function must return an error.
+func (q *Query) ForEach(fn interface{}) error {
+	m := newFuncModel(fn)
+	return q.Select(m)
+}
+
 func (q *Query) forEachHasOneJoin(fn func(*join)) {
 	if q.model == nil {
 		return
@@ -648,7 +715,8 @@ func (q *Query) Insert(values ...interface{}) (Result, error) {
 		}
 	}
 
-	res, err := q.db.Query(model, insertQuery{q: q}, q.model)
+	query := &insertQuery{q: q}
+	res, err := q.returningQuery(model, query)
 	if err != nil {
 		return nil, err
 	}
@@ -693,6 +761,9 @@ func (q *Query) SelectOrInsert(values ...interface{}) (inserted bool, _ error) {
 		res, err := insertq.Insert(values...)
 		if err != nil {
 			insertErr = err
+			if err == internal.ErrNoRows {
+				continue
+			}
 			if pgErr, ok := err.(internal.PGError); ok {
 				if pgErr.IntegrityViolation() {
 					continue
@@ -743,7 +814,8 @@ func (q *Query) update(scan []interface{}, omitZero bool) (Result, error) {
 		}
 	}
 
-	res, err := q.db.Query(model, updateQuery{q: q, omitZero: omitZero}, q.model)
+	query := updateQuery{q: q, omitZero: omitZero}
+	res, err := q.returningQuery(model, query)
 	if err != nil {
 		return nil, err
 	}
@@ -756,6 +828,16 @@ func (q *Query) update(scan []interface{}, omitZero bool) (Result, error) {
 	}
 
 	return res, nil
+}
+
+func (q *Query) returningQuery(model Model, query interface{}) (Result, error) {
+	if len(q.returning) == 0 {
+		return q.db.Query(model, query, q.model)
+	}
+	if _, ok := model.(useQueryOne); ok {
+		return q.db.QueryOne(model, query, q.model)
+	}
+	return q.db.Query(model, query, q.model)
 }
 
 // Delete deletes the model.
@@ -776,7 +858,7 @@ func (q *Query) Delete(values ...interface{}) (Result, error) {
 		}
 	}
 
-	res, err := q.db.Query(model, deleteQuery{q}, q.model)
+	res, err := q.returningQuery(model, deleteQuery{q})
 	if err != nil {
 		return nil, err
 	}
@@ -789,27 +871,6 @@ func (q *Query) Delete(values ...interface{}) (Result, error) {
 	}
 
 	return res, nil
-}
-
-// CreateTable creates table for the model.
-func (q *Query) CreateTable(opt *CreateTableOptions) (Result, error) {
-	if q.stickyErr != nil {
-		return nil, q.stickyErr
-	}
-	return q.db.Exec(createTableQuery{
-		q:   q,
-		opt: opt,
-	})
-}
-
-func (q *Query) DropTable(opt *DropTableOptions) (Result, error) {
-	if q.stickyErr != nil {
-		return nil, q.stickyErr
-	}
-	return q.db.Exec(dropTableQuery{
-		q:   q,
-		opt: opt,
-	})
 }
 
 // Exec is an alias for DB.Exec.
