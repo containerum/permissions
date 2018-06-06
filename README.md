@@ -1,8 +1,10 @@
 # Permissions 
 Permissions is a service for [Containerum](https://github.com/containerum/containerum) that manages user access and enables teamwork.
 
-## Installation
+## Prerequisites
 * Kubernetes
+
+## Installation
 
 ### Using Helm
 
