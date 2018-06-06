@@ -2,6 +2,7 @@
 Permissions is a service for [Containerum](https://github.com/containerum/containerum) that manages user access and enables teamwork.
 
 ## Installation
+* Kubernetes
 
 ### Using Helm
 
@@ -14,5 +15,4 @@ Permissions is a service for [Containerum](https://github.com/containerum/contai
 Please submit all contributions concerning Permissions component to this repository.
 
 ## License
-
-Permissions project is licensed under the terms of the Apache License Version 2.0. Please see LICENSE in this repository for more details.
+Permissions project is licensed under the terms of the Apache License Version 2.0. Please see License in this repository for more details.
