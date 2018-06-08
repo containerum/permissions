@@ -104,11 +104,15 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.N
 		return kubeClientModel.Namespace{}, err
 	}
 
+	kubeNS := ns.ToKube()
+	if kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube); kubeErr != nil {
+		s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		return kubeClientModel.Namespace{},
+			errors.ErrResourceNotExists().AddDetailF("namespace %s not exists", id)
+	}
+
 	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
 	AddUserLogins(ctx, ns.Permissions, s.clients.User)
-
-	kubeNS := ns.ToKube()
-	NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
 
 	return kubeNS, nil
 }
@@ -134,11 +138,17 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]ku
 	}
 
 	ret := make([]kubeClientModel.Namespace, len(namespaces))
-	for i := range namespaces {
-		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
-		AddUserLogins(ctx, namespaces[i].Permissions, s.clients.User)
-		ret[i] = namespaces[i].ToKube()
-		NamespaceAddUsage(ctx, &ret[i], s.clients.Kube)
+	for _, namespace := range namespaces {
+		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
+		// Because of de-synchronization of DB and Kube we can return actually deleted namespace that not marked
+		// as deleted in DB
+		kubeNS := namespace.ToKube()
+		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
+		s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		if kubeErr != nil {
+			continue
+		}
+		ret = append(ret, kubeNS)
 	}
 
 	return ret, nil
@@ -166,10 +176,17 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 	}
 
 	ret := make([]kubeClientModel.Namespace, len(namespaces))
-	for i := range namespaces {
-		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
-		ret[i] = (&model.NamespaceWithPermissions{Namespace: namespaces[i]}).ToKube()
-		NamespaceAddUsage(ctx, &ret[i], s.clients.Kube)
+	for _, namespace := range namespaces {
+		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
+		// Because of de-synchronization of DB and Kube we can return actually deleted namespace that not marked
+		// as deleted in DB
+		kubeNS := (&model.NamespaceWithPermissions{Namespace: namespace}).ToKube()
+		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
+		s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		if kubeErr != nil {
+			continue
+		}
+		ret = append(ret, kubeNS)
 	}
 
 	return ret, nil
