@@ -78,7 +78,7 @@ func (v *VolumeManagerHTTPClient) DeleteNamespaceVolumes(ctx context.Context, ns
 		SetPathParams(map[string]string{
 			"namespace": nsID,
 		}).
-		Delete("/namespaces/{ns_id}/volumes")
+		Delete("/namespaces/{namespace}/volumes")
 	if err != nil {
 		return errors.ErrInternal().Log(err, v.log)
 	}
