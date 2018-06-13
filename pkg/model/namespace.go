@@ -17,11 +17,13 @@ type Namespace struct {
 
 	Resource
 
-	RAM            int `sql:"ram,notnull" json:"ram"`
-	CPU            int `sql:"cpu,notnull" json:"cpu"`
-	MaxExtServices int `sql:"max_ext_services,notnull" json:"max_external_services"`
-	MaxIntServices int `sql:"max_int_services,notnull" json:"max_internal_services"`
-	MaxTraffic     int `sql:"max_traffic,notnull" json:"max_traffic"`
+	// swagger:strfmt uuid
+	TariffID       *string `sql:"tariff_id,type:uuid" json:"tariff_id,omitempty"`
+	RAM            int     `sql:"ram,notnull" json:"ram"`
+	CPU            int     `sql:"cpu,notnull" json:"cpu"`
+	MaxExtServices int     `sql:"max_ext_services,notnull" json:"max_external_services"`
+	MaxIntServices int     `sql:"max_int_services,notnull" json:"max_internal_services"`
+	MaxTraffic     int     `sql:"max_traffic,notnull" json:"max_traffic"`
 }
 
 func (ns *Namespace) BeforeInsert(db orm.DB) error {
