@@ -28,7 +28,7 @@ type Volume struct {
 
 func (v *Volume) BeforeInsert(db orm.DB) error {
 	cnt, err := db.Model(v).
-		Where("owner_user_id = ?owner_user_id").
+		Where("ns_id = ?ns_id").
 		Where("label = ?label").
 		Where("NOT deleted").
 		Count()
