@@ -81,6 +81,15 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 			return createErr
 		}
 
+		if subErr := s.clients.Billing.Subscribe(ctx, billing.SubscribeTariffRequest{
+			TariffID:      tariff.ID,
+			ResourceType:  billing.Namespace,
+			ResourceLabel: ns.Label,
+			ResourceID:    ns.ID,
+		}); subErr != nil {
+			return subErr
+		}
+
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
 			return updErr
 		}
