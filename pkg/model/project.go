@@ -36,3 +36,10 @@ func (p *Project) BeforeInsert(db orm.DB) error {
 type ProjectCreateRequest struct {
 	Label string `json:"label" binding:"required"`
 }
+
+// ProjectAddGroupRequest contains parameters for adding permissions for group
+//
+// swagger:model
+type ProjectAddGroupRequest struct {
+	GroupID string `json:"group" binding:"required"`
+}
