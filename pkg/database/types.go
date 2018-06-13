@@ -38,7 +38,7 @@ type DB interface {
 	DeleteAllUserNamespaces(ctx context.Context, userID string) (deleted []model.Namespace, err error)
 
 	CreateProject(ctx context.Context, project *model.Project) error
-	ProjectByLabel(ctx context.Context, project string) (model.Project, error)
+	ProjectByID(ctx context.Context, project string) (model.Project, error)
 
 	Transactional(fn func(tx DB) error) error
 

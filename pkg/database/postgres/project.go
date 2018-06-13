@@ -22,16 +22,16 @@ func (pgdb *PgDB) CreateProject(ctx context.Context, project *model.Project) err
 	return err
 }
 
-func (pgdb *PgDB) ProjectByLabel(ctx context.Context, project string) (p model.Project, err error) {
+func (pgdb *PgDB) ProjectByID(ctx context.Context, project string) (p model.Project, err error) {
 	pgdb.log.WithField("project", project).Debugf("get project")
 
-	p.Label = project
+	p.ID = project
 	err = pgdb.db.Model(&p).
 		Column("projects.*", "Namespaces").
 		Relation("Namespaces", func(q *orm.Query) (*orm.Query, error) {
 			return q.Where("NOT namespaces.deleted"), nil
 		}).
-		Where("label = ?label").
+		WherePK().
 		Select()
 	switch err {
 	case pg.ErrNoRows:

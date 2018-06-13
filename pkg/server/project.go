@@ -55,7 +55,7 @@ func (s *Server) AddGroup(ctx context.Context, project, groupID string) error {
 	}
 
 	err = s.db.Transactional(func(tx database.DB) error {
-		project, getErr := tx.ProjectByLabel(ctx, project)
+		project, getErr := tx.ProjectByID(ctx, project)
 		if getErr != nil {
 			return getErr
 		}
