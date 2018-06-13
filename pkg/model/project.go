@@ -10,7 +10,7 @@ type Project struct {
 
 	Resource
 
-	Namespaces []*Namespace `sql:"-" pg:"fk:project_id" json:"namespaces,omitempty"`
+	Namespaces []Namespace `sql:"-" pg:"fk:project_id" json:"namespaces,omitempty"`
 }
 
 func (p *Project) BeforeInsert(db orm.DB) error {
