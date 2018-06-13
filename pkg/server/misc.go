@@ -2,15 +2,16 @@ package server
 
 import (
 	"context"
-	"fmt"
 
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/containerum/bill-external/errors"
 	billing "github.com/containerum/bill-external/models"
-	kubeAPIModel "github.com/containerum/kube-client/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 )
+
+const DefaultVolumeName = "default-volume"
 
 // IsAdminRole checks that request came from user with admin permissions.
 func IsAdminRole(ctx context.Context) bool {
@@ -67,7 +68,7 @@ func AddUserLogins(ctx context.Context, permissions []model.Permission, client c
 	return nil
 }
 
-func NamespaceAddUsage(ctx context.Context, ns *kubeAPIModel.Namespace, client clients.KubeAPIClient) error {
+func NamespaceAddUsage(ctx context.Context, ns *kubeClientModel.Namespace, client clients.KubeAPIClient) error {
 	kubeNS, err := client.GetNamespace(ctx, ns.ID)
 	if err != nil {
 		return err
@@ -76,6 +77,17 @@ func NamespaceAddUsage(ctx context.Context, ns *kubeAPIModel.Namespace, client c
 	return nil
 }
 
-func StandardNamespaceVolumeName(ns model.Namespace) string {
-	return fmt.Sprintf("namespace-%s-defaultvolume", ns.ID)
+func UserGroupAccessToDBAccess(access kubeClientModel.UserGroupAccess) kubeClientModel.AccessLevel {
+	switch access {
+	case kubeClientModel.OwnerAccess, kubeClientModel.AdminAccess:
+		return kubeClientModel.Owner
+	case kubeClientModel.MasterAccess:
+		return kubeClientModel.Write
+	case kubeClientModel.MemberAccess:
+		return kubeClientModel.ReadDelete
+	case kubeClientModel.GuestAccess:
+		return kubeClientModel.Read
+	default:
+		return kubeClientModel.None
+	}
 }

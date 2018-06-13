@@ -23,7 +23,13 @@
     "pkg/errors",
     "pkg/models"
   ]
-  revision = "98035866475ff45881c44ad4a5312cf70be74c6b"
+  revision = "6e853e720bf6f8105989c3987c41e0be51474c9d"
+
+[[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
 
 [[projects]]
   name = "github.com/containerum/bill-external"
@@ -51,14 +57,23 @@
     ".",
     "pkg/model"
   ]
-  revision = "2b8f5ddce4423867372d607726e241df69b96f73"
-  version = "v0.19.6"
+  revision = "793f2f89fed79428786d0a335aa16777384e323c"
+  version = "v0.20.1"
 
 [[projects]]
   name = "github.com/containerum/utils"
   packages = ["httputil"]
   revision = "0d81250fc88af062d5836ecd83db9867eb6ee34c"
   version = "v1.0.3"
+
+[[projects]]
+  name = "github.com/docker/distribution"
+  packages = [
+    "digest",
+    "reference"
+  ]
+  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
+  version = "v2.6.2"
 
 [[projects]]
   name = "github.com/gin-contrib/cors"
@@ -331,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6ab5de70c63726c9a4a7bd38781c915e356bcc2cb247295cdba2ef63b04a6d67"
+  inputs-digest = "93baf4ef71a40d00aefb8b6f39d693eb67215a11732bc810d618c766c17643b4"
   solver-name = "gps-cdcl"
   solver-version = 1

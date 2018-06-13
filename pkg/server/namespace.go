@@ -149,13 +149,10 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]ku
 	ret := make([]kubeClientModel.Namespace, 0)
 	for _, namespace := range namespaces {
 		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
-		// Because of de-synchronization of DB and Kube we can return actually deleted namespace that not marked
-		// as deleted in DB
 		kubeNS := namespace.ToKube()
 		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
 		if kubeErr != nil {
 			s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
-			continue
 		}
 		ret = append(ret, kubeNS)
 	}
@@ -187,13 +184,10 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 	ret := make([]kubeClientModel.Namespace, 0)
 	for _, namespace := range namespaces {
 		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
-		// Because of de-synchronization of DB and Kube we can return actually deleted namespace that not marked
-		// as deleted in DB
 		kubeNS := (&model.NamespaceWithPermissions{Namespace: namespace}).ToKube()
 		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
 		if kubeErr != nil {
 			s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
-			continue
 		}
 		ret = append(ret, kubeNS)
 	}
@@ -394,7 +388,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		}
 
 		if oldTariff.VolumeSize <= 0 && newTariff.VolumeSize > 0 {
-			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, StandardNamespaceVolumeName(ns.Namespace), newTariff.VolumeSize); createErr != nil {
+			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, DefaultVolumeName, newTariff.VolumeSize); createErr != nil {
 				return createErr
 			}
 		}

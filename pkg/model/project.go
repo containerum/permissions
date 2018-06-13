@@ -9,6 +9,8 @@ type Project struct {
 	tableName struct{} `sql:"projects"`
 
 	Resource
+
+	Namespaces []Namespace `sql:"-" pg:"fk:project_id" json:"namespaces,omitempty"`
 }
 
 func (p *Project) BeforeInsert(db orm.DB) error {
@@ -33,4 +35,11 @@ func (p *Project) BeforeInsert(db orm.DB) error {
 // swagger:model
 type ProjectCreateRequest struct {
 	Label string `json:"label" binding:"required"`
+}
+
+// ProjectAddGroupRequest contains parameters for adding permissions for group
+//
+// swagger:model
+type ProjectAddGroupRequest struct {
+	GroupID string `json:"group" binding:"required"`
 }

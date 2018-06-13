@@ -15,7 +15,7 @@ type Storage struct {
 
 	Size int `sql:"size,notnull" json:"size" binding:"gt=0"`
 
-	Used int `sql:"used,notnull" json:"used" binding:"gt=0,ltecsfield=Size"`
+	Used int `sql:"used,notnull" json:"used" binding:"gte=0,ltecsfield=Size"`
 
 	Volumes []*Volume `pg:"fk:storage_id" sql:"-" json:"volumes"`
 }
