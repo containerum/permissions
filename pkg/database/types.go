@@ -30,6 +30,8 @@ type DB interface {
 	DeleteNamespace(ctx context.Context, namespace *model.Namespace) error
 	DeleteAllUserNamespaces(ctx context.Context, userID string) (deleted []model.Namespace, err error)
 
+	CreateProject(ctx context.Context, project *model.Project) error
+
 	Transactional(fn func(tx DB) error) error
 
 	io.Closer
