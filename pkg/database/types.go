@@ -14,10 +14,16 @@ type AccessWithLabel struct {
 	Label string `sql:"label"`
 }
 
+type AccessListElement struct {
+	AccessLevel kubeClientModel.AccessLevel
+	ToUserID    string
+}
+
 type DB interface {
 	UserAccesses(ctx context.Context, userID string) ([]AccessWithLabel, error)
 	SetUserAccesses(ctx context.Context, userID string, level kubeClientModel.AccessLevel) error
 	SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.AccessLevel, toUserID string) error
+	SetNamespaceAccesses(ctx context.Context, ns model.Namespace, accessList []AccessListElement) error
 	DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error
 
 	NamespaceByID(ctx context.Context, userID, id string) (ret model.NamespaceWithPermissions, err error)
