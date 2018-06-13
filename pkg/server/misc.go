@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 
 	"git.containerum.net/ch/permissions/pkg/clients"
 	"git.containerum.net/ch/permissions/pkg/model"
@@ -11,6 +10,8 @@ import (
 	kubeAPIModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 )
+
+const DefaultVolumeName = "default-volume"
 
 // IsAdminRole checks that request came from user with admin permissions.
 func IsAdminRole(ctx context.Context) bool {
@@ -74,8 +75,4 @@ func NamespaceAddUsage(ctx context.Context, ns *kubeAPIModel.Namespace, client c
 	}
 	ns.Resources.Used = kubeNS.Resources.Used
 	return nil
-}
-
-func StandardNamespaceVolumeName(ns model.Namespace) string {
-	return fmt.Sprintf("namespace-%s-defaultvolume", ns.ID)
 }

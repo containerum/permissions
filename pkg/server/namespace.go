@@ -385,7 +385,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		}
 
 		if oldTariff.VolumeSize <= 0 && newTariff.VolumeSize > 0 {
-			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, StandardNamespaceVolumeName(ns.Namespace), newTariff.VolumeSize); createErr != nil {
+			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, DefaultVolumeName, newTariff.VolumeSize); createErr != nil {
 				return createErr
 			}
 		}
