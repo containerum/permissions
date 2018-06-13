@@ -109,6 +109,32 @@ func (pgdb *PgDB) SetNamespaceAccesses(ctx context.Context, ns model.Namespace, 
 	return pgdb.setResourceAccesses(ctx, permissions)
 }
 
+func (pgdb *PgDB) SetNamespacesAccesses(ctx context.Context, namespaces []model.Namespace, accessList []database.AccessListElement) error {
+	pgdb.log.Debugf("set accesses for namespaces")
+
+	if len(accessList) == 0 {
+		return nil
+	}
+
+	if len(accessList) == 0 || len(namespaces) == 0 {
+		return nil
+	}
+
+	var permissions []model.Permission
+	for _, namespace := range namespaces {
+		for _, access := range accessList {
+			permissions = append(permissions, model.Permission{
+				ResourceType:       model.ResourceNamespace,
+				ResourceID:         namespace.ID,
+				UserID:             access.ToUserID,
+				InitialAccessLevel: access.AccessLevel,
+				CurrentAccessLevel: access.AccessLevel,
+			})
+		}
+	}
+	return pgdb.setResourceAccesses(ctx, permissions)
+}
+
 func (pgdb *PgDB) deleteResourceAccess(ctx context.Context, resource model.Resource, kind model.ResourceType, userID string) error {
 	_, err := pgdb.db.Model(&model.Permission{UserID: userID, ResourceID: resource.ID, ResourceType: kind}).
 		Where("user_id = ?user_id").
