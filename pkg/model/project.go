@@ -27,3 +27,10 @@ func (p *Project) BeforeInsert(db orm.DB) error {
 
 	return nil
 }
+
+// ProjectCreateRequest contains parameters for creating project
+//
+// swagger:model
+type ProjectCreateRequest struct {
+	Label string `json:"label" binding:"required"`
+}
