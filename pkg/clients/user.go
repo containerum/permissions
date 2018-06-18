@@ -23,7 +23,9 @@ type UserManagerClient interface {
 	UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error)
 	UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error)
 	UserLoginIDList(ctx context.Context, userIDs ...string) (map[string]string, error)
+
 	Group(ctx context.Context, groupID string) (*kubeClientModel.UserGroup, error)
+	GroupNameIDList(ctx context.Context, groupIDs ...string) (map[string]string, error)
 }
 
 type UserManagerHTTPClient struct {
@@ -128,6 +130,27 @@ func (u *UserManagerHTTPClient) Group(ctx context.Context, groupID string) (*kub
 	return resp.Result().(*kubeClientModel.UserGroup), nil
 }
 
+func (u *UserManagerHTTPClient) GroupNameIDList(ctx context.Context, groupIDs ...string) (map[string]string, error) {
+	u.log.WithField("group_ids", groupIDs).Debugf("get groups list")
+
+	resp, err := u.client.R().
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(groupIDs).
+		SetResult(make(map[string]string)).
+		Post("/groups/labelid")
+	if err != nil {
+		return nil, errors.ErrInternal().Log(err, u.log)
+	}
+	if resp.Error() != nil {
+		return nil, resp.Error().(*cherry.Err)
+	}
+
+	ret := resp.Result().(*map[string]string)
+
+	return *ret, nil
+}
+
 func (u *UserManagerHTTPClient) String() string {
 	return fmt.Sprintf("user-manager http client: url=%s", u.client.HostURL)
 }
@@ -199,6 +222,16 @@ func (u *UserManagerDummyClient) Group(ctx context.Context, groupID string) (*ku
 		UserGroupMembers: &kubeClientModel.UserGroupMembers{},
 		CreatedAt:        time.Now().Format(time.RFC3339),
 	}, nil
+}
+
+func (u *UserManagerDummyClient) GroupNameIDList(ctx context.Context, groupIDs ...string) (map[string]string, error) {
+	u.log.WithField("group_ids", groupIDs).Debugf("get groups list")
+	ret := make(map[string]string)
+	for _, v := range groupIDs {
+		ret[v] = "fake-group-" + v
+	}
+
+	return ret, nil
 }
 
 func (u *UserManagerDummyClient) String() string {
