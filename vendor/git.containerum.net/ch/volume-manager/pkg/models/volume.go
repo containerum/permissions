@@ -67,11 +67,8 @@ func (v *Volume) AfterUpdate(db orm.DB) error {
 
 func (v *Volume) ToKube() model.Volume {
 	vol := model.Volume{
-		Name: v.Label,
-		CreatedAt: func() *string {
-			t := v.CreateTime.Format(time.RFC3339)
-			return &t
-		}(),
+		Name:      v.Label,
+		CreatedAt: v.CreateTime.Format(time.RFC3339),
 		TariffID: func() string {
 			if v.TariffID == nil {
 				return ""

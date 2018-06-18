@@ -279,9 +279,9 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.DELETE("/namespaces/:id", handlers.deleteNamespaceHandler)
 
-	// swagger:operation DELETE /admin/namespaces Namespaces DeleteAllUserNamespaces
+	// swagger:operation DELETE /namespaces Namespaces DeleteAllUserNamespaces
 	//
-	// Delete all user namespaces (admin only).
+	// Delete all user namespaces.
 	//
 	// ---
 	// parameters:
@@ -293,7 +293,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespaces deleted
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.DELETE("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserNamespacesHandler)
+	r.engine.DELETE("/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.deleteAllUserNamespacesHandler)
 
 	// swagger:operation GET /namespaces/{id} Namespaces GetNamespace
 	//
