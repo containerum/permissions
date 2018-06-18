@@ -23,7 +23,7 @@
     "pkg/errors",
     "pkg/models"
   ]
-  revision = "6e853e720bf6f8105989c3987c41e0be51474c9d"
+  revision = "303cd0b0b39acfa4b2208ff6a792e08774ace37e"
 
 [[projects]]
   name = "github.com/blang/semver"
@@ -57,8 +57,8 @@
     ".",
     "pkg/model"
   ]
-  revision = "793f2f89fed79428786d0a335aa16777384e323c"
-  version = "v0.20.1"
+  revision = "dbfd7cb7735022ac3e819a199a4e07a44772bb45"
+  version = "v0.23.2"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -346,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "93baf4ef71a40d00aefb8b6f39d693eb67215a11732bc810d618c766c17643b4"
+  inputs-digest = "95435af4a0c30782d094c9b66abf1cfb8bc265397cc481cf091a1380054047f6"
   solver-name = "gps-cdcl"
   solver-version = 1
