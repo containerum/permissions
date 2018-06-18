@@ -474,6 +474,10 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 			return unsubErr
 		}
 
+		if delErr := s.clients.Solutions.DeleteUserSolutions(ctx); delErr != nil {
+			return delErr
+		}
+
 		if delErr := s.clients.Resource.DeleteAllUserNamespaces(ctx); delErr != nil {
 			return delErr
 		}
