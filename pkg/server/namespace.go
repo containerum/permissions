@@ -6,6 +6,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
+	billing "github.com/containerum/bill-external/models"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
@@ -62,8 +63,8 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 				Resource: model.Resource{
 					OwnerUserID: userID,
 					Label:       req.Label,
-					TariffID:    &req.TariffID,
 				},
+				TariffID:       &req.TariffID,
 				CPU:            tariff.CPULimit,
 				RAM:            tariff.MemoryLimit,
 				MaxExtServices: tariff.ExternalServices,
@@ -78,6 +79,15 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 
 		if createErr := s.clients.Kube.CreateNamespace(ctx, ns.ToKube()); createErr != nil {
 			return createErr
+		}
+
+		if subErr := s.clients.Billing.Subscribe(ctx, billing.SubscribeTariffRequest{
+			TariffID:      tariff.ID,
+			ResourceType:  billing.Namespace,
+			ResourceLabel: ns.Label,
+			ResourceID:    ns.ID,
+		}); subErr != nil {
+			return subErr
 		}
 
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {
@@ -103,11 +113,15 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.N
 		return kubeClientModel.Namespace{}, err
 	}
 
+	kubeNS := ns.ToKube()
+	if kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube); kubeErr != nil {
+		s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		return kubeClientModel.Namespace{},
+			errors.ErrResourceNotExists().AddDetailF("namespace %s not exists", id)
+	}
+
 	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
 	AddUserLogins(ctx, ns.Permissions, s.clients.User)
-
-	kubeNS := ns.ToKube()
-	NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
 
 	return kubeNS, nil
 }
@@ -132,12 +146,15 @@ func (s *Server) GetUserNamespaces(ctx context.Context, filters ...string) ([]ku
 		return nil, err
 	}
 
-	ret := make([]kubeClientModel.Namespace, len(namespaces))
-	for i := range namespaces {
-		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
-		AddUserLogins(ctx, namespaces[i].Permissions, s.clients.User)
-		ret[i] = namespaces[i].ToKube()
-		NamespaceAddUsage(ctx, &ret[i], s.clients.Kube)
+	ret := make([]kubeClientModel.Namespace, 0)
+	for _, namespace := range namespaces {
+		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
+		kubeNS := namespace.ToKube()
+		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
+		if kubeErr != nil {
+			s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		}
+		ret = append(ret, kubeNS)
 	}
 
 	return ret, nil
@@ -164,11 +181,15 @@ func (s *Server) GetAllNamespaces(ctx context.Context, page, perPage int, filter
 		return nil, err
 	}
 
-	ret := make([]kubeClientModel.Namespace, len(namespaces))
-	for i := range namespaces {
-		AddOwnerLogin(ctx, &namespaces[i].Resource, s.clients.User)
-		ret[i] = (&model.NamespaceWithPermissions{Namespace: namespaces[i]}).ToKube()
-		NamespaceAddUsage(ctx, &ret[i], s.clients.Kube)
+	ret := make([]kubeClientModel.Namespace, 0)
+	for _, namespace := range namespaces {
+		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
+		kubeNS := (&model.NamespaceWithPermissions{Namespace: namespace}).ToKube()
+		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
+		if kubeErr != nil {
+			s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		}
+		ret = append(ret, kubeNS)
 	}
 
 	return ret, nil
@@ -332,6 +353,14 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			return chkErr
 		}
 
+		var oldTariff billing.NamespaceTariff
+		if ns.TariffID != nil {
+			oldTariff, getErr = s.clients.Billing.GetNamespaceTariff(ctx, *ns.TariffID)
+			if getErr != nil {
+				return getErr
+			}
+		}
+
 		ns.TariffID = &newTariff.ID
 		ns.MaxIntServices = newTariff.ExternalServices
 		ns.MaxIntServices = newTariff.InternalServices
@@ -355,6 +384,16 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		}
 
 		if resizeErr := s.clients.Kube.SetNamespaceQuota(ctx, ns.ToKube()); resizeErr != nil {
+			return resizeErr
+		}
+
+		if oldTariff.VolumeSize <= 0 && newTariff.VolumeSize > 0 {
+			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, DefaultVolumeName, newTariff.VolumeSize); createErr != nil {
+				return createErr
+			}
+		}
+
+		if resizeErr := s.clients.Billing.UpdateSubscription(ctx, ns.ID, newTariff.ID); resizeErr != nil {
 			return resizeErr
 		}
 
@@ -386,6 +425,10 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 		}
 
 		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.ID); delErr != nil {
+			return delErr
+		}
+
+		if delErr := s.clients.Volume.DeleteNamespaceVolumes(ctx, ns.ID); delErr != nil {
 			return delErr
 		}
 
@@ -437,6 +480,10 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 			if delErr := s.clients.Kube.DeleteNamespace(ctx, nsPerm.ToKube()); delErr != nil {
 				return delErr
 			}
+		}
+
+		if delErr := s.clients.Volume.DeleteAllUserVolumes(ctx); delErr != nil {
+			return delErr
 		}
 
 		if updErr := updateUserAccesses(ctx, s.clients.Auth, tx, userID); updErr != nil {

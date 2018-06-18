@@ -22,9 +22,6 @@ type Resource struct {
 	DeleteTime *time.Time `sql:"delete_time" json:"delete_time,omitempty"`
 
 	// swagger:strfmt uuid
-	TariffID *string `sql:"tariff_id,type:uuid" json:"tariff_id,omitempty"`
-
-	// swagger:strfmt uuid
 	OwnerUserID string `sql:"owner_user_id,type:uuid,notnull" json:"owner_user_id,omitempty"`
 
 	// swagger:strfmt email

@@ -28,21 +28,17 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            {{- range $key, $val := .Values.env.global }}
-            {{ if $val }}
+            {{- range $key, $val := .Values.env.global }}{{ if $val }}
             - name: {{ $key  }}
               value: {{ $val | quote }}
-            {{ end }}
-            {{- end }}
-
+            {{ end }}{{- end }}
             {{- if .Values.env.local.DB_HOST }}
             - name: DB_HOST
               value: "{{ .Values.env.local.DB_HOST }}"
             {{- else }}
             - name: DB_HOST
-              value: "{{ .Release.Name }}-postgresl:5432"
+              value: "{{ .Release.Name }}-postgresql:5432"
             {{- end }}
-
             {{- if .Values.env.local.AUTH_ADDR }}
             - name: AUTH_ADDR
               value: "{{ .Values.env.local.AUTH_ADDR }}"
@@ -50,7 +46,6 @@ spec:
             - name: AUTH_ADDR
               value: "{{ .Release.Name }}-auth:1112"
             {{- end }}
-
             {{- if .Values.env.local.USER_ADDR }}
             - name: USER_ADDR
               value: "{{ .Values.env.local.USER_ADDR }}"
@@ -58,7 +53,6 @@ spec:
             - name: USER_ADDR
               value: "{{ .Release.Name }}-user-manager:8111"
             {{- end }}
-
             {{- if .Values.env.local.KUBE_API_ADDR }}
             - name: KUBE_API_ADDR
               value: "{{ .Values.env.local.KUBE_API_ADDR }}"
@@ -66,7 +60,6 @@ spec:
             - name: KUBE_API_ADDR
               value: "{{ .Release.Name }}-kube:1214"
             {{- end }}
-
             {{- if .Values.env.local.RESOURCE_SERVICE_ADDR }}
             - name: RESOURCE_SERVICE_ADDR
               value: "{{ .Values.env.local.RESOURCE_SERVICE_ADDR }}"
@@ -74,12 +67,10 @@ spec:
             - name: RESOURCE_SERVICE_ADDR
               value: "{{ .Release.Name }}-resource:1213"
             {{- end }}
-
             {{- if .Values.env.local.BILLING_ADDR }}
             - name: BILLING_ADDR
               value: "{{ .Values.env.local.BILLING_ADDR }}"
             {{- end }}
-
             {{- if .Values.env.local.DB_PASSWORD }}
             - name: DB_PASSWORD
               valueFrom:

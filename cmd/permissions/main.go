@@ -26,6 +26,7 @@ import (
 )
 
 //go:generate swagger generate spec -m -i ../../swagger-basic.yml -o ../../swagger.json
+//go:generate swagger flatten ../../swagger.json -o ../../swagger.json
 
 func exitOnError(err error) {
 	if err != nil {
@@ -73,6 +74,7 @@ func main() {
 			&UserAddrFlag,
 			&BillingAddrFlag,
 			&ResourceServiceAddrFlag,
+			&VolumeManagerAddrFlag,
 			&CORSFlag,
 		},
 		Before: func(ctx *cli.Context) error {

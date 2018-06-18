@@ -17,6 +17,21 @@
   revision = "9a9cb6024efb51db6a6672b9492091ec3685e34f"
 
 [[projects]]
+  branch = "develop"
+  name = "git.containerum.net/ch/volume-manager"
+  packages = [
+    "pkg/errors",
+    "pkg/models"
+  ]
+  revision = "303cd0b0b39acfa4b2208ff6a792e08774ace37e"
+
+[[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   name = "github.com/containerum/bill-external"
   packages = [
     "errors",
@@ -38,15 +53,27 @@
 
 [[projects]]
   name = "github.com/containerum/kube-client"
-  packages = ["pkg/model"]
-  revision = "262983343732e6686e3b4e06d61f95269127686e"
-  version = "v0.17.4"
+  packages = [
+    ".",
+    "pkg/model"
+  ]
+  revision = "dbfd7cb7735022ac3e819a199a4e07a44772bb45"
+  version = "v0.23.2"
 
 [[projects]]
   name = "github.com/containerum/utils"
   packages = ["httputil"]
   revision = "0d81250fc88af062d5836ecd83db9867eb6ee34c"
   version = "v1.0.3"
+
+[[projects]]
+  name = "github.com/docker/distribution"
+  packages = [
+    "digest",
+    "reference"
+  ]
+  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
+  version = "v2.6.2"
 
 [[projects]]
   name = "github.com/gin-contrib/cors"
@@ -92,8 +119,8 @@
     "orm",
     "types"
   ]
-  revision = "5b73ce88484575f3480edf393237f6bf79d5f166"
-  version = "v6.11.2"
+  revision = "8c7fa0eed0d9e9d07fca2cc9e08e3171da0521d5"
+  version = "v6.13.5"
 
 [[projects]]
   name = "github.com/go-playground/locales"
@@ -319,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "843a85e342ae52bfb5887f79efe056be10fede1dcf2971daceb3d87999d3a569"
+  inputs-digest = "95435af4a0c30782d094c9b66abf1cfb8bc265397cc481cf091a1380054047f6"
   solver-name = "gps-cdcl"
   solver-version = 1

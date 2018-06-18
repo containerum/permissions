@@ -74,6 +74,67 @@ func (pgdb *PgDB) SetNamespaceAccess(ctx context.Context, ns model.Namespace, ac
 	})
 }
 
+func (pgdb *PgDB) setResourceAccesses(ctx context.Context, perms []model.Permission) error {
+	_, err := pgdb.db.Model(&perms).
+		OnConflict(`(resource_type, resource_id, user_id) DO UPDATE`).
+		Set(`initial_access_level = ?initial_access_level`).
+		Set(`current_access_level = LEAST(?initial_access_level, ?current_access_level)::ACCESS_LEVEL`).
+		Insert()
+
+	if err != nil {
+		return pgdb.handleError(err)
+	}
+
+	return nil
+}
+
+func (pgdb *PgDB) SetNamespaceAccesses(ctx context.Context, ns model.Namespace, accessList []database.AccessListElement) error {
+	pgdb.log.WithField("ns_id", ns.ID).Debugf("set namespace accesses %v", accessList)
+
+	if len(accessList) == 0 {
+		return nil
+	}
+
+	permissions := make([]model.Permission, len(accessList))
+	for i, v := range accessList {
+		permissions[i] = model.Permission{
+			ResourceType:       model.ResourceNamespace,
+			ResourceID:         ns.ID,
+			UserID:             v.ToUserID,
+			InitialAccessLevel: v.AccessLevel,
+			CurrentAccessLevel: v.AccessLevel,
+		}
+	}
+
+	return pgdb.setResourceAccesses(ctx, permissions)
+}
+
+func (pgdb *PgDB) SetNamespacesAccesses(ctx context.Context, namespaces []model.Namespace, accessList []database.AccessListElement) error {
+	pgdb.log.Debugf("set accesses for namespaces")
+
+	if len(accessList) == 0 {
+		return nil
+	}
+
+	if len(accessList) == 0 || len(namespaces) == 0 {
+		return nil
+	}
+
+	var permissions []model.Permission
+	for _, namespace := range namespaces {
+		for _, access := range accessList {
+			permissions = append(permissions, model.Permission{
+				ResourceType:       model.ResourceNamespace,
+				ResourceID:         namespace.ID,
+				UserID:             access.ToUserID,
+				InitialAccessLevel: access.AccessLevel,
+				CurrentAccessLevel: access.AccessLevel,
+			})
+		}
+	}
+	return pgdb.setResourceAccesses(ctx, permissions)
+}
+
 func (pgdb *PgDB) deleteResourceAccess(ctx context.Context, resource model.Resource, kind model.ResourceType, userID string) error {
 	_, err := pgdb.db.Model(&model.Permission{UserID: userID, ResourceID: resource.ID, ResourceType: kind}).
 		Where("user_id = ?user_id").

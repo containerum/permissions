@@ -14,7 +14,7 @@ import (
 	"github.com/go-pg/pg/orm"
 	"github.com/sirupsen/logrus"
 
-	_ "git.containerum.net/ch/permissions/pkg/migrations" // to run migrations
+	_ "git.containerum.net/ch/permissions/pkg/database/postgres/migrations" // to run migrations
 )
 
 type PgDB struct {

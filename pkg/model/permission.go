@@ -42,6 +42,8 @@ type Permission struct {
 	CurrentAccessLevel model.AccessLevel `sql:"current_access_level,type:ACCESS_LEVEL,notnull" json:"new_access_level,omitempty"` // WARN: custom type here, do not forget create it
 
 	AccessLevelChangeTime *time.Time `sql:"access_level_change_time,default:now(),notnull" json:"access_level_change_time,omitempty"`
+
+	GroupID *string `sql:"group_id,type:uuid" json:"group_id,omitempty"`
 }
 
 func (p *Permission) BeforeInsert(db orm.DB) error {
@@ -101,6 +103,7 @@ func (p *Permission) Mask() {
 	p.InitialAccessLevel = p.CurrentAccessLevel
 	p.AccessLevelChangeTime = nil
 	p.CurrentAccessLevel = ""
+	p.GroupID = nil
 }
 
 // SetUserAccessRequest is a request object for setting user accesses

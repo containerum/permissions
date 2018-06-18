@@ -4,7 +4,9 @@ import (
 	"context"
 	"net/url"
 
+	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/cherry"
+	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -17,7 +19,7 @@ type ResourceServiceClient interface {
 }
 
 type ResourceServiceHTTPClient struct {
-	log    *logrus.Entry
+	log    *cherrylog.LogrusAdapter
 	client *resty.Client
 }
 
@@ -33,7 +35,7 @@ func NewResourceServiceHTTPClient(url *url.URL) *ResourceServiceHTTPClient {
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &ResourceServiceHTTPClient{
-		log:    log,
+		log:    cherrylog.NewLogrusAdapter(log),
 		client: client,
 	}
 }
@@ -48,7 +50,7 @@ func (r *ResourceServiceHTTPClient) DeleteNamespaceResources(ctx context.Context
 		}).
 		Delete("/namespaces/{namespace}")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, r.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -63,7 +65,7 @@ func (r *ResourceServiceHTTPClient) DeleteAllUserNamespaces(ctx context.Context)
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Delete("/namespaces")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, r.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)

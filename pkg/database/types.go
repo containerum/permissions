@@ -14,10 +14,17 @@ type AccessWithLabel struct {
 	Label string `sql:"label"`
 }
 
+type AccessListElement struct {
+	AccessLevel kubeClientModel.AccessLevel
+	ToUserID    string
+}
+
 type DB interface {
 	UserAccesses(ctx context.Context, userID string) ([]AccessWithLabel, error)
 	SetUserAccesses(ctx context.Context, userID string, level kubeClientModel.AccessLevel) error
 	SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.AccessLevel, toUserID string) error
+	SetNamespaceAccesses(ctx context.Context, ns model.Namespace, accessList []AccessListElement) error
+	SetNamespacesAccesses(ctx context.Context, namespaces []model.Namespace, accessList []AccessListElement) error
 	DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error
 
 	NamespaceByID(ctx context.Context, userID, id string) (ret model.NamespaceWithPermissions, err error)
@@ -29,6 +36,9 @@ type DB interface {
 	ResizeNamespace(ctx context.Context, namespace model.Namespace) error
 	DeleteNamespace(ctx context.Context, namespace *model.Namespace) error
 	DeleteAllUserNamespaces(ctx context.Context, userID string) (deleted []model.Namespace, err error)
+
+	CreateProject(ctx context.Context, project *model.Project) error
+	ProjectByID(ctx context.Context, project string) (model.Project, error)
 
 	Transactional(fn func(tx DB) error) error
 

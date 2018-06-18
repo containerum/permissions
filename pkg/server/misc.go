@@ -7,9 +7,11 @@ import (
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/containerum/bill-external/errors"
 	billing "github.com/containerum/bill-external/models"
-	kubeAPIModel "github.com/containerum/kube-client/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 )
+
+const DefaultVolumeName = "default-volume"
 
 // IsAdminRole checks that request came from user with admin permissions.
 func IsAdminRole(ctx context.Context) bool {
@@ -48,6 +50,9 @@ func AddOwnerLogin(ctx context.Context, r *model.Resource, client clients.UserMa
 }
 
 func AddUserLogins(ctx context.Context, permissions []model.Permission, client clients.UserManagerClient) error {
+	if len(permissions) == 0 {
+		return nil
+	}
 	userIDs := make([]string, len(permissions))
 	for i := range permissions {
 		userIDs[i] = permissions[i].UserID
@@ -63,11 +68,26 @@ func AddUserLogins(ctx context.Context, permissions []model.Permission, client c
 	return nil
 }
 
-func NamespaceAddUsage(ctx context.Context, ns *kubeAPIModel.Namespace, client clients.KubeAPIClient) error {
+func NamespaceAddUsage(ctx context.Context, ns *kubeClientModel.Namespace, client clients.KubeAPIClient) error {
 	kubeNS, err := client.GetNamespace(ctx, ns.ID)
 	if err != nil {
 		return err
 	}
 	ns.Resources.Used = kubeNS.Resources.Used
 	return nil
+}
+
+func UserGroupAccessToDBAccess(access kubeClientModel.UserGroupAccess) kubeClientModel.AccessLevel {
+	switch access {
+	case kubeClientModel.OwnerAccess, kubeClientModel.AdminAccess:
+		return kubeClientModel.Owner
+	case kubeClientModel.MasterAccess:
+		return kubeClientModel.Write
+	case kubeClientModel.MemberAccess:
+		return kubeClientModel.ReadDelete
+	case kubeClientModel.GuestAccess:
+		return kubeClientModel.Read
+	default:
+		return kubeClientModel.None
+	}
 }

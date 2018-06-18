@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"git.containerum.net/ch/permissions/pkg/errors"
 	berrors "github.com/containerum/bill-external/errors"
 	btypes "github.com/containerum/bill-external/models"
 	"github.com/containerum/cherry"
@@ -19,6 +20,7 @@ import (
 type BillingClient interface {
 	Subscribe(ctx context.Context, req btypes.SubscribeTariffRequest) error
 	Rename(ctx context.Context, resourceID, newLabel string) error
+	UpdateSubscription(ctx context.Context, resourceID, newTariffID string) error
 	Unsubscribe(ctx context.Context, resourceID string) error
 	MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error
 
@@ -139,7 +141,7 @@ func (b *BillingHTTPClient) Subscribe(ctx context.Context, req btypes.SubscribeT
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post("/isp/subscription")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -164,7 +166,28 @@ func (b *BillingHTTPClient) Rename(ctx context.Context, resourceID, newLabel str
 		}).
 		Put("/resource/{resource}")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+
+	return nil
+}
+
+func (b *BillingHTTPClient) UpdateSubscription(ctx context.Context, resourceID, newTariffID string) error {
+	b.log.WithFields(logrus.Fields{
+		"resource_id":   resourceID,
+		"new_tariff_id": newTariffID,
+	}).Debugf("update subscription")
+
+	resp, err := b.client.R().
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(map[string]string{"tariff_id": newTariffID}).
+		SetPathParams(map[string]string{"resource": resourceID}).
+		Put("/isp/subscription/{resource}")
+	if err != nil {
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -180,12 +203,10 @@ func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) 
 
 	resp, err := b.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		SetPathParams(map[string]string{
-			"resource": resourceID,
-		}).
+		SetPathParams(map[string]string{"resource": resourceID}).
 		Delete("/isp/subscription/{resource}")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -204,7 +225,7 @@ func (b *BillingHTTPClient) MassiveUnsubscribe(ctx context.Context, resourceIDs 
 		}).
 		Delete("/isp/subscription")
 	if err != nil {
-		return err
+		return errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
@@ -225,7 +246,7 @@ func (b *BillingHTTPClient) GetNamespaceTariff(ctx context.Context, tariffID str
 		}).
 		Get("/tariffs/namespace/{tariff}")
 	if err != nil {
-		return btypes.NamespaceTariff{}, err
+		return btypes.NamespaceTariff{}, errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return btypes.NamespaceTariff{}, resp.Error().(*cherry.Err)
@@ -246,7 +267,7 @@ func (b *BillingHTTPClient) GetVolumeTariff(ctx context.Context, tariffID string
 		}).
 		Get("/tariffs/volume/{tariff}")
 	if err != nil {
-		return btypes.VolumeTariff{}, err
+		return btypes.VolumeTariff{}, errors.ErrInternal().Log(err, b.log)
 	}
 	if resp.Error() != nil {
 		return btypes.VolumeTariff{}, resp.Error().(*cherry.Err)
@@ -280,6 +301,15 @@ func (b BillingDummyClient) Rename(ctx context.Context, resourceID, newLabel str
 		"resource_id": resourceID,
 		"new_label":   newLabel,
 	}).Debugln("Rename")
+
+	return nil
+}
+
+func (b BillingDummyClient) UpdateSubscription(ctx context.Context, resourceID, newTariffID string) error {
+	b.log.WithFields(logrus.Fields{
+		"resource_id":   resourceID,
+		"new_tariff_id": newTariffID,
+	}).Debugf("update subscription")
 
 	return nil
 }

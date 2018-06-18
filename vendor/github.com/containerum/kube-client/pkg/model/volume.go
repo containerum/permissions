@@ -4,11 +4,16 @@ package model
 //
 //swagger:model
 type Volume struct {
-	Name        string                     `json:"name,omitempty"`
-	CreatedAt   *string                    `json:"created_at,omitempty"`
+	Name string `json:"name,omitempty"`
+	//creation date in RFC3339 format
+	CreatedAt string `json:"created_at,omitempty"`
+	//delete date in RFC3339 format
+	Status      string                     `json:"status,omitempty"`
+	DeletedAt   string                     `json:"deleted_at,omitempty"`
 	Owner       string                     `json:"owner,omitempty"`
 	OwnerLogin  string                     `json:"owner_login,omitempty"`
 	Access      AccessLevel                `json:"access,omitempty"`
+	TariffID    string                     `json:"tariff_id,omitempty"`
 	Capacity    uint                       `json:"capacity,omitempty"`
 	StorageName string                     `json:"storage_name,omitempty"` //AKA StorageClass
 	AccessMode  PersistentVolumeAccessMode `json:"access_mode,omitempty"`
@@ -23,14 +28,14 @@ type VolumesList struct {
 }
 
 // CreateVolume --
-//swagger:ignore
+//swagger:model
 type CreateVolume struct {
-	TariffID string `json:"tariff-id"`
+	TariffID string `json:"tariff_id"`
 	Label    string `json:"label"`
 }
 
 // ResourceUpdateName -- contains new resource name
-//swagger:ignore
+//swagger:model
 type ResourceUpdateName struct {
 	Label string `json:"label"`
 }

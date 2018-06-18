@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"time"
 
+	"git.containerum.net/ch/permissions/pkg/errors"
 	umtypes "git.containerum.net/ch/user-manager/pkg/models"
 	"github.com/containerum/cherry"
+	"github.com/containerum/cherry/adaptors/cherrylog"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/satori/go.uuid"
@@ -19,10 +23,11 @@ type UserManagerClient interface {
 	UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error)
 	UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error)
 	UserLoginIDList(ctx context.Context, userIDs ...string) (map[string]string, error)
+	Group(ctx context.Context, groupID string) (*kubeClientModel.UserGroup, error)
 }
 
 type UserManagerHTTPClient struct {
-	log    *logrus.Entry
+	log    *cherrylog.LogrusAdapter
 	client *resty.Client
 }
 
@@ -39,7 +44,7 @@ func NewUserManagerHTTPClient(url *url.URL) *UserManagerHTTPClient {
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &UserManagerHTTPClient{
-		log:    log,
+		log:    cherrylog.NewLogrusAdapter(log),
 		client: client,
 	}
 }
@@ -55,7 +60,7 @@ func (u *UserManagerHTTPClient) UserInfoByLogin(ctx context.Context, login strin
 		}).
 		Get("/user/info/login/{login}")
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternal().Log(err, u.log)
 	}
 	if resp.Error() != nil {
 		return nil, resp.Error().(*cherry.Err)
@@ -74,7 +79,7 @@ func (u *UserManagerHTTPClient) UserInfoByID(ctx context.Context, userID string)
 		}).
 		Get("/user/info/id/{id}")
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternal().Log(err, u.log)
 	}
 	if resp.Error() != nil {
 		return nil, resp.Error().(*cherry.Err)
@@ -91,7 +96,7 @@ func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context, userIDs ...
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post("/user/loginid")
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrInternal().Log(err, u.log)
 	}
 	if resp.Error() != nil {
 		return nil, resp.Error().(*cherry.Err)
@@ -100,6 +105,27 @@ func (u *UserManagerHTTPClient) UserLoginIDList(ctx context.Context, userIDs ...
 	ret := resp.Result().(*map[string]string)
 
 	return *ret, nil
+}
+
+func (u *UserManagerHTTPClient) Group(ctx context.Context, groupID string) (*kubeClientModel.UserGroup, error) {
+	u.log.WithField("group_id", groupID).Debugf("get group")
+	resp, err := u.client.R().
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetResult(kubeClientModel.UserGroup{}).
+		SetPathParams(map[string]string{
+			"group": groupID,
+		}).
+		Get("/groups/{group}")
+
+	if err != nil {
+		return nil, errors.ErrInternal().Log(err, u.log)
+	}
+	if resp.Error() != nil {
+		return nil, resp.Error().(*cherry.Err)
+	}
+
+	return resp.Result().(*kubeClientModel.UserGroup), nil
 }
 
 func (u *UserManagerHTTPClient) String() string {
@@ -162,6 +188,17 @@ func (u *UserManagerDummyClient) UserLoginIDList(ctx context.Context, userIDs ..
 		ret[v] = "fake-" + v + "@test.com"
 	}
 	return ret, nil
+}
+
+func (u *UserManagerDummyClient) Group(ctx context.Context, groupID string) (*kubeClientModel.UserGroup, error) {
+	u.log.WithField("group_id", groupID).Debugf("get group")
+
+	return &kubeClientModel.UserGroup{
+		ID:               "adbd8eb1-63ae-419e-a6d3-9ab9ecea875f",
+		Label:            "fake-group",
+		UserGroupMembers: &kubeClientModel.UserGroupMembers{},
+		CreatedAt:        time.Now().Format(time.RFC3339),
+	}, nil
 }
 
 func (u *UserManagerDummyClient) String() string {
