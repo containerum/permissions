@@ -27,7 +27,8 @@ func (pgdb *PgDB) ProjectByID(ctx context.Context, project string) (p model.Proj
 
 	p.ID = project
 	err = pgdb.db.Model(&p).
-		Column("projects.*", "Namespaces").
+		ColumnExpr("?TableAlias.*").
+		Column("Namespaces").
 		Relation("Namespaces", func(q *orm.Query) (*orm.Query, error) {
 			return q.Where("NOT namespaces.deleted"), nil
 		}).

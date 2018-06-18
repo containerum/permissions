@@ -16,6 +16,8 @@ definitions:
     $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateName"
   ResourceUpdateUserAccess:
     $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateUserAccess"
+  UserGroup:
+    $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/UserGroup"
 parameters:
   SubstitutedUserID:
     $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"

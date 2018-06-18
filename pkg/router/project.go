@@ -48,7 +48,17 @@ func (ph *projectHandlers) addGroupToProjectHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-func (r *Router) SetupProjectHandlers(acts server.ProjectActions) {
+func (ph *projectHandlers) getProjectGroupsHandler(ctx *gin.Context) {
+	groups, err := ph.acts.GetProjectGroups(ctx.Request.Context(), ctx.Param("project"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"groups": groups})
+}
+
+func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	handlers := &projectHandlers{tv: r.tv, acts: acts}
 
 	// swagger:operation POST /projects Projects CreateProject
@@ -83,6 +93,7 @@ func (r *Router) SetupProjectHandlers(acts server.ProjectActions) {
 	//  - $ref: '#/parameters/SubstitutedUserID'
 	//  - name: project
 	//    in: path
+	//    required: true
 	//  - name: body
 	//    in: body
 	//    required: true
@@ -93,5 +104,31 @@ func (r *Router) SetupProjectHandlers(acts server.ProjectActions) {
 	//     description: group added to project
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.POST("/project/:project/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToProjectHandler)
+	r.engine.POST("/projects/:project/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToProjectHandler)
+
+	// swagger:operation GET /projects/{project}/groups Projects GetProjectGroups
+	//
+	// Get project groups.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: project
+	//    in: path
+	//    required: true
+	// responses:
+	//   '200':
+	//     description: project groups
+	//     schema:
+	//       type: object
+	//       properties:
+	//         groups:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/UserGroup'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/projects/:project/groups", handlers.getProjectGroupsHandler)
 }

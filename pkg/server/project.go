@@ -5,6 +5,7 @@ import (
 
 	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/model"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
@@ -12,6 +13,7 @@ import (
 type ProjectActions interface {
 	CreateProject(ctx context.Context, label string) error
 	AddGroup(ctx context.Context, project, groupID string) error
+	GetProjectGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
 }
 
 func (s *Server) CreateProject(ctx context.Context, label string) error {
@@ -64,4 +66,46 @@ func (s *Server) AddGroup(ctx context.Context, project, groupID string) error {
 	})
 
 	return err
+}
+
+func (s *Server) GetProjectGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error) {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"project_id": projectID,
+		"user_id":    userID,
+	}).Infof("get project groups")
+
+	project, err := s.db.ProjectByID(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(project.Namespaces) == 0 {
+		return make([]kubeClientModel.UserGroup, 0), nil
+	}
+
+	nsWithPermissions := make([]model.NamespaceWithPermissions, len(project.Namespaces))
+	for i := range project.Namespaces {
+		nsWithPermissions[i].Namespace = project.Namespaces[i]
+		err = s.db.NamespacePermissions(ctx, &nsWithPermissions[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var groupIDs []string
+	for _, ns := range nsWithPermissions {
+		for _, v := range ns.Permissions {
+			if v.GroupID != nil {
+				groupIDs = append(groupIDs, *v.GroupID)
+			}
+		}
+	}
+
+	groups, err := s.clients.User.GroupFullIDList(ctx, groupIDs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return groups.Groups, nil
 }

@@ -2,7 +2,6 @@ package clients
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
@@ -46,7 +45,10 @@ func (r *ResourceServiceHTTPClient) DeleteNamespaceResources(ctx context.Context
 
 	resp, err := r.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Delete(fmt.Sprintf("/namespaces/%s", namespaceID))
+		SetPathParams(map[string]string{
+			"namespace": namespaceID,
+		}).
+		Delete("/namespaces/{namespace}")
 	if err != nil {
 		return errors.ErrInternal().Log(err, r.log)
 	}

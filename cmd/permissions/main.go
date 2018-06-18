@@ -122,6 +122,7 @@ func main() {
 			r := router.NewRouter(g, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
 			r.SetupAccessRoutes(srv)
 			r.SetupNamespaceRoutes(srv)
+			r.SetupProjectRoutes(srv)
 
 			// for graceful shutdown
 			httpsrv := &http.Server{

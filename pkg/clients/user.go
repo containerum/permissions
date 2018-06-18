@@ -23,7 +23,10 @@ type UserManagerClient interface {
 	UserInfoByLogin(ctx context.Context, login string) (*umtypes.User, error)
 	UserInfoByID(ctx context.Context, userID string) (*umtypes.User, error)
 	UserLoginIDList(ctx context.Context, userIDs ...string) (map[string]string, error)
+
 	Group(ctx context.Context, groupID string) (*kubeClientModel.UserGroup, error)
+	GroupNameIDList(ctx context.Context, groupIDs ...string) (map[string]string, error)
+	GroupFullIDList(ctx context.Context, groupIDs ...string) (*kubeClientModel.UserGroups, error)
 }
 
 type UserManagerHTTPClient struct {
@@ -128,6 +131,46 @@ func (u *UserManagerHTTPClient) Group(ctx context.Context, groupID string) (*kub
 	return resp.Result().(*kubeClientModel.UserGroup), nil
 }
 
+func (u *UserManagerHTTPClient) GroupNameIDList(ctx context.Context, groupIDs ...string) (map[string]string, error) {
+	u.log.WithField("group_ids", groupIDs).Debugf("get groups list")
+
+	resp, err := u.client.R().
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(groupIDs).
+		SetResult(make(map[string]string)).
+		Post("/groups/labelid")
+	if err != nil {
+		return nil, errors.ErrInternal().Log(err, u.log)
+	}
+	if resp.Error() != nil {
+		return nil, resp.Error().(*cherry.Err)
+	}
+
+	ret := resp.Result().(*map[string]string)
+
+	return *ret, nil
+}
+
+func (u *UserManagerHTTPClient) GroupFullIDList(ctx context.Context, groupIDs ...string) (*kubeClientModel.UserGroups, error) {
+	u.log.WithField("group_ids", groupIDs).Debugf("get fulfilled groups list")
+
+	resp, err := u.client.R().
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetResult(kubeClientModel.UserGroups{}).
+		Post("/groups/labelidfull")
+
+	if err != nil {
+		return nil, errors.ErrInternal().Log(err, u.log)
+	}
+	if resp.Error() != nil {
+		return nil, resp.Error().(*cherry.Err)
+	}
+
+	return resp.Result().(*kubeClientModel.UserGroups), nil
+}
+
 func (u *UserManagerHTTPClient) String() string {
 	return fmt.Sprintf("user-manager http client: url=%s", u.client.HostURL)
 }
@@ -198,6 +241,43 @@ func (u *UserManagerDummyClient) Group(ctx context.Context, groupID string) (*ku
 		Label:            "fake-group",
 		UserGroupMembers: &kubeClientModel.UserGroupMembers{},
 		CreatedAt:        time.Now().Format(time.RFC3339),
+	}, nil
+}
+
+func (u *UserManagerDummyClient) GroupNameIDList(ctx context.Context, groupIDs ...string) (map[string]string, error) {
+	u.log.WithField("group_ids", groupIDs).Debugf("get groups list")
+	ret := make(map[string]string)
+	for _, v := range groupIDs {
+		ret[v] = "fake-group-" + v
+	}
+
+	return ret, nil
+}
+
+func (u *UserManagerDummyClient) GroupFullIDList(ctx context.Context, groupIDs ...string) (*kubeClientModel.UserGroups, error) {
+	u.log.WithField("group_ids", groupIDs).Debugf("get fulfilled groups list")
+
+	return &kubeClientModel.UserGroups{
+		Groups: []kubeClientModel.UserGroup{
+			{
+				ID:         "0af07df2-c243-46b2-b6f9-61a54549055e",
+				Label:      "fake-group",
+				OwnerID:    "cdc8ab7b-dd43-401c-9809-0af480ecdfb6",
+				OwnerLogin: "fake-user@test.com",
+				UserGroupMembers: &kubeClientModel.UserGroupMembers{
+					Members: []kubeClientModel.UserGroupMember{
+						{
+							ID:       "947b90d9-5c61-4828-adc2-aaa7155de47b",
+							Username: "fake-member@test.com",
+							Access:   kubeClientModel.AdminAccess,
+						},
+					},
+				},
+				MembersCount: 1,
+				UserAccess:   kubeClientModel.OwnerAccess,
+				CreatedAt:    time.Now().Format(time.RFC3339),
+			},
+		},
 	}, nil
 }
 
