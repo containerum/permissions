@@ -26,7 +26,7 @@ type UserManagerClient interface {
 
 	Group(ctx context.Context, groupID string) (*kubeClientModel.UserGroup, error)
 	GroupNameIDList(ctx context.Context, groupIDs ...string) (map[string]string, error)
-	GroupFullIDList(ctx context.Context, groupIDs ...string) (kubeClientModel.UserGroups, error)
+	GroupFullIDList(ctx context.Context, groupIDs ...string) (*kubeClientModel.UserGroups, error)
 }
 
 type UserManagerHTTPClient struct {
