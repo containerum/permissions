@@ -20,6 +20,7 @@ import (
 type BillingClient interface {
 	Subscribe(ctx context.Context, req btypes.SubscribeTariffRequest) error
 	Rename(ctx context.Context, resourceID, newLabel string) error
+	UpdateSubscription(ctx context.Context, resourceID, newTariffID string) error
 	Unsubscribe(ctx context.Context, resourceID string) error
 	MassiveUnsubscribe(ctx context.Context, resourceIDs []string) error
 
@@ -174,6 +175,27 @@ func (b *BillingHTTPClient) Rename(ctx context.Context, resourceID, newLabel str
 	return nil
 }
 
+func (b *BillingHTTPClient) UpdateSubscription(ctx context.Context, resourceID, newTariffID string) error {
+	b.log.WithFields(logrus.Fields{
+		"resource_id":   resourceID,
+		"new_tariff_id": newTariffID,
+	}).Debugf("update subscription")
+
+	resp, err := b.client.R().
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(map[string]string{"tariff_id": newTariffID}).
+		SetPathParams(map[string]string{"resource": resourceID}).
+		Put("/isp/subscription/{resource}")
+	if err != nil {
+		return errors.ErrInternal().Log(err, b.log)
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+
+	return nil
+}
+
 func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) error {
 	b.log.WithFields(logrus.Fields{
 		"resource_id": resourceID,
@@ -181,7 +203,8 @@ func (b *BillingHTTPClient) Unsubscribe(ctx context.Context, resourceID string) 
 
 	resp, err := b.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Delete(fmt.Sprintf("/isp/subscription/%s", resourceID))
+		SetPathParams(map[string]string{"resource": resourceID}).
+		Delete("/isp/subscription/{resource}")
 	if err != nil {
 		return errors.ErrInternal().Log(err, b.log)
 	}
@@ -278,6 +301,15 @@ func (b BillingDummyClient) Rename(ctx context.Context, resourceID, newLabel str
 		"resource_id": resourceID,
 		"new_label":   newLabel,
 	}).Debugln("Rename")
+
+	return nil
+}
+
+func (b BillingDummyClient) UpdateSubscription(ctx context.Context, resourceID, newTariffID string) error {
+	b.log.WithFields(logrus.Fields{
+		"resource_id":   resourceID,
+		"new_tariff_id": newTariffID,
+	}).Debugf("update subscription")
 
 	return nil
 }
