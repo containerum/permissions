@@ -393,6 +393,10 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			}
 		}
 
+		if resizeErr := s.clients.Billing.UpdateSubscription(ctx, ns.ID, newTariff.ID); resizeErr != nil {
+			return resizeErr
+		}
+
 		return nil
 	})
 
