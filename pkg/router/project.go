@@ -58,6 +58,22 @@ func (ph *projectHandlers) getProjectGroupsHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"groups": groups})
 }
 
+func (ph *projectHandlers) setGroupMemberAccessHandler(ctx *gin.Context) {
+	var req model.SetGroupMemberAccessRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := ph.acts.SetGroupMemberAccess(ctx.Request.Context(), ctx.Param("project"), ctx.Param("group"), req); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
 func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	handlers := &projectHandlers{tv: r.tv, acts: acts}
 
@@ -91,9 +107,7 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: project
-	//    in: path
-	//    required: true
+	//  - $ref: '#/parameters/ProjectID'
 	//  - name: body
 	//    in: body
 	//    required: true
@@ -115,9 +129,7 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - name: project
-	//    in: path
-	//    required: true
+	//  - $ref: '#/parameters/ProjectID'
 	// responses:
 	//   '200':
 	//     description: project groups
@@ -131,4 +143,26 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/projects/:project/groups", handlers.getProjectGroupsHandler)
+
+	// swagger:operation PUT /projects/{project}/groups/{group} Projects SetGroupMemberAccess
+	//
+	// Change access of group member to namespace
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ProjectID'
+	//  - $ref: '#/parameters/GroupID'
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/SetGroupMemberAccessRequest'
+	// responses:
+	//   '202':
+	//     description: access set
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.PUT("/project/:project/groups/:group", handlers.setGroupMemberAccessHandler)
 }

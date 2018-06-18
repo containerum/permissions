@@ -48,6 +48,20 @@ parameters:
     format: uuid
     required: true
     description: Resource ID
+  ProjectID:
+    name: project
+    in: path
+    type: string
+    format: uuid
+    required: true
+    description: Project ID
+  GroupID:
+      name: group
+      in: path
+      type: string
+      format: uuid
+      required: true
+      description: Group ID
 responses:
   error:
     description: cherry error
