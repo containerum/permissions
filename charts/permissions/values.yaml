@@ -31,6 +31,7 @@ env:
     RESOURCE_SERVICE_ADDR: "resource-service:1213"
     BILLING_ADDR: "billing-manager:5000"
     DB_PASSWORD:
+    SOLUTIONS_ADDR: "solutions:6767"
 
 postgresql:
   persistence:

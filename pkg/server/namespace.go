@@ -424,6 +424,10 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return delErr
 		}
 
+		if delErr := s.clients.Solutions.DeleteNamespaceSolutions(ctx, ns.ID); delErr != nil {
+			return delErr
+		}
+
 		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.ID); delErr != nil {
 			return delErr
 		}
@@ -468,6 +472,10 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 
 		if unsubErr := s.clients.Billing.MassiveUnsubscribe(ctx, resourceIDs); unsubErr != nil {
 			return unsubErr
+		}
+
+		if delErr := s.clients.Solutions.DeleteUserSolutions(ctx); delErr != nil {
+			return delErr
 		}
 
 		if delErr := s.clients.Resource.DeleteAllUserNamespaces(ctx); delErr != nil {
