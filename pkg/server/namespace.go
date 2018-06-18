@@ -424,6 +424,10 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return delErr
 		}
 
+		if delErr := s.clients.Solutions.DeleteNamespaceSolutions(ctx, ns.ID); delErr != nil {
+			return delErr
+		}
+
 		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.ID); delErr != nil {
 			return delErr
 		}
