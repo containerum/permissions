@@ -6,9 +6,9 @@ import (
 	"net/url"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
-	"git.containerum.net/ch/utils/httputil"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
+	"github.com/containerum/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/resty.v1"
@@ -16,6 +16,7 @@ import (
 
 type SolutionsClient interface {
 	DeleteNamespaceSolutions(ctx context.Context, nsID string) error
+	DeleteUserSolutions(ctx context.Context) error
 }
 
 type SolutionsHTTPClient struct {
@@ -56,6 +57,21 @@ func (s *SolutionsHTTPClient) DeleteNamespaceSolutions(ctx context.Context, nsID
 	return nil
 }
 
+func (s *SolutionsHTTPClient) DeleteUserSolutions(ctx context.Context) error {
+	s.log.Debugf("delete user solutions")
+
+	resp, err := s.client.R().
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		Delete("/solutions")
+	if err != nil {
+		return errors.ErrInternal().Log(err, s.log)
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+	return nil
+}
+
 func (s SolutionsHTTPClient) String() string {
 	return fmt.Sprintf("solutions http client: url=%s", s.client.HostURL)
 }
@@ -72,6 +88,12 @@ func NewSolutionsDummyClient() *SolutionsDummyClient {
 
 func (s *SolutionsDummyClient) DeleteNamespaceSolutions(ctx context.Context, nsID string) error {
 	s.log.WithField("namespace_id", nsID).Debugf("delete namespace solutions")
+
+	return nil
+}
+
+func (s *SolutionsDummyClient) DeleteUserSolutions(ctx context.Context) error {
+	s.log.Debugf("delete user solutions")
 
 	return nil
 }
