@@ -2,6 +2,7 @@ package model
 
 import (
 	"git.containerum.net/ch/permissions/pkg/errors"
+	"github.com/containerum/kube-client/pkg/model"
 	"github.com/go-pg/pg/orm"
 )
 
@@ -42,4 +43,12 @@ type ProjectCreateRequest struct {
 // swagger:model
 type ProjectAddGroupRequest struct {
 	GroupID string `json:"group" binding:"required"`
+}
+
+// SetGroupMemberAccessRequest contains parameters for setting access to member of group
+//
+// swagger:model
+type SetGroupMemberAccessRequest struct {
+	Username    string                `json:"username" binding:"required,email"`
+	AccessLevel model.UserGroupAccess `json:"access" binding:"required"`
 }
