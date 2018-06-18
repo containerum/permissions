@@ -21,7 +21,8 @@ ENV MODE="release" \
     KUBE_API_ADDR="kube-api:1214" \
     RESOURCE_SERVICE_ADDR="resource-service:1213" \
     BILLING_ADDR="billing-manager:5000" \
-    VOLUME_MANAGER_ADDR="volume-manager:4343"
+    VOLUME_MANAGER_ADDR="volume-manager:4343" \
+    SOLUTIONS_ADDR="solutions:6767"
 
 EXPOSE 4242
 

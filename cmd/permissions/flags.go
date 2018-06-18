@@ -83,6 +83,11 @@ var (
 		EnvVars: []string{"VOLUME_MANAGER_ADDR"},
 	}
 
+	SolutionsAddrFlag = cli.StringFlag{
+		Name:    "solutions_addr",
+		EnvVars: []string{"SOLUTIONS_ADDR"},
+	}
+
 	CORSFlag = cli.BoolFlag{
 		Name: "cors",
 	}

@@ -138,6 +138,17 @@ func SetupVolumeClient(addr string) (clients.VolumeManagerClient, error) {
 	}
 }
 
+func SetupSolutionsClient(addr string) (clients.SolutionsClient, error) {
+	switch {
+	case opMode == modeDebug && addr == "":
+		return clients.NewSolutionsDummyClient(), nil
+	case addr != "":
+		return clients.NewSolutionsHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
+	default:
+		return nil, errors.New("missing configuration for solutions service")
+	}
+}
+
 func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
 	var errs []error
 	var clients server.Clients
@@ -162,7 +173,12 @@ func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
 	if clients.Billing, err = setupBillingClient(ctx.String(BillingAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
 	}
+
 	if clients.Volume, err = SetupVolumeClient(ctx.String(VolumeManagerAddrFlag.Name)); err != nil {
+		errs = append(errs, err)
+	}
+
+	if clients.Solutions, err = SetupSolutionsClient(ctx.String(SolutionsAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
 	}
 
