@@ -16,6 +16,7 @@ type ProjectActions interface {
 	GetProjectGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
 	SetGroupMemberAccess(ctx context.Context, projectID, groupID string, req model.SetGroupMemberAccessRequest) error
 	DeleteGroupFromProject(ctx context.Context, projectID, groupID string) error
+	AddMemberToProject(ctx context.Context, projectID string, req model.AddMemberToProjectRequest) error
 }
 
 func (s *Server) CreateProject(ctx context.Context, label string) error {
@@ -167,6 +168,37 @@ func (s *Server) DeleteGroupFromProject(ctx context.Context, projectID, groupID 
 		}
 
 		return nil
+	})
+
+	return err
+}
+
+func (s *Server) AddMemberToProject(ctx context.Context, projectID string, req model.AddMemberToProjectRequest) error {
+	s.log.WithFields(logrus.Fields{
+		"project_id": projectID,
+		"username":   req.Username,
+		"access":     req.AccessLevel,
+	}).Infof("add member to project")
+
+	user, err := s.clients.User.UserInfoByLogin(ctx, req.Username)
+	if err != nil {
+		return err
+	}
+
+	err = s.db.Transactional(func(tx database.DB) error {
+		project, getErr := tx.ProjectByID(ctx, projectID)
+		if getErr != nil {
+			return getErr
+		}
+
+		access := []database.AccessListElement{
+			{ToUserID: user.ID, AccessLevel: UserGroupAccessToDBAccess(req.AccessLevel)},
+		}
+		if setErr := tx.SetNamespacesAccesses(ctx, project.Namespaces, access); setErr != nil {
+			return setErr
+		}
+
+		return updateUserAccesses(ctx, s.clients.Auth, s.db, user.ID)
 	})
 
 	return err
