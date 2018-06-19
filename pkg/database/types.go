@@ -39,6 +39,7 @@ type DB interface {
 
 	CreateProject(ctx context.Context, project *model.Project) error
 	ProjectByID(ctx context.Context, project string) (model.Project, error)
+	DeleteGroupFromProject(ctx context.Context, projectID, groupID string) (deletedPerms []model.Permission, err error)
 
 	Transactional(fn func(tx DB) error) error
 
