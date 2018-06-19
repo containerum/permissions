@@ -2477,7 +2477,7 @@
       "type": "object",
       "properties": {
         "access": {
-          "$ref": "#/definitions/AccessLevel"
+          "$ref": "#/definitions/UserGroupAccess"
         },
         "access_level_change_time": {
           "type": "string",
@@ -2497,7 +2497,7 @@
           "$ref": "#/definitions/ResourceType"
         },
         "new_access_level": {
-          "$ref": "#/definitions/AccessLevel"
+          "$ref": "#/definitions/UserGroupAccess"
         },
         "perm_id": {
           "type": "string",
@@ -3073,7 +3073,7 @@
       "type": "object",
       "properties": {
         "access": {
-          "$ref": "#/definitions/AccessLevel"
+          "$ref": "#/definitions/UserGroupAccess"
         }
       },
       "x-go-name": "SetUserAccessesRequest",
@@ -3447,7 +3447,7 @@
       "type": "object",
       "properties": {
         "access_level": {
-          "$ref": "#/definitions/AccessLevel"
+          "$ref": "#/definitions/UserGroupAccess"
         },
         "username": {
           "type": "string",
@@ -3527,7 +3527,7 @@
       ],
       "properties": {
         "access": {
-          "$ref": "#/definitions/AccessLevel"
+          "$ref": "#/definitions/UserGroupAccess"
         },
         "id": {
           "description": "hosting-internal name",
@@ -3664,45 +3664,48 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/blang/semver"
     },
     "Volume": {
-      "description": "Volume -- volume representation",
+      "description": "Volume describes volume",
       "type": "object",
       "properties": {
-        "access": {
-          "$ref": "#/definitions/AccessLevel"
-        },
         "access_mode": {
           "$ref": "#/definitions/PersistentVolumeAccessMode"
         },
         "capacity": {
           "type": "integer",
-          "format": "uint64",
+          "format": "int64",
           "x-go-name": "Capacity"
         },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
+        "create_time": {
           "type": "string",
-          "x-go-name": "CreatedAt"
+          "format": "date-time",
+          "x-go-name": "CreateTime"
         },
-        "deleted_at": {
+        "delete_time": {
           "type": "string",
-          "x-go-name": "DeletedAt"
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
         },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
         },
-        "owner": {
+        "id": {
           "type": "string",
-          "x-go-name": "Owner"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
-        "owner_login": {
+        "label": {
           "type": "string",
-          "x-go-name": "OwnerLogin"
+          "x-go-name": "Label"
         },
-        "status": {
-          "description": "delete date in RFC3339 format",
+        "namespace_id": {
           "type": "string",
-          "x-go-name": "Status"
+          "format": "uuid",
+          "x-go-name": "NamespaceID"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "x-go-name": "OwnerUserID"
         },
         "storage_name": {
           "type": "string",
@@ -3710,17 +3713,11 @@
         },
         "tariff_id": {
           "type": "string",
+          "format": "uuid",
           "x-go-name": "TariffID"
-        },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserAccess"
-          },
-          "x-go-name": "Users"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/volume-manager/pkg/models"
     },
     "VolumeCreateRequest": {
       "description": "VolumeCreateRequest is a request object for creating volume",
