@@ -1154,6 +1154,68 @@
           }
         }
       }
+    },
+    "/projects/{project}/members": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Add permissions for user to project namespaces.",
+        "operationId": "AddMemberToProject",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddMemberToProjectRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "member added"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1211,6 +1273,21 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
+    },
+    "AddMemberToProjectRequest": {
+      "description": "AddMemberToProjectRequest contains parameters for adding user to project",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/UserGroupAccess"
+        },
+        "username": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "AdminVolumeResizeRequest": {
       "description": "AdminVolumeResizeRequest contains parameters for changing volume size as admin",
