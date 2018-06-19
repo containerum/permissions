@@ -83,6 +83,22 @@ func (ph *projectHandlers) deleteGroupFromProjectHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+func (ph *projectHandlers) addMemberToProjectHandler(ctx *gin.Context) {
+	var req model.AddMemberToProjectRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := ph.acts.AddMemberToProject(ctx.Request.Context(), ctx.Param("project"), req); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
 func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	handlers := &projectHandlers{tv: r.tv, acts: acts}
 
@@ -193,4 +209,26 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.DELETE("/project/:project/groups/:group", handlers.deleteGroupFromProjectHandler)
+
+	// swagger:operation POST /projects/{project}/members Projects AddMemberToProject
+	//
+	// Add permissions for user to project namespaces.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ProjectID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/AddMemberToProjectRequest'
+	// responses:
+	//   '202':
+	//     description: member added
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.POST("/project/:project/members", handlers.addMemberToProjectHandler)
 }
