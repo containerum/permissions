@@ -7,6 +7,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/model"
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
+	"github.com/sirupsen/logrus"
 )
 
 func (pgdb *PgDB) CreateProject(ctx context.Context, project *model.Project) error {
@@ -37,6 +38,30 @@ func (pgdb *PgDB) ProjectByID(ctx context.Context, project string) (p model.Proj
 	switch err {
 	case pg.ErrNoRows:
 		err = errors.ErrResourceNotExists().AddDetailF("project %s not exists", project)
+	default:
+		err = pgdb.handleError(err)
+	}
+
+	return
+}
+
+func (pgdb *PgDB) DeleteGroupFromProject(ctx context.Context, projectID, groupID string) (deletedPerms []model.Permission, err error) {
+	pgdb.log.WithFields(logrus.Fields{
+		"project_id": projectID,
+		"group_id":   groupID,
+	}).Debugf("delete group from project")
+
+	_, err = pgdb.db.Model(&deletedPerms).
+		Where("group_id = ?", groupID).
+		Where("resource_type = ?", model.ResourceNamespace).
+		Where("resource_id IN (?)", pgdb.db.Model(&model.Namespace{ProjectID: &projectID}).
+			Where("project_id = ?project_id")).
+		Returning("*").
+		Delete()
+
+	switch err {
+	case pg.ErrNoRows:
+		err = nil
 	default:
 		err = pgdb.handleError(err)
 	}

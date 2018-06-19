@@ -74,6 +74,15 @@ func (ph *projectHandlers) setGroupMemberAccessHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+func (ph *projectHandlers) deleteGroupFromProjectHandler(ctx *gin.Context) {
+	if err := ph.acts.DeleteGroupFromProject(ctx.Request.Context(), ctx.Param("project"), ctx.Param("group")); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
 func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	handlers := &projectHandlers{tv: r.tv, acts: acts}
 
@@ -146,7 +155,7 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 
 	// swagger:operation PUT /projects/{project}/groups/{group} Projects SetGroupMemberAccess
 	//
-	// Change access of group member to namespace
+	// Change access of group member to project namespaces.
 	//
 	// ---
 	// parameters:
@@ -155,6 +164,7 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//  - $ref: '#/parameters/SubstitutedUserID'
 	//  - $ref: '#/parameters/ProjectID'
 	//  - $ref: '#/parameters/GroupID'
+	//  - name: body
 	//    in: body
 	//    required: true
 	//    schema:
@@ -165,4 +175,22 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.PUT("/project/:project/groups/:group", handlers.setGroupMemberAccessHandler)
+
+	// swagger:operation DELETE /projects/{project}/groups/{group} Projects DeleteGroupFromProject
+	//
+	// Delete group permissions from project namespaces.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ProjectID'
+	//  - $ref: '#/parameters/GroupID'
+	// responses:
+	//   '202':
+	//     description: group deleted
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.DELETE("/project/:project/groups/:group", handlers.deleteGroupFromProjectHandler)
 }
