@@ -15,9 +15,9 @@ import (
 
 type AccessActions interface {
 	GetUserAccesses(ctx context.Context) (*authProto.ResourcesAccess, error)
-	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.AccessLevel) error
+	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.UserGroupAccess) error
 	GetNamespaceAccess(ctx context.Context, id string) (kubeClientModel.Namespace, error)
-	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error
+	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error
 	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
 }
 

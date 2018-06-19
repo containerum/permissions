@@ -110,7 +110,7 @@ func (p *Permission) Mask() {
 //
 // swagger:model SetResourcesAccessesRequest
 type SetUserAccessesRequest struct {
-	Access model.AccessLevel `json:"access"`
+	Access model.UserGroupAccess `json:"access"`
 }
 
 // SetUserAccessRequest is a request object for setting access to resource for user
