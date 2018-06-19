@@ -15,6 +15,7 @@ type ProjectActions interface {
 	AddGroup(ctx context.Context, project, groupID string) error
 	GetProjectGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
 	SetGroupMemberAccess(ctx context.Context, projectID, groupID string, req model.SetGroupMemberAccessRequest) error
+	DeleteGroupFromProject(ctx context.Context, projectID, groupID string) error
 }
 
 func (s *Server) CreateProject(ctx context.Context, label string) error {
@@ -117,7 +118,7 @@ func (s *Server) SetGroupMemberAccess(ctx context.Context, projectID, groupID st
 		"group":    groupID,
 		"username": req.Username,
 		"access":   req.AccessLevel,
-	}).Debugf("set group member access")
+	}).Infof("set group member access")
 
 	err := s.db.Transactional(func(tx database.DB) error {
 		project, getErr := tx.ProjectByID(ctx, projectID)
@@ -138,6 +139,34 @@ func (s *Server) SetGroupMemberAccess(ctx context.Context, projectID, groupID st
 		}
 
 		return updateUserAccesses(ctx, s.clients.Auth, s.db, user.ID)
+	})
+
+	return err
+}
+
+func (s *Server) DeleteGroupFromProject(ctx context.Context, projectID, groupID string) error {
+	s.log.WithFields(logrus.Fields{
+		"project": projectID,
+		"group":   groupID,
+	}).Infof("delete group from project")
+
+	err := s.db.Transactional(func(tx database.DB) error {
+		delPerms, delErr := tx.DeleteGroupFromProject(ctx, projectID, groupID)
+		if delErr != nil {
+			return delErr
+		}
+		users := make(map[string]bool)
+		for _, v := range delPerms {
+			users[v.UserID] = true
+		}
+
+		for user := range users {
+			if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, user); updErr != nil {
+				s.log.WithError(updErr).Warnf("update access failed for user %s", user)
+			}
+		}
+
+		return nil
 	})
 
 	return err
