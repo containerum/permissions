@@ -91,3 +91,7 @@ required = [
 [[constraint]]
   branch = "develop"
   name = "git.containerum.net/ch/volume-manager"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/kube-api"

@@ -12,6 +12,12 @@
 
 [[projects]]
   branch = "develop"
+  name = "git.containerum.net/ch/kube-api"
+  packages = ["pkg/kubeErrors"]
+  revision = "765f4d41b76cccef7ed6c696cb7aebf45528b579"
+
+[[projects]]
+  branch = "develop"
   name = "git.containerum.net/ch/user-manager"
   packages = ["pkg/models"]
   revision = "9a9cb6024efb51db6a6672b9492091ec3685e34f"
@@ -346,6 +352,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "95435af4a0c30782d094c9b66abf1cfb8bc265397cc481cf091a1380054047f6"
+  inputs-digest = "29cd6c145e49a0c32bb4c81fd85735cfb3a2c4493beaa64ebed0ca8f9cee9e93"
   solver-name = "gps-cdcl"
   solver-version = 1
