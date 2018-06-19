@@ -49,6 +49,7 @@ type ProjectAddGroupRequest struct {
 //
 // swagger:model
 type SetGroupMemberAccessRequest struct {
+	//swagger:strfmt email
 	Username    string                `json:"username" binding:"required,email"`
 	AccessLevel model.UserGroupAccess `json:"access" binding:"required"`
 }
