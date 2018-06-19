@@ -488,9 +488,11 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 		for _, ns := range deletedNamespaces {
 			nsPerm := model.NamespaceWithPermissions{Namespace: ns}
 			if delErr := s.clients.Kube.DeleteNamespace(ctx, nsPerm.ToKube()); delErr != nil {
-				if cherry.Equals(delErr, kubeErrors.ErrResourceNotExist()) {
+				switch {
+				case delErr == nil: //pass
+				case cherry.Equals(delErr, kubeErrors.ErrResourceNotExist()):
 					s.log.WithError(delErr).Warnf("namespace not found in kube")
-				} else {
+				default:
 					return delErr
 				}
 			}
