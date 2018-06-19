@@ -76,18 +76,3 @@ func NamespaceAddUsage(ctx context.Context, ns *kubeClientModel.Namespace, clien
 	ns.Resources.Used = kubeNS.Resources.Used
 	return nil
 }
-
-func UserGroupAccessToDBAccess(access kubeClientModel.UserGroupAccess) kubeClientModel.AccessLevel {
-	switch access {
-	case kubeClientModel.OwnerAccess, kubeClientModel.AdminAccess:
-		return kubeClientModel.Owner
-	case kubeClientModel.MasterAccess:
-		return kubeClientModel.Write
-	case kubeClientModel.MemberAccess:
-		return kubeClientModel.ReadDelete
-	case kubeClientModel.GuestAccess:
-		return kubeClientModel.Read
-	default:
-		return kubeClientModel.None
-	}
-}
