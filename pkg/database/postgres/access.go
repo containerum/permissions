@@ -30,7 +30,7 @@ func (pgdb *PgDB) UserAccesses(ctx context.Context, userID string) ([]database.A
 	return ret, nil
 }
 
-func (pgdb *PgDB) SetUserAccesses(ctx context.Context, userID string, level kubeClientModel.AccessLevel) error {
+func (pgdb *PgDB) SetUserAccesses(ctx context.Context, userID string, level kubeClientModel.UserGroupAccess) error {
 	pgdb.log.WithField("user_id", userID).Debugf("set accesses to %s", level)
 
 	nsIDsQuery := pgdb.db.Model(&model.Namespace{}).Column("id").Where("owner_user_id = ?", userID)
@@ -62,7 +62,7 @@ func (pgdb *PgDB) setResourceAccess(ctx context.Context, permission model.Permis
 	return nil
 }
 
-func (pgdb *PgDB) SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.AccessLevel, toUserID string) error {
+func (pgdb *PgDB) SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.UserGroupAccess, toUserID string) error {
 	pgdb.log.WithField("ns_id", ns.ID).Debugf("set namespace access %s to %s", accessLevel, toUserID)
 
 	return pgdb.setResourceAccess(ctx, model.Permission{
@@ -140,7 +140,7 @@ func (pgdb *PgDB) deleteResourceAccess(ctx context.Context, resource model.Resou
 		Where("user_id = ?user_id").
 		Where("resource_type = ?resource_type").
 		Where("resource_id = ?resource_id").
-		Where("initial_access_level < ?", kubeClientModel.Owner). // do not delete owner permission
+		Where("initial_access_level < ?", kubeClientModel.AdminAccess). // do not delete owner permission
 		Delete()
 
 	if err != nil {

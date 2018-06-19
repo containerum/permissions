@@ -37,9 +37,9 @@ type Permission struct {
 	// swagger:strfmt email
 	UserLogin string `sql:"-" json:"user_login,omitempty"`
 
-	InitialAccessLevel model.AccessLevel `sql:"initial_access_level,type:ACCESS_LEVEL,notnull" json:"access,omitempty"` // WARN: custom type here, do not forget create it
+	InitialAccessLevel model.UserGroupAccess `sql:"initial_access_level,type:ACCESS_LEVEL,notnull" json:"access,omitempty"` // WARN: custom type here, do not forget create it
 
-	CurrentAccessLevel model.AccessLevel `sql:"current_access_level,type:ACCESS_LEVEL,notnull" json:"new_access_level,omitempty"` // WARN: custom type here, do not forget create it
+	CurrentAccessLevel model.UserGroupAccess `sql:"current_access_level,type:ACCESS_LEVEL,notnull" json:"new_access_level,omitempty"` // WARN: custom type here, do not forget create it
 
 	AccessLevelChangeTime *time.Time `sql:"access_level_change_time,default:now(),notnull" json:"access_level_change_time,omitempty"`
 
@@ -47,12 +47,12 @@ type Permission struct {
 }
 
 func (p *Permission) BeforeInsert(db orm.DB) error {
-	if p.InitialAccessLevel == model.Owner {
+	if p.InitialAccessLevel == model.AdminAccess {
 		cnt, err := db.Model(p).
 			Column("id").
 			Where("resource_id = ?", p.ResourceID).
 			Where("resource_type = ?", p.ResourceType).
-			Where("initial_access_level = ?", model.Owner).
+			Where("initial_access_level = ?", model.AdminAccess).
 			Count()
 		if err != nil {
 			return err
@@ -73,7 +73,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 		// that`s our error if we will here
 		return errors.ErrInternal().AddDetails("initial access level must be greater than current access level")
 	}
-	if p.InitialAccessLevel == model.Owner && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
+	if p.InitialAccessLevel == model.AdminAccess && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
 		_, err := db.Model(p).
 			Where("resource_id = ?resource_id").
 			Set("current_access_level = LEAST(?TableAlias.initial_access_level, ?current_access_level)::ACCESS_LEVEL").
@@ -82,7 +82,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 			return err
 		}
 	}
-	if p.InitialAccessLevel == model.Owner && p.InitialAccessLevel == p.CurrentAccessLevel { // un-limiting access
+	if p.InitialAccessLevel == model.AdminAccess && p.InitialAccessLevel == p.CurrentAccessLevel { // un-limiting access
 		_, err := db.Model(p).
 			Where("resource_id = ?resource_id").
 			Set("current_access_level = initial_access_level").
@@ -110,7 +110,7 @@ func (p *Permission) Mask() {
 //
 // swagger:model SetResourcesAccessesRequest
 type SetUserAccessesRequest struct {
-	Access model.AccessLevel `json:"access"`
+	Access model.UserGroupAccess `json:"access"`
 }
 
 // SetUserAccessRequest is a request object for setting access to resource for user

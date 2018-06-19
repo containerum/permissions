@@ -15,14 +15,14 @@ type AccessWithLabel struct {
 }
 
 type AccessListElement struct {
-	AccessLevel kubeClientModel.AccessLevel
+	AccessLevel kubeClientModel.UserGroupAccess
 	ToUserID    string
 }
 
 type DB interface {
 	UserAccesses(ctx context.Context, userID string) ([]AccessWithLabel, error)
-	SetUserAccesses(ctx context.Context, userID string, level kubeClientModel.AccessLevel) error
-	SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.AccessLevel, toUserID string) error
+	SetUserAccesses(ctx context.Context, userID string, level kubeClientModel.UserGroupAccess) error
+	SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.UserGroupAccess, toUserID string) error
 	SetNamespaceAccesses(ctx context.Context, ns model.Namespace, accessList []AccessListElement) error
 	SetNamespacesAccesses(ctx context.Context, namespaces []model.Namespace, accessList []AccessListElement) error
 	DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error

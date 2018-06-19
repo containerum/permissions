@@ -15,9 +15,9 @@ import (
 
 type AccessActions interface {
 	GetUserAccesses(ctx context.Context) (*authProto.ResourcesAccess, error)
-	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.AccessLevel) error
+	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.UserGroupAccess) error
 	GetNamespaceAccess(ctx context.Context, id string) (kubeClientModel.Namespace, error)
-	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error
+	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error
 	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
 }
 
@@ -64,7 +64,7 @@ func updateUserAccesses(ctx context.Context, auth clients.AuthClient, db databas
 	return auth.UpdateUserAccess(ctx, userID, accesses)
 }
 
-func (s *Server) SetUserAccesses(ctx context.Context, access kubeClientModel.AccessLevel) error {
+func (s *Server) SetUserAccesses(ctx context.Context, access kubeClientModel.UserGroupAccess) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithField("user_id", userID).Infof("Set user accesses to %s", access)
 
@@ -83,7 +83,7 @@ func (s *Server) SetUserAccesses(ctx context.Context, access kubeClientModel.Acc
 	return err
 }
 
-func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.AccessLevel) error {
+func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,

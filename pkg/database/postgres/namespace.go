@@ -28,7 +28,7 @@ func (pgdb *PgDB) NamespaceByID(ctx context.Context, userID, id string) (ret mod
 		WherePK().
 		Where("permission.resource_id = ?TableAlias.id").
 		Where("permission.user_id = ?", userID).
-		Where("coalesce(permission.current_access_level, ?0) > ?0", kubeClientModel.None).
+		Where("coalesce(permission.current_access_level, ?0) > ?0", kubeClientModel.NoAccess).
 		Where("NOT ?TableAlias.deleted").
 		Select()
 	switch err {
@@ -74,7 +74,7 @@ func (pgdb *PgDB) NamespacePermissions(ctx context.Context, ns *model.NamespaceW
 		WherePK().
 		Column("Permissions").
 		Relation("Permissions", func(q *orm.Query) (*orm.Query, error) {
-			return q.Where("initial_access_level != ?", kubeClientModel.Owner), nil
+			return q.Where("initial_access_level != ?", kubeClientModel.AdminAccess), nil
 		}).
 		Select()
 	if len(ns.Permissions) == 0 {
