@@ -70,8 +70,8 @@ func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
-	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"))
+func (ah *accessHandlers) getNamespaceAccessesHandler(ctx *gin.Context) {
+	ret, err := ah.acts.GetNamespaceAccesses(ctx.Request.Context(), ctx.Param("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
@@ -182,5 +182,5 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//       $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/namespaces/:id/accesses", handlers.getNamespaceAccessHandler)
+	r.engine.GET("/namespaces/:id/accesses", handlers.getNamespaceAccessesHandler)
 }
