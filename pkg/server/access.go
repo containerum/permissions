@@ -15,6 +15,7 @@ type AccessActions interface {
 	GetUserAccesses(ctx context.Context) ([]httputil.ProjectAccess, error)
 	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.UserGroupAccess) error
 	GetNamespaceAccesses(ctx context.Context, id string) (kubeClientModel.Namespace, error)
+	GetNamespaceAccess(ctx context.Context, id string) (httputil.NamespaceAccess, error)
 	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error
 	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
 }
@@ -130,6 +131,25 @@ func (s *Server) GetNamespaceAccesses(ctx context.Context, id string) (kubeClien
 	AddUserLogins(ctx, ns.Permissions, s.clients.User)
 
 	return ns.ToKube(), nil
+}
+
+func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (httputil.NamespaceAccess, error) {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id": userID,
+		"id":      id,
+	}).Infof("get namespace access")
+
+	ns, err := s.db.NamespaceByID(ctx, userID, id)
+	if err != nil {
+		return httputil.NamespaceAccess{}, err
+	}
+
+	return httputil.NamespaceAccess{
+		NamespaceID:    ns.ID,
+		NamespaceLabel: ns.Label,
+		Access:         ns.Permission.CurrentAccessLevel,
+	}, nil
 }
 
 func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error {
