@@ -39,13 +39,6 @@ spec:
             - name: DB_HOST
               value: "{{ .Release.Name }}-postgresql:5432"
             {{- end }}
-            {{- if .Values.env.local.AUTH_ADDR }}
-            - name: AUTH_ADDR
-              value: "{{ .Values.env.local.AUTH_ADDR }}"
-            {{- else }}
-            - name: AUTH_ADDR
-              value: "{{ .Release.Name }}-auth:1112"
-            {{- end }}
             {{- if .Values.env.local.USER_ADDR }}
             - name: USER_ADDR
               value: "{{ .Values.env.local.USER_ADDR }}"

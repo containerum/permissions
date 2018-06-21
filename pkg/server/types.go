@@ -12,7 +12,6 @@ import (
 )
 
 type Clients struct {
-	Auth      clients.AuthClient
 	User      clients.UserManagerClient
 	Kube      clients.KubeAPIClient
 	Resource  clients.ResourceServiceClient

@@ -16,7 +16,6 @@ ENV MODE="release" \
     DB_SSLMODE="false" \
     DB_BASE="permissions" \
     LISTEN_ADDR=":4242" \
-    AUTH_ADDR="ch-auth:1112" \
     USER_ADDR="user-manager:8111" \
     KUBE_API_ADDR="kube-api:1214" \
     RESOURCE_SERVICE_ADDR="resource-service:1213" \

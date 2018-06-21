@@ -53,11 +53,6 @@ var (
 		Value:   ":4242",
 	}
 
-	AuthAddrFlag = cli.StringFlag{
-		Name:    "auth_addr",
-		EnvVars: []string{"AUTH_ADDR"},
-	}
-
 	UserAddrFlag = cli.StringFlag{
 		Name:    "user_addr",
 		EnvVars: []string{"USER_ADDR"},
