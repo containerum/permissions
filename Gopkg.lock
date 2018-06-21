@@ -69,8 +69,8 @@
 [[projects]]
   name = "github.com/containerum/utils"
   packages = ["httputil"]
-  revision = "0d81250fc88af062d5836ecd83db9867eb6ee34c"
-  version = "v1.0.3"
+  revision = "bb180470c4fcf71ec9060c90d2033852cafea3f8"
+  version = "v1.0.4"
 
 [[projects]]
   name = "github.com/docker/distribution"
