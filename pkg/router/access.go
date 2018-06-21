@@ -211,5 +211,5 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//     description: namespace access response (TODO schema)
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/projects/:project/namespaces/:namespace/access", handlers.getNamespaceAccessHandler)
+	r.engine.GET("/projects/:project/namespaces/:id/access", handlers.getNamespaceAccessHandler)
 }
