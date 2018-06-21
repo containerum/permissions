@@ -95,9 +95,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//  - $ref: '#/parameters/SubstitutedUserID'
 	// responses:
 	//	 '200':
-	//     description: user accesses to resources
-	//     schema:
-	//       $ref: '#/definitions/ResourcesAccesses'
+	//     description: user accesses to resources (TODO: schema)
 	//	 default:
 	//	   $ref: '#/responses/error'
 	r.engine.GET("/accesses", handlers.getUserAccessesHandler)
