@@ -190,7 +190,7 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//     description: access set
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/project/:project/groups/:group", handlers.setGroupMemberAccessHandler)
+	r.engine.PUT("/projects/:project/groups/:group", handlers.setGroupMemberAccessHandler)
 
 	// swagger:operation DELETE /projects/{project}/groups/{group} Projects DeleteGroupFromProject
 	//
@@ -208,7 +208,7 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//     description: group deleted
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.DELETE("/project/:project/groups/:group", handlers.deleteGroupFromProjectHandler)
+	r.engine.DELETE("/projects/:project/groups/:group", handlers.deleteGroupFromProjectHandler)
 
 	// swagger:operation POST /projects/{project}/members Projects AddMemberToProject
 	//
@@ -230,5 +230,5 @@ func (r *Router) SetupProjectRoutes(acts server.ProjectActions) {
 	//     description: member added
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.POST("/project/:project/members", handlers.addMemberToProjectHandler)
+	r.engine.POST("/projects/:project/members", handlers.addMemberToProjectHandler)
 }
