@@ -69,7 +69,6 @@ func main() {
 			&DBBaseFlag,
 			&DBSSLModeFlag,
 			&ListenAddrFlag,
-			&AuthAddrFlag,
 			&KubeAPIAddrFlag,
 			&UserAddrFlag,
 			&BillingAddrFlag,

@@ -139,7 +139,7 @@ func (s *Server) SetGroupMemberAccess(ctx context.Context, projectID, groupID st
 			return setErr
 		}
 
-		return updateUserAccesses(ctx, s.clients.Auth, s.db, user.ID)
+		return nil
 	})
 
 	return err
@@ -159,12 +159,6 @@ func (s *Server) DeleteGroupFromProject(ctx context.Context, projectID, groupID 
 		users := make(map[string]bool)
 		for _, v := range delPerms {
 			users[v.UserID] = true
-		}
-
-		for user := range users {
-			if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, user); updErr != nil {
-				s.log.WithError(updErr).Warnf("update access failed for user %s", user)
-			}
 		}
 
 		return nil
@@ -198,7 +192,7 @@ func (s *Server) AddMemberToProject(ctx context.Context, projectID string, req m
 			return setErr
 		}
 
-		return updateUserAccesses(ctx, s.clients.Auth, s.db, user.ID)
+		return nil
 	})
 
 	return err

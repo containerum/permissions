@@ -70,8 +70,8 @@ func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
-	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"))
+func (ah *accessHandlers) getNamespaceAccessesHandler(ctx *gin.Context) {
+	ret, err := ah.acts.GetNamespaceAccesses(ctx.Request.Context(), ctx.Param("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
@@ -81,12 +81,23 @@ func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ret)
 }
 
+func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
+	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"))
+
+	if err != nil {
+		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, ret)
+}
+
 func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	handlers := &accessHandlers{acts: acts, tv: r.tv}
 
-	// swagger:operation GET /accesses Permissions GetResourcesAccesses
+	// swagger:operation GET /accesses Permissions GetUserAccesses
 	//
-	// Returns user accesses to resources.
+	// Returns user accesses.
 	//
 	// ---
 	// parameters:
@@ -95,9 +106,7 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//  - $ref: '#/parameters/SubstitutedUserID'
 	// responses:
 	//	 '200':
-	//     description: user accesses to resources
-	//     schema:
-	//       $ref: '#/definitions/ResourcesAccesses'
+	//     description: user accesses to resources (TODO schema)
 	//	 default:
 	//	   $ref: '#/responses/error'
 	r.engine.GET("/accesses", handlers.getUserAccessesHandler)
@@ -184,5 +193,23 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//       $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/namespaces/:id/accesses", handlers.getNamespaceAccessHandler)
+	r.engine.GET("/namespaces/:id/accesses", handlers.getNamespaceAccessesHandler)
+
+	// swagger:operation GET /projects/{project}/namespaces/{id}/accesses Permissions GetNamespaceWithPermissions
+	//
+	// Get namespace with user permissions.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ProjectID'
+	//  - $ref: '#/parameters/ResourceID'
+	// responses:
+	//   '200':
+	//     description: namespace access response (TODO schema)
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/projects/:project/namespaces/:id/access", handlers.getNamespaceAccessHandler)
 }

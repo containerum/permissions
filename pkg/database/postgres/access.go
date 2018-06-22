@@ -16,7 +16,10 @@ func (pgdb *PgDB) UserAccesses(ctx context.Context, userID string) ([]database.A
 	err := pgdb.db.Model(&ret).
 		ColumnExpr("?TableAlias.*").
 		ColumnExpr("ns.label AS label").
+		ColumnExpr("p.label AS project_label").
+		ColumnExpr("p.id AS project_id").
 		Join("LEFT JOIN namespaces AS ns").JoinOn("?TableAlias.resource_id = ns.id").JoinOn("?TableAlias.resource_type = ?", model.ResourceNamespace).
+		Join("LEFT JOIN projects AS p").JoinOn("ns.project_id = p.id").
 		Where("?TableAlias.user_id = ?", userID).
 		WhereGroup(func(query *orm.Query) (*orm.Query, error) {
 			return query.

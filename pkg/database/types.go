@@ -11,7 +11,9 @@ import (
 type AccessWithLabel struct {
 	model.Permission `pg:",override"`
 
-	Label string `sql:"label"`
+	Label        string `sql:"label"`
+	ProjectID    string `sql:"project_id"`
+	ProjectLabel string `sql:"project_label"`
 }
 
 type AccessListElement struct {

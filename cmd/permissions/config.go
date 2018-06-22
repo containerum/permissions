@@ -72,17 +72,6 @@ func setupTranslator() *ut.UniversalTranslator {
 	return ut.New(en.New(), en.New(), en_US.New())
 }
 
-func setupAuthClient(addr string) (clients.AuthClient, error) {
-	switch {
-	case opMode == modeDebug && addr == "":
-		return clients.NewAuthDummyClient(), nil
-	case addr != "":
-		return clients.NewAuthGRPCClient(addr)
-	default:
-		return nil, errors.New("missing configuration for auth service")
-	}
-}
-
 func setupUserClient(addr string) (clients.UserManagerClient, error) {
 	switch {
 	case opMode == modeDebug && addr == "":
@@ -153,10 +142,6 @@ func setupServiceClients(ctx *cli.Context) (*server.Clients, error) {
 	var errs []error
 	var clients server.Clients
 	var err error
-
-	if clients.Auth, err = setupAuthClient(ctx.String(AuthAddrFlag.Name)); err != nil {
-		errs = append(errs, err)
-	}
 
 	if clients.User, err = setupUserClient(ctx.String(UserAddrFlag.Name)); err != nil {
 		errs = append(errs, err)
