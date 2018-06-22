@@ -50,8 +50,8 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 		ResourceID:         ns.ID,
 		UserID:             ns.OwnerUserID,
 		ResourceType:       ResourceNamespace,
-		InitialAccessLevel: model.AdminAccess,
-		CurrentAccessLevel: model.AdminAccess,
+		InitialAccessLevel: model.AccessAdmin,
+		CurrentAccessLevel: model.AccessAdmin,
 	})
 }
 

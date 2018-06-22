@@ -143,7 +143,7 @@ func (pgdb *PgDB) deleteResourceAccess(ctx context.Context, resource model.Resou
 		Where("user_id = ?user_id").
 		Where("resource_type = ?resource_type").
 		Where("resource_id = ?resource_id").
-		Where("initial_access_level < ?", kubeClientModel.AdminAccess). // do not delete owner permission
+		Where("initial_access_level < ?", kubeClientModel.AccessAdmin). // do not delete owner permission
 		Delete()
 
 	if err != nil {

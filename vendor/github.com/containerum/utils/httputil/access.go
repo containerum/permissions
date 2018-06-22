@@ -42,6 +42,9 @@ type AccessChecker struct {
 
 func (a *AccessChecker) CheckAccess(requiredAccess kubeModel.UserGroupAccess) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if MustGetUserRole(ctx.Request.Context()) == "admin" {
+			return
+		}
 		project := ctx.Param(ProjectParam)
 		ns := ctx.Param(NamespaceParam)
 

@@ -22,10 +22,10 @@ func (f *NamespaceFilter) Filter(q *orm.Query) (*orm.Query, error) {
 		q = q.Where("permission.initial_access_level != permissions.initial_access_level")
 	}
 	if f.Owned {
-		q = q.Where("permission.initial_access_level = ?", kubeClientModel.AdminAccess)
+		q = q.Where("permission.initial_access_level = ?", kubeClientModel.AccessAdmin)
 	}
 	if f.NotOwned {
-		q = q.Where("permission.initial_access_level != ?", kubeClientModel.AdminAccess)
+		q = q.Where("permission.initial_access_level != ?", kubeClientModel.AccessAdmin)
 	}
 	if f.Limit > 0 {
 		q = q.Apply(f.Paginate)
