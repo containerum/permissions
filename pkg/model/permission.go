@@ -47,12 +47,12 @@ type Permission struct {
 }
 
 func (p *Permission) BeforeInsert(db orm.DB) error {
-	if p.InitialAccessLevel == model.AdminAccess {
+	if p.InitialAccessLevel == model.AccessAdmin {
 		cnt, err := db.Model(p).
 			Column("id").
 			Where("resource_id = ?", p.ResourceID).
 			Where("resource_type = ?", p.ResourceType).
-			Where("initial_access_level = ?", model.AdminAccess).
+			Where("initial_access_level = ?", model.AccessAdmin).
 			Count()
 		if err != nil {
 			return err
@@ -73,7 +73,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 		// that`s our error if we will here
 		return errors.ErrInternal().AddDetails("initial access level must be greater than current access level")
 	}
-	if p.InitialAccessLevel == model.AdminAccess && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
+	if p.InitialAccessLevel == model.AccessAdmin && p.CurrentAccessLevel != p.InitialAccessLevel { // limiting access
 		_, err := db.Model(p).
 			Where("resource_id = ?resource_id").
 			Set("current_access_level = LEAST(?TableAlias.initial_access_level, ?current_access_level)::ACCESS_LEVEL").
@@ -82,7 +82,7 @@ func (p *Permission) BeforeUpdate(db orm.DB) error {
 			return err
 		}
 	}
-	if p.InitialAccessLevel == model.AdminAccess && p.InitialAccessLevel == p.CurrentAccessLevel { // un-limiting access
+	if p.InitialAccessLevel == model.AccessAdmin && p.InitialAccessLevel == p.CurrentAccessLevel { // un-limiting access
 		_, err := db.Model(p).
 			Where("resource_id = ?resource_id").
 			Set("current_access_level = initial_access_level").
@@ -102,7 +102,7 @@ func (p *Permission) Mask() {
 	p.UserID = ""
 	p.InitialAccessLevel = p.CurrentAccessLevel
 	p.AccessLevelChangeTime = nil
-	p.CurrentAccessLevel = ""
+	p.CurrentAccessLevel = 0
 	p.GroupID = nil
 }
 
