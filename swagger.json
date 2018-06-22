@@ -20,28 +20,13 @@
         "operationId": "GetUserAccesses",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           }
         ],
         "responses": {
@@ -49,10 +34,7 @@
             "description": "user accesses to resources (TODO schema)"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -66,28 +48,13 @@
         "operationId": "SetResourcesAccesses",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -103,10 +70,7 @@
             "description": "access set"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -120,60 +84,41 @@
         "operationId": "GetAllNamespaces",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "description": "A set of filters separated with comma. See \"dao\" package for more information.",
-            "name": "filter",
-            "in": "query"
+            "$ref": "#/parameters/Filters"
           },
           {
-            "minimum": 0,
-            "type": "integer",
-            "name": "page",
-            "in": "query"
+            "$ref": "#/parameters/PageNum"
           },
           {
-            "minimum": 0,
-            "type": "integer",
-            "name": "per_page",
-            "in": "query"
+            "$ref": "#/parameters/PerPageLimit"
           }
         ],
         "responses": {
           "200": {
             "description": "namespaces response",
             "schema": {
-              "$ref": "#/definitions/getAllNamespacesOKBody"
+              "type": "object",
+              "properties": {
+                "namespaces": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Namespace"
+                  }
+                }
+              }
             }
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -185,28 +130,13 @@
         "operationId": "AdminCreateNamespace",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -222,10 +152,7 @@
             "description": "namespace created"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -239,28 +166,13 @@
         "operationId": "AdminResizeNamespace",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -271,12 +183,7 @@
             }
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -284,10 +191,7 @@
             "description": "namespace resized"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -301,48 +205,35 @@
         "operationId": "GetUserNamespaces",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "description": "A set of filters separated with comma. See \"dao\" package for more information.",
-            "name": "filter",
-            "in": "query"
+            "$ref": "#/parameters/Filters"
           }
         ],
         "responses": {
           "200": {
             "description": "namespaces response",
             "schema": {
-              "$ref": "#/definitions/getUserNamespacesOKBody"
+              "type": "object",
+              "properties": {
+                "namespaces": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Namespace"
+                  }
+                }
+              }
             }
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -354,28 +245,13 @@
         "operationId": "CreateNamespace",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -391,10 +267,7 @@
             "description": "namespace created"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -406,28 +279,13 @@
         "operationId": "DeleteAllUserNamespaces",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           }
         ],
         "responses": {
@@ -435,10 +293,7 @@
             "description": "namespaces deleted"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -452,36 +307,16 @@
         "operationId": "GetNamespace",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -492,10 +327,7 @@
             }
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -507,28 +339,13 @@
         "operationId": "ResizeNamespace",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -539,12 +356,7 @@
             }
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -552,10 +364,7 @@
             "description": "namespace resized"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -567,36 +376,16 @@
         "operationId": "DeleteNamespace",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -604,10 +393,7 @@
             "description": "namespace deleted"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -621,36 +407,16 @@
         "operationId": "GetNamespaceWithPermissions",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -661,10 +427,7 @@
             }
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -676,28 +439,13 @@
         "operationId": "SetNamespaceAccess",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -708,12 +456,7 @@
             }
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -721,10 +464,7 @@
             "description": "access set"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -736,28 +476,13 @@
         "operationId": "DeleteNamespaceAccess",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -768,12 +493,7 @@
             }
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -781,10 +501,7 @@
             "description": "access deleted"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -798,28 +515,13 @@
         "operationId": "RenameNamespace",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -830,12 +532,7 @@
             }
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -843,10 +540,7 @@
             "description": "namespace renamed"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -860,28 +554,13 @@
         "operationId": "CreateProject",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
             "name": "body",
@@ -897,10 +576,7 @@
             "description": "project created"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -914,50 +590,35 @@
         "operationId": "GetProjectGroups",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Project ID",
-            "name": "project",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ProjectID"
           }
         ],
         "responses": {
           "200": {
             "description": "project groups",
             "schema": {
-              "$ref": "#/definitions/getProjectGroupsOKBody"
+              "type": "object",
+              "properties": {
+                "groups": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/UserGroup"
+                  }
+                }
+              }
             }
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -969,36 +630,16 @@
         "operationId": "AddGroupToProject",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Project ID",
-            "name": "project",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ProjectID"
           },
           {
             "name": "body",
@@ -1014,10 +655,7 @@
             "description": "group added to project"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -1031,44 +669,19 @@
         "operationId": "SetGroupMemberAccess",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Project ID",
-            "name": "project",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ProjectID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Group ID",
-            "name": "group",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/GroupID"
           },
           {
             "name": "body",
@@ -1084,10 +697,7 @@
             "description": "access set"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       },
@@ -1099,44 +709,19 @@
         "operationId": "DeleteGroupFromProject",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Project ID",
-            "name": "project",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ProjectID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Group ID",
-            "name": "group",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/GroupID"
           }
         ],
         "responses": {
@@ -1144,10 +729,7 @@
             "description": "group deleted"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -1161,36 +743,16 @@
         "operationId": "AddMemberToProject",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Project ID",
-            "name": "project",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ProjectID"
           },
           {
             "name": "body",
@@ -1206,10 +768,7 @@
             "description": "member added"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -1223,44 +782,19 @@
         "operationId": "GetNamespaceWithPermissions",
         "parameters": [
           {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserIDHeader"
           },
           {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
+            "$ref": "#/parameters/UserRoleHeader"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
+            "$ref": "#/parameters/SubstitutedUserID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Project ID",
-            "name": "project",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ProjectID"
           },
           {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
+            "$ref": "#/parameters/ResourceID"
           }
         ],
         "responses": {
@@ -1268,10 +802,7 @@
             "description": "namespace access response (TODO schema)"
           },
           "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
+            "$ref": "#/responses/error"
           }
         }
       }
@@ -2039,7 +1570,83 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/bill-external/models"
     },
     "Namespace": {
-      "$ref": "#/definitions/namespaceOAIGen"
+      "description": "Namespace describes namespace",
+      "type": "object",
+      "required": [
+        "resources"
+      ],
+      "properties": {
+        "cpu": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CPU"
+        },
+        "create_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreateTime"
+        },
+        "delete_time": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
+        },
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ID"
+        },
+        "label": {
+          "description": "user-visible label for the namespace",
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "max_external_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxExtServices"
+        },
+        "max_internal_services": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxIntServices"
+        },
+        "max_traffic": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxTraffic"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "OwnerUserID"
+        },
+        "owner_user_login": {
+          "type": "string",
+          "format": "email",
+          "x-go-name": "OwnerUserLogin"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "ProjectID"
+        },
+        "ram": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RAM"
+        },
+        "tariff_id": {
+          "type": "string",
+          "format": "uuid",
+          "x-go-name": "TariffID"
+        }
+      },
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Namespace"
     },
     "NamespaceAdminCreateRequest": {
       "description": "NamespaceAdminCreateRequest contains parameters for creating namespace without billing",
@@ -2593,6 +2200,10 @@
           "type": "string",
           "x-go-name": "DeletedAt"
         },
+        "last_login": {
+          "type": "string",
+          "x-go-name": "LastLogin"
+        },
         "referral": {
           "type": "string",
           "x-go-name": "Referral"
@@ -2740,10 +2351,29 @@
       "x-go-package": "git.containerum.net/ch/permissions/pkg/model"
     },
     "ResourceUpdateName": {
-      "$ref": "#/definitions/resourceUpdateNameOAIGen"
+      "description": "ResourceUpdateName -- contains new resource name",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        }
+      },
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateName"
     },
     "ResourceUpdateUserAccess": {
-      "$ref": "#/definitions/resourceUpdateUserAccessOAIGen"
+      "description": "ResourceUpdateUserAccess -- contains user access data",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/UserGroupAccess"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/ResourceUpdateUserAccess"
     },
     "Resources": {
       "type": "object",
@@ -2762,7 +2392,7 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ResourcesAccesses": {
-      "$ref": "#/definitions/resourcesAccess"
+      "$ref": "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/ResourcesAccess"
     },
     "Rule": {
       "description": "Rule -- ingress rule",
@@ -3218,6 +2848,10 @@
           "type": "boolean",
           "x-go-name": "IsInBlacklist"
         },
+        "last_login": {
+          "type": "string",
+          "x-go-name": "LastLogin"
+        },
         "login": {
           "type": "string",
           "x-go-name": "Login"
@@ -3259,10 +2893,51 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/user-manager/pkg/models"
     },
     "UserGroup": {
-      "$ref": "#/definitions/userGroupOAIGen"
+      "description": "UserGroup -- group of users",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/UserGroupAccess"
+        },
+        "created_at": {
+          "description": "creation date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "CreatedAt"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserGroupMember"
+          },
+          "x-go-name": "Members"
+        },
+        "members_count": {
+          "type": "integer",
+          "format": "uint64",
+          "x-go-name": "MembersCount"
+        },
+        "owner_login": {
+          "type": "string",
+          "x-go-name": "OwnerLogin"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "x-go-name": "OwnerID"
+        }
+      },
+      "$ref": "vendor/github.com/containerum/kube-client/swagger.json#/definitions/UserGroup"
     },
     "UserGroupAccess": {
-      "type": "string",
+      "type": "integer",
+      "format": "uint64",
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UserGroupMember": {
@@ -3458,45 +3133,48 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/blang/semver"
     },
     "Volume": {
-      "description": "Volume -- volume representation",
+      "description": "Volume describes volume",
       "type": "object",
       "properties": {
-        "access": {
-          "$ref": "#/definitions/UserGroupAccess"
-        },
         "access_mode": {
           "$ref": "#/definitions/PersistentVolumeAccessMode"
         },
         "capacity": {
           "type": "integer",
-          "format": "uint64",
+          "format": "int64",
           "x-go-name": "Capacity"
         },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
+        "create_time": {
           "type": "string",
-          "x-go-name": "CreatedAt"
+          "format": "date-time",
+          "x-go-name": "CreateTime"
         },
-        "deleted_at": {
+        "delete_time": {
           "type": "string",
-          "x-go-name": "DeletedAt"
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
         },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
         },
-        "owner": {
+        "id": {
           "type": "string",
-          "x-go-name": "Owner"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
-        "owner_login": {
+        "label": {
           "type": "string",
-          "x-go-name": "OwnerLogin"
+          "x-go-name": "Label"
         },
-        "status": {
-          "description": "delete date in RFC3339 format",
+        "namespace_id": {
           "type": "string",
-          "x-go-name": "Status"
+          "format": "uuid",
+          "x-go-name": "NamespaceID"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "x-go-name": "OwnerUserID"
         },
         "storage_name": {
           "type": "string",
@@ -3504,17 +3182,11 @@
         },
         "tariff_id": {
           "type": "string",
+          "format": "uuid",
           "x-go-name": "TariffID"
-        },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserAccess"
-          },
-          "x-go-name": "Users"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/volume-manager/pkg/models"
     },
     "VolumeCreateRequest": {
       "description": "VolumeCreateRequest is a request object for creating volume",
@@ -3596,393 +3268,6 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
-    },
-    "errOAIGen": {
-      "description": "Err -- standard serializable API error\nMessage -- constant error message:\n+ \"invalid username\"\n+ \"quota exceeded\"\n+ \"validation error\"\n...etc...\nID -- unique error identification code\nDetails -- optional context error messages kinda\n+ \"field 'Replicas' must be non-zero value\"\n+ \"not enough tights to feed gopher\"\n+ \"resource 'God' does't exist\"\nFields -- optional set of key-value pairs",
-      "type": "object",
-      "properties": {
-        "details": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Details"
-        },
-        "fields": {
-          "description": "Fields -- represents additional key-value fields of error",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "x-go-package": "github.com/containerum/cherry"
-        },
-        "id": {
-          "$ref": "#/definitions/errOaiGenId"
-        },
-        "message": {
-          "type": "string",
-          "x-go-name": "Message"
-        },
-        "status_http": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "StatusHTTP"
-        }
-      },
-      "x-go-package": "github.com/containerum/cherry"
-    },
-    "errOaiGenId": {
-      "description": "ErrID -- represents unique error ID",
-      "type": "object",
-      "properties": {
-        "kind": {
-          "description": "ErrKind -- represents kind of error",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-package": "github.com/containerum/cherry"
-        },
-        "sid": {
-          "description": "ErrSID -- represents service ID of error",
-          "type": "string",
-          "x-go-package": "github.com/containerum/cherry"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/containerum/cherry"
-    },
-    "getAllNamespacesOKBody": {
-      "type": "object",
-      "properties": {
-        "namespaces": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Namespace"
-          }
-        }
-      },
-      "x-go-gen-location": "operations"
-    },
-    "getProjectGroupsOKBody": {
-      "type": "object",
-      "properties": {
-        "groups": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserGroup"
-          }
-        }
-      },
-      "x-go-gen-location": "operations"
-    },
-    "getUserNamespacesOKBody": {
-      "type": "object",
-      "properties": {
-        "namespaces": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Namespace"
-          }
-        }
-      },
-      "x-go-gen-location": "operations"
-    },
-    "namespaceOAIGen": {
-      "description": "Namespace -- namespace representation",
-      "type": "object",
-      "required": [
-        "resources"
-      ],
-      "properties": {
-        "access": {
-          "type": "string",
-          "x-go-package": "github.com/containerum/kube-client/pkg/model"
-        },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "id": {
-          "type": "string",
-          "x-go-name": "ID"
-        },
-        "label": {
-          "description": "user-visible label for the namespace",
-          "type": "string",
-          "x-go-name": "Label"
-        },
-        "max_ext_service": {
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxExtService"
-        },
-        "max_int_service": {
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxIntService"
-        },
-        "max_traffic": {
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MaxTraffic"
-        },
-        "owner": {
-          "type": "string",
-          "x-go-name": "Owner"
-        },
-        "owner_login": {
-          "type": "string",
-          "x-go-name": "OwnerLogin"
-        },
-        "resources": {
-          "$ref": "#/definitions/namespaceOaiGenResources"
-        },
-        "tariff_id": {
-          "type": "string",
-          "x-go-name": "TariffID"
-        },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/namespaceOaiGenUsersItems"
-          },
-          "x-go-name": "Users"
-        }
-      },
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "namespaceOaiGenResources": {
-      "type": "object",
-      "title": "Resources -- represents namespace limits and user resources.",
-      "required": [
-        "hard"
-      ],
-      "properties": {
-        "hard": {
-          "$ref": "#/definitions/namespaceOaiGenResourcesHard"
-        },
-        "used": {
-          "$ref": "#/definitions/namespaceOaiGenResourcesUsed"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "namespaceOaiGenResourcesHard": {
-      "description": "Resource -- represents namespace CPU and RAM",
-      "type": "object",
-      "required": [
-        "cpu",
-        "memory"
-      ],
-      "properties": {
-        "cpu": {
-          "description": "CPU in m",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "CPU"
-        },
-        "memory": {
-          "description": "RAM in Mi",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "Memory"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "namespaceOaiGenResourcesUsed": {
-      "description": "Resource -- represents namespace CPU and RAM",
-      "type": "object",
-      "required": [
-        "cpu",
-        "memory"
-      ],
-      "properties": {
-        "cpu": {
-          "description": "CPU in m",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "CPU"
-        },
-        "memory": {
-          "description": "RAM in Mi",
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "Memory"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "namespaceOaiGenUsersItems": {
-      "type": "object",
-      "properties": {
-        "access_level": {
-          "type": "string",
-          "x-go-package": "github.com/containerum/kube-client/pkg/model"
-        },
-        "username": {
-          "type": "string",
-          "x-go-name": "Username"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "resourceUpdateNameOAIGen": {
-      "description": "ResourceUpdateName -- contains new resource name",
-      "type": "object",
-      "properties": {
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        }
-      },
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "resourceUpdateUserAccessOAIGen": {
-      "description": "ResourceUpdateUserAccess -- contains user access data",
-      "type": "object",
-      "properties": {
-        "access": {
-          "type": "string",
-          "x-go-package": "github.com/containerum/kube-client/pkg/model"
-        },
-        "username": {
-          "type": "string",
-          "x-go-name": "Username"
-        }
-      },
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "resourcesAccess": {
-      "description": "ResourceAccesses contains user accesses to resources",
-      "type": "object",
-      "properties": {
-        "namespace": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/resourcesAccessNamespaceItems"
-          },
-          "x-go-name": "Namespace"
-        },
-        "volume": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/resourcesAccessVolumeItems"
-          },
-          "x-go-name": "Volume"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/auth/proto"
-    },
-    "resourcesAccessNamespaceItems": {
-      "description": "AccessObject represents user access to resource",
-      "type": "object",
-      "properties": {
-        "access": {
-          "type": "string",
-          "x-go-name": "Access"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "Id"
-        },
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "git.containerum.net/ch/auth/proto"
-    },
-    "resourcesAccessVolumeItems": {
-      "description": "AccessObject represents user access to resource",
-      "type": "object",
-      "properties": {
-        "access": {
-          "type": "string",
-          "x-go-name": "Access"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid",
-          "x-go-name": "Id"
-        },
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "git.containerum.net/ch/auth/proto"
-    },
-    "userGroupOAIGen": {
-      "description": "UserGroup -- group of users",
-      "type": "object",
-      "properties": {
-        "access": {
-          "type": "string",
-          "x-go-package": "github.com/containerum/kube-client/pkg/model"
-        },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
-        },
-        "id": {
-          "type": "string",
-          "x-go-name": "ID"
-        },
-        "label": {
-          "type": "string",
-          "x-go-name": "Label"
-        },
-        "members": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/userGroupOaiGenMembersItems"
-          },
-          "x-go-name": "Members"
-        },
-        "members_count": {
-          "type": "integer",
-          "format": "uint64",
-          "x-go-name": "MembersCount"
-        },
-        "owner_login": {
-          "type": "string",
-          "x-go-name": "OwnerLogin"
-        },
-        "owner_user_id": {
-          "type": "string",
-          "x-go-name": "OwnerID"
-        }
-      },
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
-    },
-    "userGroupOaiGenMembersItems": {
-      "description": "UserGroupMember -- group member",
-      "type": "object",
-      "properties": {
-        "access": {
-          "type": "string",
-          "x-go-package": "github.com/containerum/kube-client/pkg/model"
-        },
-        "id": {
-          "type": "string",
-          "x-go-name": "ID"
-        },
-        "username": {
-          "type": "string",
-          "x-go-name": "Username"
-        }
-      },
-      "x-go-gen-location": "models",
-      "x-go-package": "github.com/containerum/kube-client/pkg/model"
     }
   },
   "parameters": {
@@ -4029,35 +3314,20 @@
       "required": true
     },
     "SubstitutedUserID": {
-      "type": "string",
-      "format": "uuid",
-      "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-      "name": "user-id",
-      "in": "query"
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/SubstitutedUserID"
     },
     "UserIDHeader": {
-      "type": "string",
-      "format": "uuid",
-      "name": "X-User-ID",
-      "in": "header",
-      "required": true
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserIDHeader"
     },
     "UserRoleHeader": {
-      "enum": [
-        "user",
-        "admin"
-      ],
-      "type": "string",
-      "name": "X-User-Role",
-      "in": "header",
-      "required": true
+      "$ref": "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserRoleHeader"
     }
   },
   "responses": {
     "error": {
       "description": "cherry error",
       "schema": {
-        "$ref": "#/definitions/errOAIGen"
+        "$ref": "vendor/github.com/containerum/cherry/swagger.json#/definitions/Err"
       }
     }
   }
