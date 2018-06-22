@@ -42,9 +42,10 @@ func extractAccessesFromDB(ctx context.Context, db database.DB, userID string) (
 			NamespaceLabel: permission.Label,
 			Access:         permission.CurrentAccessLevel,
 		})
+		projects[permission.ProjectID] = pa
 	}
 
-	var ret []httputil.ProjectAccess
+	ret := make([]httputil.ProjectAccess, 0)
 	for _, project := range projects {
 		ret = append(ret, project)
 	}
