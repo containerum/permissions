@@ -8,8 +8,6 @@ definitions:
       - readdelete
       - write
       - owner
-  ResourcesAccesses:
-    $ref: "vendor/git.containerum.net/ch/auth/swagger.json#/definitions/ResourcesAccess"
   Namespace:
     $ref: "vendor/github.com/containerum/kube-client/swagger.json#/definitions/Namespace"
   ResourceUpdateName:
