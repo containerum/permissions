@@ -73,6 +73,7 @@ func (s *Server) CreateNamespace(ctx context.Context, projectID string, req mode
 				MaxExtServices: tariff.ExternalServices,
 				MaxIntServices: tariff.InternalServices,
 				MaxTraffic:     tariff.Traffic,
+				ProjectID:      &projectID,
 			},
 		}
 
