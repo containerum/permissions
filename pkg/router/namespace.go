@@ -25,7 +25,7 @@ func (nh *namespaceHandlers) adminCreateNamespaceHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := nh.acts.AdminCreateNamespace(ctx.Request.Context(), req); err != nil {
+	if err := nh.acts.AdminCreateNamespace(ctx.Request.Context(), ctx.Param("project"), req); err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
@@ -57,7 +57,7 @@ func (nh *namespaceHandlers) adminResizeNamespaceHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := nh.acts.AdminResizeNamespace(ctx.Request.Context(), ctx.Param("namespace"), req); err != nil {
+	if err := nh.acts.AdminResizeNamespace(ctx.Request.Context(), ctx.Param("project"), ctx.Param("namespace"), req); err != nil {
 		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
@@ -154,7 +154,7 @@ func (nh *namespaceHandlers) resizeNamespaceHandler(ctx *gin.Context) {
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
-	// swagger:operation POST /admin/namespaces Namespaces AdminCreateNamespace
+	// swagger:operation POST /admin/projects/{project}/namespaces Namespaces AdminCreateNamespace
 	//
 	// Create namespace without billing (admin only).
 	//
@@ -163,6 +163,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ProjectID'
 	//  - name: body
 	//    in: body
 	//    required: true
@@ -173,7 +174,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: namespace created
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.POST("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminCreateNamespaceHandler)
+	r.engine.POST("/admin/projects/:project/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminCreateNamespaceHandler)
 
 	// swagger:operation POST /projects/:project/namespaces Namespaces CreateNamespace
 	//
@@ -197,7 +198,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.POST("/projects/:project/namespaces", handlers.createNamespaceHandler)
 
-	// swagger:operation PUT /admin/namespaces/{id} Namespaces AdminResizeNamespace
+	// swagger:operation PUT /admin/projects/{project}/namespaces/{namespace} Namespaces AdminResizeNamespace
 	//
 	// Resize namespace without billing (admin only).
 	//
@@ -212,12 +213,13 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    schema:
 	//      $ref: '#/definitions/NamespaceAdminResizeRequest'
 	//  - $ref: '#/parameters/NamespaceID'
+	//  - $ref: '#/parameters/ProjectID'
 	// responses:
 	//   '200':
 	//     description: namespace resized
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/admin/namespaces/:namespace", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespaceHandler)
+	r.engine.PUT("/admin/projects/:project/namespaces/:namespace", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.adminResizeNamespaceHandler)
 
 	// swagger:operation PUT /projects/{project}/namespaces/{namespace}/rename Namespaces RenameNamespace
 	//

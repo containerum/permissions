@@ -16,10 +16,10 @@ import (
 )
 
 type KubeAPIClient interface {
-	CreateNamespace(ctx context.Context, req model.Namespace) error
-	SetNamespaceQuota(ctx context.Context, ns model.Namespace) error
-	DeleteNamespace(ctx context.Context, ns model.Namespace) error
-	GetNamespace(ctx context.Context, name string) (model.Namespace, error)
+	CreateNamespace(ctx context.Context, projectID string, req model.Namespace) error
+	SetNamespaceQuota(ctx context.Context, projectID string, ns model.Namespace) error
+	DeleteNamespace(ctx context.Context, projectID string, ns model.Namespace) error
+	GetNamespace(ctx context.Context, projectID string, name string) (model.Namespace, error)
 }
 
 type KubeAPIHTTPClient struct {
@@ -45,20 +45,22 @@ func NewKubeAPIHTTPClient(url *url.URL) *KubeAPIHTTPClient {
 	}
 }
 
-func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.Namespace) error {
+func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, projectID string, req model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
-		"cpu":    req.Resources.Hard.CPU,
-		"memory": req.Resources.Hard.Memory,
-		"label":  req.Label,
-		"name":   req.ID,
-		"access": req.Access,
+		"project_id": projectID,
+		"cpu":        req.Resources.Hard.CPU,
+		"memory":     req.Resources.Hard.Memory,
+		"label":      req.Label,
+		"name":       req.ID,
+		"access":     req.Access,
 	}).Debug("create namespace")
 
 	resp, err := k.client.R().
 		SetBody(req).
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Post("/namespaces")
+		SetPathParams(map[string]string{"project": projectID}).
+		Post("/projects/{project}/namespaces")
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}
@@ -68,12 +70,13 @@ func (k *KubeAPIHTTPClient) CreateNamespace(ctx context.Context, req model.Names
 	return nil
 }
 
-func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Namespace) error {
+func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, projectID string, ns model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
-		"cpu":    ns.Resources.Hard.CPU,
-		"memory": ns.Resources.Hard.Memory,
-		"label":  ns.Label,
-		"name":   ns.ID,
+		"project_id": projectID,
+		"cpu":        ns.Resources.Hard.CPU,
+		"memory":     ns.Resources.Hard.Memory,
+		"label":      ns.Label,
+		"name":       ns.ID,
 	}).Debug("set namespace quota")
 
 	resp, err := k.client.R().
@@ -82,8 +85,9 @@ func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Name
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetPathParams(map[string]string{
 			"namespace": ns.ID,
+			"project":   projectID,
 		}).
-		Put("/namespaces/{namespace}")
+		Put("/projects/{project}/namespaces/{namespace}")
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}
@@ -93,16 +97,20 @@ func (k *KubeAPIHTTPClient) SetNamespaceQuota(ctx context.Context, ns model.Name
 	return nil
 }
 
-func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.Namespace) error {
-	k.log.WithField("name", ns.ID).Debugf("delete namespace")
+func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, projectID string, ns model.Namespace) error {
+	k.log.WithFields(logrus.Fields{
+		"name":       ns.ID,
+		"project_id": projectID,
+	}).Debugf("delete namespace")
 
 	resp, err := k.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetPathParams(map[string]string{
 			"namespace": ns.ID,
+			"project":   projectID,
 		}).
-		Delete("/namespaces/{namespace}")
+		Delete("/projects/{project}/namespaces/{namespace}")
 	if err != nil {
 		return errors.ErrInternal().Log(err, k.log)
 	}
@@ -112,8 +120,11 @@ func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, ns model.Namesp
 	return nil
 }
 
-func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, name string) (ret model.Namespace, err error) {
-	k.log.WithField("name", name).Debugf("get namespace")
+func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, projectID string, name string) (ret model.Namespace, err error) {
+	k.log.WithFields(logrus.Fields{
+		"name":       name,
+		"project_id": projectID,
+	}).Debugf("get namespace")
 
 	resp, err := k.client.R().
 		SetResult(&ret).
@@ -121,8 +132,9 @@ func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, name string) (ret 
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetPathParams(map[string]string{
 			"namespace": name,
+			"project":   projectID,
 		}).
-		Get("/namespaces/{namespace}")
+		Get("/projects/{project}/namespaces/{namespace}")
 	if err != nil {
 		err = errors.ErrInternal().Log(err, k.log)
 		return
@@ -148,33 +160,36 @@ func NewKubeAPIDummyClient() *KubeAPIDummyClient {
 	}
 }
 
-func (k *KubeAPIDummyClient) CreateNamespace(ctx context.Context, req model.Namespace) error {
+func (k *KubeAPIDummyClient) CreateNamespace(ctx context.Context, projectID string, req model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
-		"cpu":    req.Resources.Hard.CPU,
-		"memory": req.Resources.Hard.Memory,
-		"name":   req.Label,
-		"access": req.Access,
+		"project_id": projectID,
+		"cpu":        req.Resources.Hard.CPU,
+		"memory":     req.Resources.Hard.Memory,
+		"label":      req.Label,
+		"name":       req.ID,
+		"access":     req.Access,
 	}).Debug("create namespace")
 
 	return nil
 }
 
-func (k *KubeAPIDummyClient) SetNamespaceQuota(ctx context.Context, ns model.Namespace) error {
+func (k *KubeAPIDummyClient) SetNamespaceQuota(ctx context.Context, projectID string, ns model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
-		"cpu":    ns.Resources.Hard.CPU,
-		"memory": ns.Resources.Hard.Memory,
-		"label":  ns.Label,
+		"project_id": projectID,
+		"cpu":        ns.Resources.Hard.CPU,
+		"memory":     ns.Resources.Hard.Memory,
+		"label":      ns.Label,
+		"name":       ns.ID,
 	}).Debug("set namespace quota")
 
 	return nil
 }
 
-func (k *KubeAPIDummyClient) DeleteNamespace(ctx context.Context, ns model.Namespace) error {
+func (k *KubeAPIDummyClient) DeleteNamespace(ctx context.Context, projectID string, ns model.Namespace) error {
 	k.log.WithFields(logrus.Fields{
-		"cpu":    ns.Resources.Hard.CPU,
-		"memory": ns.Resources.Hard.Memory,
-		"label":  ns.Label,
-	}).Debug("set namespace quota")
+		"name":       ns.ID,
+		"project_id": projectID,
+	}).Debugf("delete namespace")
 
 	return nil
 }
@@ -183,8 +198,11 @@ func (k *KubeAPIDummyClient) String() string {
 	return "kube-api dummy client"
 }
 
-func (k *KubeAPIDummyClient) GetNamespace(ctx context.Context, name string) (ret model.Namespace, err error) {
-	k.log.WithField("name", name).Debugf("get namespace")
+func (k *KubeAPIDummyClient) GetNamespace(ctx context.Context, projectID string, name string) (ret model.Namespace, err error) {
+	k.log.WithFields(logrus.Fields{
+		"name":       name,
+		"project_id": projectID,
+	}).Debugf("get namespace")
 
 	return
 }
