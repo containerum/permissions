@@ -14,10 +14,10 @@ import (
 type AccessActions interface {
 	GetUserAccesses(ctx context.Context) ([]httputil.ProjectAccess, error)
 	SetUserAccesses(ctx context.Context, accessLevel kubeClientModel.UserGroupAccess) error
-	GetNamespaceAccesses(ctx context.Context, id string) (kubeClientModel.Namespace, error)
-	GetNamespaceAccess(ctx context.Context, id string) (httputil.NamespaceAccess, error)
-	SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error
-	DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error
+	GetNamespaceAccesses(ctx context.Context, projectID, id string) (kubeClientModel.Namespace, error)
+	GetNamespaceAccess(ctx context.Context, projectID, id string) (httputil.NamespaceAccess, error)
+	SetNamespaceAccess(ctx context.Context, projectID, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error
+	DeleteNamespaceAccess(ctx context.Context, projectID, id string, targetUser string) error
 }
 
 func extractAccessesFromDB(ctx context.Context, db database.DB, userID string) ([]httputil.ProjectAccess, error) {
@@ -74,11 +74,12 @@ func (s *Server) SetUserAccesses(ctx context.Context, access kubeClientModel.Use
 	return err
 }
 
-func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error {
+func (s *Server) SetNamespaceAccess(ctx context.Context, projectID, id, targetUser string, accessLevel kubeClientModel.UserGroupAccess) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":     ownerID,
 		"target_user":  targetUser,
+		"project_id":   projectID,
 		"id":           id,
 		"access_level": accessLevel,
 	}).Debugf("set namespace access")
@@ -112,11 +113,12 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, 
 	return err
 }
 
-func (s *Server) GetNamespaceAccesses(ctx context.Context, id string) (kubeClientModel.Namespace, error) {
+func (s *Server) GetNamespaceAccesses(ctx context.Context, projectID, id string) (kubeClientModel.Namespace, error) {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
-		"user_id": userID,
-		"id":      id,
+		"user_id":    userID,
+		"project_id": projectID,
+		"id":         id,
 	}).Infof("get namespace accesses")
 
 	ns, err := s.db.NamespaceByID(ctx, userID, id)
@@ -134,11 +136,12 @@ func (s *Server) GetNamespaceAccesses(ctx context.Context, id string) (kubeClien
 	return ns.ToKube(), nil
 }
 
-func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (httputil.NamespaceAccess, error) {
+func (s *Server) GetNamespaceAccess(ctx context.Context, projectID, id string) (httputil.NamespaceAccess, error) {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
-		"user_id": userID,
-		"id":      id,
+		"user_id":    userID,
+		"project_id": projectID,
+		"id":         id,
 	}).Infof("get namespace access")
 
 	ns, err := s.db.NamespaceByID(ctx, userID, id)
@@ -153,10 +156,11 @@ func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (httputil.Na
 	}, nil
 }
 
-func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUser string) error {
+func (s *Server) DeleteNamespaceAccess(ctx context.Context, projectID, id string, targetUser string) error {
 	ownerID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"owner_id":    ownerID,
+		"project_id":  projectID,
 		"id":          id,
 		"target_user": targetUser,
 	}).Debugf("delete namespace access")

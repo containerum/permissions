@@ -14,7 +14,7 @@ import (
 )
 
 type ResourceServiceClient interface {
-	DeleteNamespaceResources(ctx context.Context, namespaceID string) error
+	DeleteNamespaceResources(ctx context.Context, projectID, namespaceID string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
 }
 
@@ -40,15 +40,19 @@ func NewResourceServiceHTTPClient(url *url.URL) *ResourceServiceHTTPClient {
 	}
 }
 
-func (r *ResourceServiceHTTPClient) DeleteNamespaceResources(ctx context.Context, namespaceID string) error {
-	r.log.WithField("namespace_id", namespaceID).Debugf("delete namespace resources")
+func (r *ResourceServiceHTTPClient) DeleteNamespaceResources(ctx context.Context, projectID, namespaceID string) error {
+	r.log.WithFields(logrus.Fields{
+		"namespace_id": namespaceID,
+		"project_id":   projectID,
+	}).Debugf("delete namespace resources")
 
 	resp, err := r.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetPathParams(map[string]string{
 			"namespace": namespaceID,
+			"project":   projectID,
 		}).
-		Delete("/namespaces/{namespace}")
+		Delete("/projects/{project}/namespaces/{namespace}")
 	if err != nil {
 		return errors.ErrInternal().Log(err, r.log)
 	}
@@ -83,8 +87,11 @@ func NewResourceServiceDummyClient() *ResourceServiceDummyClient {
 	}
 }
 
-func (r *ResourceServiceDummyClient) DeleteNamespaceResources(ctx context.Context, namespaceID string) error {
-	r.log.WithField("namespace_id", namespaceID).Debugf("delete namespace resources")
+func (r *ResourceServiceDummyClient) DeleteNamespaceResources(ctx context.Context, projectID, namespaceID string) error {
+	r.log.WithFields(logrus.Fields{
+		"namespace_id": namespaceID,
+		"project_id":   projectID,
+	}).Debugf("delete namespace resources")
 
 	return nil
 }

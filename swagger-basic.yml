@@ -39,8 +39,8 @@ parameters:
     type: string
     required: false
     description: A set of filters separated with comma. See "dao" package for more information.
-  ResourceID:
-    name: id
+  NamespaceID:
+    name: namespace
     in: path
     type: string
     format: uuid
@@ -54,12 +54,12 @@ parameters:
     required: true
     description: Project ID
   GroupID:
-      name: group
-      in: path
-      type: string
-      format: uuid
-      required: true
-      description: Group ID
+    name: group
+    in: path
+    type: string
+    format: uuid
+    required: true
+    description: Group ID
 responses:
   error:
     description: cherry error

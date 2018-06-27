@@ -47,7 +47,7 @@ func (ah *accessHandlers) setNamespaceAccessHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := ah.acts.SetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"), req.Username, req.Access); err != nil {
+	if err := ah.acts.SetNamespaceAccess(ctx.Request.Context(), ctx.Param("project"), ctx.Param("namespace"), req.Username, req.Access); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -62,7 +62,7 @@ func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := ah.acts.DeleteNamespaceAccess(ctx.Request.Context(), ctx.Param("id"), req.UserName); err != nil {
+	if err := ah.acts.DeleteNamespaceAccess(ctx.Request.Context(), ctx.Param("project"), ctx.Param("namespace"), req.UserName); err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
 	}
@@ -71,7 +71,7 @@ func (ah *accessHandlers) deleteNamespaceAccessHandler(ctx *gin.Context) {
 }
 
 func (ah *accessHandlers) getNamespaceAccessesHandler(ctx *gin.Context) {
-	ret, err := ah.acts.GetNamespaceAccesses(ctx.Request.Context(), ctx.Param("id"))
+	ret, err := ah.acts.GetNamespaceAccesses(ctx.Request.Context(), ctx.Param("project"), ctx.Param("namespace"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
 		return
@@ -82,7 +82,7 @@ func (ah *accessHandlers) getNamespaceAccessesHandler(ctx *gin.Context) {
 }
 
 func (ah *accessHandlers) getNamespaceAccessHandler(ctx *gin.Context) {
-	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("id"))
+	ret, err := ah.acts.GetNamespaceAccess(ctx.Request.Context(), ctx.Param("project"), ctx.Param("namespace"))
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(ah.tv.HandleError(err))
@@ -146,15 +146,16 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    schema:
 	//      $ref: "#/definitions/SetResourceAccessRequest"
-	//  - $ref: '#/parameters/ResourceID'
+	//  - $ref: '#/parameters/NamespaceID'
+	//  - $ref: '#/parameters/ProjectID'
 	// responses:
 	//	 '200':
 	//	   description: access set
 	//	 default:
 	//	   $ref: '#/responses/error'
-	r.engine.PUT("/namespaces/:id/accesses", handlers.setNamespaceAccessHandler)
+	r.engine.PUT("/projects/:project/namespaces/:namespace/accesses", handlers.setNamespaceAccessHandler)
 
-	// swagger:operation DELETE /namespaces/{id}/accesses Permissions DeleteNamespaceAccess
+	// swagger:operation DELETE /projects/{project}/namespaces/{namespace}/accesses Permissions DeleteNamespaceAccess
 	//
 	// Delete namespace permission to user.
 	//
@@ -168,15 +169,16 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//    required: true
 	//    schema:
 	//      $ref: "#/definitions/DeleteResourceAccessRequest"
-	//  - $ref: '#/parameters/ResourceID'
+	//  - $ref: '#/parameters/NamespaceID'
+	//  - $ref: '#/parameters/ProjectID'
 	// responses:
 	//	 '200':
 	//	   description: access deleted
 	//	 default:
 	//	   $ref: '#/responses/error'
-	r.engine.DELETE("/namespaces/:id/accesses", handlers.deleteNamespaceAccessHandler)
+	r.engine.DELETE("/projects/:project/namespaces/:namespace/accesses", handlers.deleteNamespaceAccessHandler)
 
-	// swagger:operation GET /namespaces/{id}/accesses Permissions GetNamespaceWithPermissions
+	// swagger:operation GET /projects/{project}/namespaces/{namespace}/accesses Permissions GetNamespaceWithPermissions
 	//
 	// Get namespace with user permissions.
 	//
@@ -185,7 +187,8 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
-	//  - $ref: '#/parameters/ResourceID'
+	//  - $ref: '#/parameters/NamespaceID'
+	//  - $ref: '#/parameters/ProjectID'
 	// responses:
 	//   '200':
 	//     description: namespace response
@@ -193,9 +196,9 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//       $ref: '#/definitions/Namespace'
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/namespaces/:id/accesses", handlers.getNamespaceAccessesHandler)
+	r.engine.GET("/projects/:project/namespaces/:namespace/accesses", handlers.getNamespaceAccessesHandler)
 
-	// swagger:operation GET /projects/{project}/namespaces/{id}/accesses Permissions GetNamespaceWithPermissions
+	// swagger:operation GET /projects/{project}/namespaces/{namespace}/accesses Permissions GetNamespaceWithPermissions
 	//
 	// Get namespace with user permissions.
 	//
@@ -205,11 +208,11 @@ func (r *Router) SetupAccessRoutes(acts server.AccessActions) {
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
 	//  - $ref: '#/parameters/ProjectID'
-	//  - $ref: '#/parameters/ResourceID'
+	//  - $ref: '#/parameters/NamespaceID'
 	// responses:
 	//   '200':
 	//     description: namespace access response (TODO schema)
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.GET("/projects/:project/namespaces/:id/access", handlers.getNamespaceAccessHandler)
+	r.engine.GET("/projects/:project/namespaces/:namespace/access", handlers.getNamespaceAccessHandler)
 }

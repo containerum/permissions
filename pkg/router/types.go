@@ -94,6 +94,7 @@ func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 	ret.engine.Use(tv.ValidateURLParams(map[string]string{
 		"namespace": "omitempty,uuid",
 		"project":   "omitempty,uuid",
+		"group":     "omitempty,uuid",
 	}))
 	ret.engine.Use(httputil.SubstituteUserMiddleware(tv.Validate, tv.UniversalTranslator, errors.ErrRequestValidationFailed))
 	return ret

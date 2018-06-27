@@ -15,8 +15,8 @@ import (
 )
 
 type VolumeManagerClient interface {
-	CreateVolume(ctx context.Context, nsID, label string, capacity int) error
-	DeleteNamespaceVolumes(ctx context.Context, nsID string) error
+	CreateVolume(ctx context.Context, projectID, nsID, label string, capacity int) error
+	DeleteNamespaceVolumes(ctx context.Context, projectID, nsID string) error
 	DeleteAllUserVolumes(ctx context.Context) error
 }
 
@@ -42,8 +42,9 @@ func NewVolumeManagerHTTPClient(url *url.URL) *VolumeManagerHTTPClient {
 	}
 }
 
-func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, nsID, label string, capacity int) error {
+func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, projectID, nsID, label string, capacity int) error {
 	v.log.WithFields(logrus.Fields{
+		"project_id":   projectID,
 		"namespace_id": nsID,
 		"label":        label,
 		"capacity":     capacity,
@@ -58,8 +59,9 @@ func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, nsID, label 
 		}).
 		SetPathParams(map[string]string{
 			"namespace": nsID,
+			"project":   projectID,
 		}).
-		Post("/limits/namespaces/{namespace}/volumes")
+		Post("/limits/projects/{project}/namespaces/{namespace}/volumes")
 	if err != nil {
 		return errors.ErrInternal().Log(err, v.log)
 	}
@@ -69,16 +71,20 @@ func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, nsID, label 
 	return nil
 }
 
-func (v *VolumeManagerHTTPClient) DeleteNamespaceVolumes(ctx context.Context, nsID string) error {
-	v.log.WithField("namespace_id", nsID)
+func (v *VolumeManagerHTTPClient) DeleteNamespaceVolumes(ctx context.Context, projectID, nsID string) error {
+	v.log.WithFields(logrus.Fields{
+		"namespace_id": nsID,
+		"project_id":   projectID,
+	}).Debugf("delete namespace volumes")
 
 	resp, err := v.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetPathParams(map[string]string{
 			"namespace": nsID,
+			"project":   projectID,
 		}).
-		Delete("/namespaces/{namespace}/volumes")
+		Delete("/projects/{project}/namespaces/{namespace}/volumes")
 	if err != nil {
 		return errors.ErrInternal().Log(err, v.log)
 	}
@@ -114,8 +120,9 @@ func NewVolumeManagerDummyClient() *VolumeManagerDummyClient {
 	}
 }
 
-func (v *VolumeManagerDummyClient) CreateVolume(ctx context.Context, nsID, label string, capacity int) error {
+func (v *VolumeManagerDummyClient) CreateVolume(ctx context.Context, projectID, nsID, label string, capacity int) error {
 	v.log.WithFields(logrus.Fields{
+		"project_id":   projectID,
 		"namespace_id": nsID,
 		"label":        label,
 		"capacity":     capacity,
@@ -124,8 +131,11 @@ func (v *VolumeManagerDummyClient) CreateVolume(ctx context.Context, nsID, label
 	return nil
 }
 
-func (v *VolumeManagerDummyClient) DeleteNamespaceVolumes(ctx context.Context, nsID string) error {
-	v.log.WithField("namespace_id", nsID)
+func (v *VolumeManagerDummyClient) DeleteNamespaceVolumes(ctx context.Context, projectID, nsID string) error {
+	v.log.WithFields(logrus.Fields{
+		"namespace_id": nsID,
+		"project_id":   projectID,
+	}).Debugf("delete namespace volumes")
 
 	return nil
 }
