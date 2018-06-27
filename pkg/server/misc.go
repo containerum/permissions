@@ -68,8 +68,8 @@ func AddUserLogins(ctx context.Context, permissions []model.Permission, client c
 	return nil
 }
 
-func NamespaceAddUsage(ctx context.Context, ns *kubeClientModel.Namespace, client clients.KubeAPIClient) error {
-	kubeNS, err := client.GetNamespace(ctx, ns.ID)
+func NamespaceAddUsage(ctx context.Context, projectID string, ns *kubeClientModel.Namespace, client clients.KubeAPIClient) error {
+	kubeNS, err := client.GetNamespace(ctx, projectID, ns.ID)
 	if err != nil {
 		return err
 	}
