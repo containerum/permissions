@@ -274,7 +274,7 @@
             "type": "string",
             "format": "uuid",
             "description": "Resource ID",
-            "name": "id",
+            "name": "namespace",
             "in": "path",
             "required": true
           }
@@ -346,58 +346,6 @@
           }
         }
       },
-      "post": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "Create namespace using billing.",
-        "operationId": "CreateNamespace",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
-          },
-          {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/NamespaceCreateRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "namespace created"
-          },
-          "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
-          }
-        }
-      },
       "delete": {
         "tags": [
           "Namespaces"
@@ -443,231 +391,7 @@
         }
       }
     },
-    "/namespaces/{id}": {
-      "get": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "Get namespace.",
-        "operationId": "GetNamespace",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
-          },
-          {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "namespace response",
-            "schema": {
-              "$ref": "#/definitions/Namespace"
-            }
-          },
-          "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "Resize namespace.",
-        "operationId": "ResizeNamespace",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
-          },
-          {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/NamespaceResizeRequest"
-            }
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "namespace resized"
-          },
-          "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "Delete namespace.",
-        "operationId": "DeleteNamespace",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
-          },
-          {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "namespace deleted"
-          },
-          "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
-          }
-        }
-      }
-    },
     "/namespaces/{id}/accesses": {
-      "get": {
-        "tags": [
-          "Permissions"
-        ],
-        "summary": "Get namespace with user permissions.",
-        "operationId": "GetNamespaceWithPermissions",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
-          },
-          {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "namespace response",
-            "schema": {
-              "$ref": "#/definitions/Namespace"
-            }
-          },
-          "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
-          }
-        }
-      },
       "put": {
         "tags": [
           "Permissions"
@@ -711,7 +435,15 @@
             "type": "string",
             "format": "uuid",
             "description": "Resource ID",
-            "name": "id",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
             "in": "path",
             "required": true
           }
@@ -719,128 +451,6 @@
         "responses": {
           "200": {
             "description": "access set"
-          },
-          "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Permissions"
-        ],
-        "summary": "Delete namespace permission to user.",
-        "operationId": "DeleteNamespaceAccess",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
-          },
-          {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/DeleteResourceAccessRequest"
-            }
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "access deleted"
-          },
-          "default": {
-            "description": "cherry error",
-            "schema": {
-              "$ref": "#/definitions/errOAIGen"
-            }
-          }
-        }
-      }
-    },
-    "/namespaces/{id}/rename": {
-      "put": {
-        "tags": [
-          "Namespaces"
-        ],
-        "summary": "Rename namespace.",
-        "operationId": "RenameNamespace",
-        "parameters": [
-          {
-            "type": "string",
-            "format": "uuid",
-            "name": "X-User-ID",
-            "in": "header",
-            "required": true
-          },
-          {
-            "enum": [
-              "user",
-              "admin"
-            ],
-            "type": "string",
-            "name": "X-User-Role",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
-            "name": "user-id",
-            "in": "query"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/NamespaceRenameRequest"
-            }
-          },
-          {
-            "type": "string",
-            "format": "uuid",
-            "description": "Resource ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "namespace renamed"
           },
           "default": {
             "description": "cherry error",
@@ -895,6 +505,68 @@
         "responses": {
           "201": {
             "description": "project created"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      }
+    },
+    "/projects/:project/namespaces": {
+      "post": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Create namespace using billing.",
+        "operationId": "CreateNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NamespaceCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "namespace created"
           },
           "default": {
             "description": "cherry error",
@@ -1214,7 +886,200 @@
         }
       }
     },
-    "/projects/{project}/namespaces/{id}/accesses": {
+    "/projects/{project}/namespaces/{namespace}": {
+      "get": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Get namespace.",
+        "operationId": "GetNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace response",
+            "schema": {
+              "$ref": "#/definitions/Namespace"
+            }
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Resize namespace.",
+        "operationId": "ResizeNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NamespaceResizeRequest"
+            }
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace resized"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Delete namespace.",
+        "operationId": "DeleteNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace deleted"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project}/namespaces/{namespace}/accesses": {
       "get": {
         "tags": [
           "Permissions"
@@ -1258,7 +1123,7 @@
             "type": "string",
             "format": "uuid",
             "description": "Resource ID",
-            "name": "id",
+            "name": "namespace",
             "in": "path",
             "required": true
           }
@@ -1266,6 +1131,144 @@
         "responses": {
           "200": {
             "description": "namespace access response (TODO schema)"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Permissions"
+        ],
+        "summary": "Delete namespace permission to user.",
+        "operationId": "DeleteNamespaceAccess",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteResourceAccessRequest"
+            }
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "access deleted"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project}/namespaces/{namespace}/rename": {
+      "put": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Rename namespace.",
+        "operationId": "RenameNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NamespaceRenameRequest"
+            }
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace renamed"
           },
           "default": {
             "description": "cherry error",
@@ -3464,48 +3467,45 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/blang/semver"
     },
     "Volume": {
-      "description": "Volume describes volume",
+      "description": "Volume -- volume representation",
       "type": "object",
       "properties": {
+        "access": {
+          "$ref": "#/definitions/UserGroupAccess"
+        },
         "access_mode": {
           "$ref": "#/definitions/PersistentVolumeAccessMode"
         },
         "capacity": {
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "Capacity"
         },
-        "create_time": {
+        "created_at": {
+          "description": "creation date in RFC3339 format",
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "CreateTime"
+          "x-go-name": "CreatedAt"
         },
-        "delete_time": {
+        "deleted_at": {
           "type": "string",
-          "format": "date-time",
-          "x-go-name": "DeleteTime"
+          "x-go-name": "DeletedAt"
         },
-        "deleted": {
-          "type": "boolean",
-          "x-go-name": "Deleted"
-        },
-        "id": {
+        "name": {
           "type": "string",
-          "format": "uuid",
-          "x-go-name": "ID"
+          "x-go-name": "Name"
         },
-        "label": {
+        "owner": {
           "type": "string",
-          "x-go-name": "Label"
+          "x-go-name": "Owner"
         },
-        "namespace_id": {
+        "owner_login": {
           "type": "string",
-          "format": "uuid",
-          "x-go-name": "NamespaceID"
+          "x-go-name": "OwnerLogin"
         },
-        "owner_user_id": {
+        "status": {
+          "description": "delete date in RFC3339 format",
           "type": "string",
-          "x-go-name": "OwnerUserID"
+          "x-go-name": "Status"
         },
         "storage_name": {
           "type": "string",
@@ -3513,11 +3513,17 @@
         },
         "tariff_id": {
           "type": "string",
-          "format": "uuid",
           "x-go-name": "TariffID"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserAccess"
+          },
+          "x-go-name": "Users"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/volume-manager/pkg/models"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "VolumeCreateRequest": {
       "description": "VolumeCreateRequest is a request object for creating volume",
@@ -3940,6 +3946,14 @@
       "in": "path",
       "required": true
     },
+    "NamespaceID": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Resource ID",
+      "name": "namespace",
+      "in": "path",
+      "required": true
+    },
     "PageNum": {
       "minimum": 0,
       "type": "integer",
@@ -3957,14 +3971,6 @@
       "format": "uuid",
       "description": "Project ID",
       "name": "project",
-      "in": "path",
-      "required": true
-    },
-    "ResourceID": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Resource ID",
-      "name": "id",
       "in": "path",
       "required": true
     },

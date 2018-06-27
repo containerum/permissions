@@ -15,15 +15,15 @@ import (
 )
 
 type NamespaceActions interface {
-	CreateNamespace(ctx context.Context, req model.NamespaceCreateRequest) error
-	GetNamespace(ctx context.Context, id string) (kubeClientModel.Namespace, error)
+	CreateNamespace(ctx context.Context, projectID string, req model.NamespaceCreateRequest) error
+	GetNamespace(ctx context.Context, projectID, id string) (kubeClientModel.Namespace, error)
 	GetUserNamespaces(ctx context.Context, filters ...string) ([]kubeClientModel.Namespace, error)
 	GetAllNamespaces(ctx context.Context, page, perPage int, filters ...string) ([]kubeClientModel.Namespace, error)
 	AdminCreateNamespace(ctx context.Context, req model.NamespaceAdminCreateRequest) error
 	AdminResizeNamespace(ctx context.Context, id string, req model.NamespaceAdminResizeRequest) error
-	RenameNamespace(ctx context.Context, id, newLabel string) error
-	ResizeNamespace(ctx context.Context, id, newTariffID string) error
-	DeleteNamespace(ctx context.Context, id string) error
+	RenameNamespace(ctx context.Context, projectID, id, newLabel string) error
+	ResizeNamespace(ctx context.Context, projectID, id, newTariffID string) error
+	DeleteNamespace(ctx context.Context, projectID, id string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
 }
 
@@ -41,13 +41,14 @@ func checkResizeNSQuota(nsWithUsage, kubeNS kubeClientModel.Namespace) error {
 	return nil
 }
 
-func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateRequest) error {
+func (s *Server) CreateNamespace(ctx context.Context, projectID string, req model.NamespaceCreateRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 
 	s.log.WithFields(logrus.Fields{
-		"user_id":   userID,
-		"tariff_id": req.TariffID,
-		"id":        req.Label,
+		"user_id":    userID,
+		"tariff_id":  req.TariffID,
+		"id":         req.Label,
+		"project_id": projectID,
 	}).Infof("create namespace")
 
 	tariff, err := s.clients.Billing.GetNamespaceTariff(ctx, req.TariffID)
@@ -98,12 +99,13 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 	return err
 }
 
-func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.Namespace, error) {
+func (s *Server) GetNamespace(ctx context.Context, projectID, id string) (kubeClientModel.Namespace, error) {
 	userID := httputil.MustGetUserID(ctx)
 
 	s.log.WithFields(logrus.Fields{
-		"user_id": userID,
-		"id":      id,
+		"user_id":    userID,
+		"id":         id,
+		"project_id": projectID,
 	}).Infof("get namespace")
 
 	ns, err := s.db.NamespaceByID(ctx, userID, id)
@@ -284,12 +286,13 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 	return err
 }
 
-func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error {
+func (s *Server) RenameNamespace(ctx context.Context, projectID, id, newLabel string) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
-		"user_id": userID,
-		"id":      id,
-		"new_id":  newLabel,
+		"user_id":    userID,
+		"id":         id,
+		"new_id":     newLabel,
+		"project_id": projectID,
 	}).Infof("rename namespace")
 
 	err := s.db.Transactional(func(tx database.DB) error {
@@ -316,12 +319,13 @@ func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error
 	return err
 }
 
-func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) error {
+func (s *Server) ResizeNamespace(ctx context.Context, projectID, id, newTariffID string) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id":       userID,
 		"id":            id,
 		"new_tariff_id": newTariffID,
+		"project_id":    projectID,
 	}).Infof("resize namespace")
 
 	newTariff, err := s.clients.Billing.GetNamespaceTariff(ctx, newTariffID)
@@ -378,7 +382,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		}
 
 		if oldTariff.VolumeSize <= 0 && newTariff.VolumeSize > 0 {
-			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, DefaultVolumeName, newTariff.VolumeSize); createErr != nil {
+			if createErr := s.clients.Volume.CreateVolume(ctx, projectID, ns.ID, DefaultVolumeName, newTariff.VolumeSize); createErr != nil {
 				return createErr
 			}
 		}
@@ -393,11 +397,12 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 	return err
 }
 
-func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
+func (s *Server) DeleteNamespace(ctx context.Context, projectID, id string) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
-		"user_id": userID,
-		"id":      id,
+		"user_id":    userID,
+		"id":         id,
+		"project_id": projectID,
 	}).Infof("delete namespace")
 
 	err := s.db.Transactional(func(tx database.DB) error {
@@ -414,15 +419,15 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return delErr
 		}
 
-		if delErr := s.clients.Solutions.DeleteNamespaceSolutions(ctx, ns.ID); delErr != nil {
+		if delErr := s.clients.Solutions.DeleteNamespaceSolutions(ctx, projectID, ns.ID); delErr != nil {
 			return delErr
 		}
 
-		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.ID); delErr != nil {
+		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, projectID, ns.ID); delErr != nil {
 			return delErr
 		}
 
-		if delErr := s.clients.Volume.DeleteNamespaceVolumes(ctx, ns.ID); delErr != nil {
+		if delErr := s.clients.Volume.DeleteNamespaceVolumes(ctx, projectID, ns.ID); delErr != nil {
 			return delErr
 		}
 

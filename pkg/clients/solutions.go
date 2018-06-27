@@ -15,7 +15,7 @@ import (
 )
 
 type SolutionsClient interface {
-	DeleteNamespaceSolutions(ctx context.Context, nsID string) error
+	DeleteNamespaceSolutions(ctx context.Context, projectID, nsID string) error
 	DeleteUserSolutions(ctx context.Context) error
 }
 
@@ -41,13 +41,19 @@ func NewSolutionsHTTPClient(url *url.URL) *SolutionsHTTPClient {
 	}
 }
 
-func (s *SolutionsHTTPClient) DeleteNamespaceSolutions(ctx context.Context, nsID string) error {
-	s.log.WithField("namespace_id", nsID).Debugf("delete namespace solutions")
+func (s *SolutionsHTTPClient) DeleteNamespaceSolutions(ctx context.Context, projectID, nsID string) error {
+	s.log.WithFields(logrus.Fields{
+		"namespace_id": nsID,
+		"project_id":   projectID,
+	}).Debugf("delete namespace solutions")
 
 	resp, err := s.client.R().
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		SetPathParams(map[string]string{"namespace": nsID}).
-		Delete("/namespace/{namespace}/solutions")
+		SetPathParams(map[string]string{
+			"namespace": nsID,
+			"project":   projectID,
+		}).
+		Delete("/projects/{project}/namespaces/{namespace}/solutions")
 	if err != nil {
 		return errors.ErrInternal().Log(err, s.log)
 	}
@@ -86,8 +92,11 @@ func NewSolutionsDummyClient() *SolutionsDummyClient {
 	}
 }
 
-func (s *SolutionsDummyClient) DeleteNamespaceSolutions(ctx context.Context, nsID string) error {
-	s.log.WithField("namespace_id", nsID).Debugf("delete namespace solutions")
+func (s *SolutionsDummyClient) DeleteNamespaceSolutions(ctx context.Context, projectID, nsID string) error {
+	s.log.WithFields(logrus.Fields{
+		"namespace_id": nsID,
+		"project_id":   projectID,
+	}).Debugf("delete namespace solutions")
 
 	return nil
 }
