@@ -19,6 +19,7 @@ type KubeAPIClient interface {
 	CreateNamespace(ctx context.Context, projectID string, req model.Namespace) error
 	SetNamespaceQuota(ctx context.Context, projectID string, ns model.Namespace) error
 	DeleteNamespace(ctx context.Context, projectID string, ns model.Namespace) error
+	DeleteUserNamespaces(ctx context.Context, userID string) error
 	GetNamespace(ctx context.Context, projectID string, name string) (model.Namespace, error)
 }
 
@@ -120,6 +121,22 @@ func (k *KubeAPIHTTPClient) DeleteNamespace(ctx context.Context, projectID strin
 	return nil
 }
 
+func (k *KubeAPIHTTPClient) DeleteUserNamespaces(ctx context.Context, userID string) error {
+	k.log.WithField("user_id", userID).Debugf("delete user namespaces")
+
+	resp, err := k.client.R().
+		SetContext(ctx).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		Delete("/namespaces")
+	if err != nil {
+		return errors.ErrInternal().Log(err, k.log)
+	}
+	if resp.Error() != nil {
+		return resp.Error().(*cherry.Err)
+	}
+	return nil
+}
+
 func (k *KubeAPIHTTPClient) GetNamespace(ctx context.Context, projectID string, name string) (ret model.Namespace, err error) {
 	k.log.WithFields(logrus.Fields{
 		"name":       name,
@@ -190,6 +207,12 @@ func (k *KubeAPIDummyClient) DeleteNamespace(ctx context.Context, projectID stri
 		"name":       ns.ID,
 		"project_id": projectID,
 	}).Debugf("delete namespace")
+
+	return nil
+}
+
+func (k *KubeAPIDummyClient) DeleteUserNamespaces(ctx context.Context, userID string) error {
+	k.log.WithField("user_id", userID).Debugf("delete user namespaces")
 
 	return nil
 }

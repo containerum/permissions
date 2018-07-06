@@ -3,12 +3,10 @@ package server
 import (
 	"context"
 
-	"git.containerum.net/ch/kube-api/pkg/kubeErrors"
 	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	billing "github.com/containerum/bill-external/models"
-	"github.com/containerum/cherry"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
@@ -489,22 +487,8 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 			return delErr
 		}
 
-		// kube-api don`t have method to delete list of namespaces
-		for _, ns := range deletedNamespaces {
-			nsPerm := model.NamespaceWithPermissions{Namespace: ns}
-			project := "2503033d-9f29-4782-8cd4-4274ee97a956" // a random uuid
-			if ns.ProjectID != nil {
-				project = *ns.ProjectID
-			}
-			if delErr := s.clients.Kube.DeleteNamespace(ctx, project, nsPerm.ToKube()); delErr != nil {
-				switch {
-				case delErr == nil: //pass
-				case cherry.Equals(delErr, kubeErrors.ErrResourceNotExist()):
-					s.log.WithError(delErr).Warnf("namespace not found in kube")
-				default:
-					return delErr
-				}
-			}
+		if delErr := s.clients.Kube.DeleteUserNamespaces(ctx, userID); delErr != nil {
+			return delErr
 		}
 
 		if delErr := s.clients.Volume.DeleteAllUserVolumes(ctx); delErr != nil {
