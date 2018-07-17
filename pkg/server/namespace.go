@@ -29,6 +29,7 @@ type NamespaceActions interface {
 	SetGroupMemberNamespaceAccess(ctx context.Context, namespace, groupID string, req model.SetGroupMemberAccessRequest) error
 	GetNamespaceGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
 	DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) error
+	GetGroupsNamespaces(ctx context.Context, groupID string) ([]kubeClientModel.Namespace, error)
 }
 
 var StandardNamespaceFilter = database.NamespaceFilter{
@@ -636,4 +637,28 @@ func (s *Server) DeleteGroupFromNamespace(ctx context.Context, namespace, groupI
 	})
 
 	return err
+}
+
+func (s *Server) GetGroupsNamespaces(ctx context.Context, groupID string) ([]kubeClientModel.Namespace, error) {
+	s.log.WithFields(logrus.Fields{
+		"group_id": groupID,
+	}).Infof("get groups namespaces")
+
+	namespaces, err := s.db.GroupNamespaces(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make([]kubeClientModel.Namespace, 0)
+	for _, namespace := range namespaces {
+		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
+		kubeNS := namespace.ToKube()
+		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
+		if kubeErr != nil {
+			s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		}
+		ret = append(ret, kubeNS)
+	}
+
+	return ret, nil
 }

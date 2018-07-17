@@ -113,6 +113,28 @@ func (pgdb *PgDB) UserNamespaces(ctx context.Context, userID string, filter data
 	return
 }
 
+func (pgdb *PgDB) GroupNamespaces(ctx context.Context, groupID string) (ret []model.NamespaceWithPermissions, err error) {
+	pgdb.log.WithFields(logrus.Fields{
+		"group_id": groupID,
+	}).Debugf("get user namespaces")
+
+	ret = make([]model.NamespaceWithPermissions, 0)
+
+	err = pgdb.db.Model(&ret).
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		Where("permission.group_id = ?", groupID).
+		Select()
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrResourceNotExists().AddDetailF("group has no namespaces")
+	default:
+		err = pgdb.handleError(err)
+	}
+
+	return
+}
+
 func (pgdb *PgDB) AllNamespaces(ctx context.Context, filter database.NamespaceFilter) (ret []model.Namespace, err error) {
 	pgdb.log.Debugf("get all namespaces")
 

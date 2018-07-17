@@ -202,6 +202,18 @@ func (nh *namespaceHandlers) deleteGroupFromNamespaceHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+func (nh *namespaceHandlers) getGroupNamespacesHandler(ctx *gin.Context) {
+	ret, err := nh.acts.GetGroupsNamespaces(ctx.Request.Context(), ctx.Param("group"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+	for i := range ret {
+		httputil.MaskForNonAdmin(ctx, &ret[i])
+	}
+	ctx.JSON(http.StatusOK, gin.H{"namespaces": ret})
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
@@ -437,7 +449,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.POST("/namespaces/:id/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToNamespaceHandler)
 
-	// swagger:operation PUT /namespaces/{id}/groups/{group} Projects SetGroupMemberAccess
+	// swagger:operation PUT /namespaces/{id}/groups/{group} Namespaces SetGroupMemberNamespaceAccess
 	//
 	// Change access of group member to namespace.
 	//
@@ -460,9 +472,9 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.PUT("/namespaces/:id/groups/:group", handlers.setGroupMemberNamespaceAccessHandler)
 
-	// swagger:operation GET /namespaces/{id}/groups Projects GetProjectGroups
+	// swagger:operation GET /namespaces/{id}/groups Namespaces GetNamespaceGroups
 	//
-	// Get project groups.
+	// Get namespace groups.
 	//
 	// ---
 	// parameters:
@@ -484,7 +496,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.GET("/namespaces/:id/groups", handlers.getNamespaceGroupsHandler)
 
-	// swagger:operation DELETE /namespaces/{id}/groups/{group} Projects DeleteGroupFromProject
+	// swagger:operation DELETE /namespaces/{id}/groups/{group} Namespaces DeleteGroupFromNamespace
 	//
 	// Delete group permissions from namespace.
 	//
@@ -501,4 +513,28 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.DELETE("/namespaces/:id/groups/:group", handlers.deleteGroupFromNamespaceHandler)
+
+	// swagger:operation GET /groups/{group}/namespaces Namespaces GetGroupNamespaces
+	//
+	// Get groups namespaces.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/GroupID'
+	// responses:
+	//   '200':
+	//     description: namespaces response
+	//     schema:
+	//       type: object
+	//       properties:
+	//         namespaces:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/Namespace'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/groups/:group/namespaces", handlers.getGroupNamespacesHandler)
 }
