@@ -240,3 +240,25 @@ func (pgdb *PgDB) DeleteAllUserNamespaces(ctx context.Context, userID string) (d
 
 	return
 }
+
+func (pgdb *PgDB) DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) (deletedPerms []model.Permission, err error) {
+	pgdb.log.WithFields(logrus.Fields{
+		"namespace": namespace,
+		"group_id":  groupID,
+	}).Debugf("delete group from namespace")
+
+	_, err = pgdb.db.Model(&deletedPerms).
+		Where("group_id = ?", groupID).
+		Where("resource_type = ?", model.ResourceNamespace).
+		Returning("*").
+		Delete()
+
+	switch err {
+	case pg.ErrNoRows:
+		err = nil
+	default:
+		err = pgdb.handleError(err)
+	}
+
+	return
+}

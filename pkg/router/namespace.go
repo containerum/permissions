@@ -193,6 +193,15 @@ func (nh *namespaceHandlers) getNamespaceGroupsHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"groups": groups})
 }
 
+func (nh *namespaceHandlers) deleteGroupFromNamespaceHandler(ctx *gin.Context) {
+	if err := nh.acts.DeleteGroupFromNamespace(ctx.Request.Context(), ctx.Param("id"), ctx.Param("group")); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
@@ -406,7 +415,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllNamespacesHandler)
 
-	// swagger:operation POST /namespaces/{namespace}/groups Namespaces AddGroupToNamespace
+	// swagger:operation POST /namespaces/{id}/groups Namespaces AddGroupToNamespace
 	//
 	// Add group to namespace (admin only).
 	//
@@ -415,6 +424,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ResourceID'
 	//  - name: body
 	//    in: body
 	//    required: true
@@ -427,7 +437,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.POST("/namespaces/:id/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToNamespaceHandler)
 
-	// swagger:operation PUT /namespaces/{namespace}/groups/{group} Projects SetGroupMemberAccess
+	// swagger:operation PUT /namespaces/{id}/groups/{group} Projects SetGroupMemberAccess
 	//
 	// Change access of group member to namespace.
 	//
@@ -436,6 +446,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ResourceID'
 	//  - $ref: '#/parameters/GroupID'
 	//  - name: body
 	//    in: body
@@ -449,7 +460,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.PUT("/namespaces/:id/groups/:group", handlers.setGroupMemberNamespaceAccessHandler)
 
-	// swagger:operation GET /projects/{project}/groups Projects GetProjectGroups
+	// swagger:operation GET /namespaces/{id}/groups Projects GetProjectGroups
 	//
 	// Get project groups.
 	//
@@ -458,9 +469,10 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//  - $ref: '#/parameters/UserIDHeader'
 	//  - $ref: '#/parameters/UserRoleHeader'
 	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ResourceID'
 	// responses:
 	//   '200':
-	//     description: project groups
+	//     description: namespace groups
 	//     schema:
 	//       type: object
 	//       properties:
@@ -472,4 +484,21 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     $ref: '#/responses/error'
 	r.engine.GET("/namespaces/:id/groups", handlers.getNamespaceGroupsHandler)
 
+	// swagger:operation DELETE /namespaces/{id}/groups/{group} Projects DeleteGroupFromProject
+	//
+	// Delete group permissions from namespace.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ProjectID'
+	//  - $ref: '#/parameters/GroupID'
+	// responses:
+	//   '202':
+	//     description: group deleted
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.DELETE("/namespaces/:id/groups/:group", handlers.deleteGroupFromNamespaceHandler)
 }

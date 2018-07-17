@@ -36,6 +36,7 @@ type DB interface {
 	ResizeNamespace(ctx context.Context, namespace model.Namespace) error
 	DeleteNamespace(ctx context.Context, namespace *model.Namespace) error
 	DeleteAllUserNamespaces(ctx context.Context, userID string) (deleted []model.Namespace, err error)
+	DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) (deletedPerms []model.Permission, err error)
 
 	CreateProject(ctx context.Context, project *model.Project) error
 	ProjectByID(ctx context.Context, project string) (model.Project, error)
