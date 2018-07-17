@@ -25,6 +25,11 @@ type NamespaceActions interface {
 	ResizeNamespace(ctx context.Context, id, newTariffID string) error
 	DeleteNamespace(ctx context.Context, id string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
+	AddGroupNamespace(ctx context.Context, namespace, groupID string) error
+	SetGroupMemberNamespaceAccess(ctx context.Context, namespace, groupID string, req model.SetGroupMemberAccessRequest) error
+	GetNamespaceGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
+	DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) error
+	GetGroupsNamespaces(ctx context.Context, groupID string) ([]kubeClientModel.Namespace, error)
 }
 
 var StandardNamespaceFilter = database.NamespaceFilter{
@@ -510,4 +515,150 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 	})
 
 	return err
+}
+
+func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID string) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id":   userID,
+		"group_id":  groupID,
+		"namespace": namespace,
+	}).Info("add group")
+
+	group, err := s.clients.User.Group(ctx, groupID)
+	if err != nil {
+		return err
+	}
+
+	var accessList []database.AccessListElement
+	for _, v := range group.Members {
+		accessList = append(accessList, database.AccessListElement{
+			AccessLevel: UserGroupAccessToDBAccess(v.Access),
+			ToUserID:    v.Username,
+		})
+	}
+
+	err = s.db.Transactional(func(tx database.DB) error {
+		ns, getErr := tx.NamespaceByID(ctx, userID, namespace)
+		if getErr != nil {
+			return getErr
+		}
+
+		return tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accessList)
+	})
+
+	return err
+}
+
+func (s *Server) SetGroupMemberNamespaceAccess(ctx context.Context, namespace, groupID string, req model.SetGroupMemberAccessRequest) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"namespace": namespace,
+		"group":     groupID,
+		"username":  req.Username,
+		"user_id":   userID,
+		"access":    req.AccessLevel,
+	}).Infof("set group member access")
+
+	err := s.db.Transactional(func(tx database.DB) error {
+		ns, getErr := tx.NamespaceByID(ctx, userID, namespace)
+		if getErr != nil {
+			return getErr
+		}
+
+		user, getErr := s.clients.User.UserInfoByLogin(ctx, req.Username)
+		if getErr != nil {
+			return getErr
+		}
+
+		accesses := []database.AccessListElement{
+			{ToUserID: user.ID, AccessLevel: UserGroupAccessToDBAccess(req.AccessLevel)},
+		}
+		if setErr := tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accesses); setErr != nil {
+			return setErr
+		}
+
+		return updateUserAccesses(ctx, s.clients.Auth, s.db, user.ID)
+	})
+
+	return err
+}
+
+func (s *Server) GetNamespaceGroups(ctx context.Context, namespace string) ([]kubeClientModel.UserGroup, error) {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"namespace": namespace,
+		"user_id":   userID,
+	}).Infof("get project groups")
+
+	ns, err := s.db.NamespaceByID(ctx, userID, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	var groupIDs []string
+	for _, v := range ns.Permissions {
+		if v.GroupID != nil {
+			groupIDs = append(groupIDs, *v.GroupID)
+		}
+	}
+
+	groups, err := s.clients.User.GroupFullIDList(ctx, groupIDs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return groups.Groups, nil
+}
+
+func (s *Server) DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) error {
+	s.log.WithFields(logrus.Fields{
+		"namespace": namespace,
+		"group":     groupID,
+	}).Infof("delete group from project")
+
+	err := s.db.Transactional(func(tx database.DB) error {
+		delPerms, delErr := tx.DeleteGroupFromNamespace(ctx, namespace, groupID)
+		if delErr != nil {
+			return delErr
+		}
+		users := make(map[string]bool)
+		for _, v := range delPerms {
+			users[v.UserID] = true
+		}
+
+		for user := range users {
+			if updErr := updateUserAccesses(ctx, s.clients.Auth, s.db, user); updErr != nil {
+				s.log.WithError(updErr).Warnf("update access failed for user %s", user)
+			}
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *Server) GetGroupsNamespaces(ctx context.Context, groupID string) ([]kubeClientModel.Namespace, error) {
+	s.log.WithFields(logrus.Fields{
+		"group_id": groupID,
+	}).Infof("get groups namespaces")
+
+	namespaces, err := s.db.GroupNamespaces(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make([]kubeClientModel.Namespace, 0)
+	for _, namespace := range namespaces {
+		AddOwnerLogin(ctx, &namespace.Resource, s.clients.User)
+		kubeNS := namespace.ToKube()
+		kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube)
+		if kubeErr != nil {
+			s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
+		}
+		ret = append(ret, kubeNS)
+	}
+
+	return ret, nil
 }
