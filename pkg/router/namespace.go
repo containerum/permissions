@@ -151,36 +151,46 @@ func (nh *namespaceHandlers) resizeNamespaceHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (ph *namespaceHandlers) addGroupToNamespaceHandler(ctx *gin.Context) {
+func (nh *namespaceHandlers) addGroupToNamespaceHandler(ctx *gin.Context) {
 	var req model.ProjectAddGroupRequest
 
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
-		ctx.AbortWithStatusJSON(ph.tv.BadRequest(ctx, err))
+		ctx.AbortWithStatusJSON(nh.tv.BadRequest(ctx, err))
 		return
 	}
 
-	if err := ph.acts.AddGroupNamespace(ctx.Request.Context(), ctx.Param("namespace"), req.GroupID); err != nil {
-		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+	if err := nh.acts.AddGroupNamespace(ctx.Request.Context(), ctx.Param("id"), req.GroupID); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
 
 	ctx.Status(http.StatusAccepted)
 }
 
-func (ph *namespaceHandlers) setGroupMemberNamespaceAccessHandler(ctx *gin.Context) {
+func (nh *namespaceHandlers) setGroupMemberNamespaceAccessHandler(ctx *gin.Context) {
 	var req model.SetGroupMemberAccessRequest
 
 	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
-		ctx.AbortWithStatusJSON(ph.tv.BadRequest(ctx, err))
+		ctx.AbortWithStatusJSON(nh.tv.BadRequest(ctx, err))
 		return
 	}
 
-	if err := ph.acts.SetGroupMemberNamespaceAccess(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("group"), req); err != nil {
-		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+	if err := nh.acts.SetGroupMemberNamespaceAccess(ctx.Request.Context(), ctx.Param("id"), ctx.Param("group"), req); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
 		return
 	}
 
 	ctx.Status(http.StatusAccepted)
+}
+
+func (nh *namespaceHandlers) getNamespaceGroupsHandler(ctx *gin.Context) {
+	groups, err := nh.acts.GetNamespaceGroups(ctx.Request.Context(), ctx.Param("id"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"groups": groups})
 }
 
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
@@ -415,7 +425,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: group added to namespace
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.POST("/namespaces/:namespace/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToNamespaceHandler)
+	r.engine.POST("/namespaces/:id/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToNamespaceHandler)
 
 	// swagger:operation PUT /namespaces/{namespace}/groups/{group} Projects SetGroupMemberAccess
 	//
@@ -437,5 +447,29 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//     description: access set
 	//   default:
 	//     $ref: '#/responses/error'
-	r.engine.PUT("/namespaces/:namespace/groups/:group", handlers.setGroupMemberNamespaceAccessHandler)
+	r.engine.PUT("/namespaces/:id/groups/:group", handlers.setGroupMemberNamespaceAccessHandler)
+
+	// swagger:operation GET /projects/{project}/groups Projects GetProjectGroups
+	//
+	// Get project groups.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	// responses:
+	//   '200':
+	//     description: project groups
+	//     schema:
+	//       type: object
+	//       properties:
+	//         groups:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/UserGroup'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/namespaces/:id/groups", handlers.getNamespaceGroupsHandler)
+
 }
