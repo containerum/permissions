@@ -26,6 +26,7 @@ type NamespaceActions interface {
 	DeleteNamespace(ctx context.Context, id string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
 	AddGroupNamespace(ctx context.Context, namespace, groupID string) error
+	SetGroupMemberNamespaceAccess(ctx context.Context, namespace, groupID string, req model.SetGroupMemberAccessRequest) error
 }
 
 var StandardNamespaceFilter = database.NamespaceFilter{
@@ -541,6 +542,40 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 		}
 
 		return tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accessList)
+	})
+
+	return err
+}
+
+func (s *Server) SetGroupMemberNamespaceAccess(ctx context.Context, namespace, groupID string, req model.SetGroupMemberAccessRequest) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"namespace": namespace,
+		"group":     groupID,
+		"username":  req.Username,
+		"user_id":   userID,
+		"access":    req.AccessLevel,
+	}).Infof("set group member access")
+
+	err := s.db.Transactional(func(tx database.DB) error {
+		ns, getErr := tx.NamespaceByID(ctx, userID, namespace)
+		if getErr != nil {
+			return getErr
+		}
+
+		user, getErr := s.clients.User.UserInfoByLogin(ctx, req.Username)
+		if getErr != nil {
+			return getErr
+		}
+
+		accesses := []database.AccessListElement{
+			{ToUserID: user.ID, AccessLevel: UserGroupAccessToDBAccess(req.AccessLevel)},
+		}
+		if setErr := tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accesses); setErr != nil {
+			return setErr
+		}
+
+		return updateUserAccesses(ctx, s.clients.Auth, s.db, user.ID)
 	})
 
 	return err

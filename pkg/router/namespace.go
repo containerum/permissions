@@ -167,6 +167,22 @@ func (ph *namespaceHandlers) addGroupToNamespaceHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+func (ph *namespaceHandlers) setGroupMemberNamespaceAccessHandler(ctx *gin.Context) {
+	var req model.SetGroupMemberAccessRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := ph.acts.SetGroupMemberNamespaceAccess(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("group"), req); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
@@ -400,4 +416,26 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.POST("/namespaces/:namespace/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToNamespaceHandler)
+
+	// swagger:operation PUT /namespaces/{namespace}/groups/{group} Projects SetGroupMemberAccess
+	//
+	// Change access of group member to namespace.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/GroupID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/SetGroupMemberAccessRequest'
+	// responses:
+	//   '202':
+	//     description: access set
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.PUT("/namespaces/:namespace/groups/:group", handlers.setGroupMemberNamespaceAccessHandler)
 }
