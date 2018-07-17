@@ -151,6 +151,22 @@ func (nh *namespaceHandlers) resizeNamespaceHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (ph *namespaceHandlers) addGroupToNamespaceHandler(ctx *gin.Context) {
+	var req model.ProjectAddGroupRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := ph.acts.AddGroupNamespace(ctx.Request.Context(), ctx.Param("namespace"), req.GroupID); err != nil {
+		ctx.AbortWithStatusJSON(ph.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
@@ -363,4 +379,25 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllNamespacesHandler)
+
+	// swagger:operation POST /namespaces/{namespace}/groups Namespaces AddGroupToNamespace
+	//
+	// Add group to namespace (admin only).
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/ProjectAddGroupRequest'
+	// responses:
+	//   '202':
+	//     description: group added to namespace
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.POST("/namespaces/:namespace/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToNamespaceHandler)
 }

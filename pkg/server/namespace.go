@@ -25,6 +25,7 @@ type NamespaceActions interface {
 	ResizeNamespace(ctx context.Context, id, newTariffID string) error
 	DeleteNamespace(ctx context.Context, id string) error
 	DeleteAllUserNamespaces(ctx context.Context) error
+	AddGroupNamespace(ctx context.Context, namespace, groupID string) error
 }
 
 var StandardNamespaceFilter = database.NamespaceFilter{
@@ -507,6 +508,39 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 		}
 
 		return nil
+	})
+
+	return err
+}
+
+func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID string) error {
+	userID := httputil.MustGetUserID(ctx)
+	s.log.WithFields(logrus.Fields{
+		"user_id":   userID,
+		"group_id":  groupID,
+		"namespace": namespace,
+	}).Info("add group")
+
+	group, err := s.clients.User.Group(ctx, groupID)
+	if err != nil {
+		return err
+	}
+
+	var accessList []database.AccessListElement
+	for _, v := range group.Members {
+		accessList = append(accessList, database.AccessListElement{
+			AccessLevel: UserGroupAccessToDBAccess(v.Access),
+			ToUserID:    v.Username,
+		})
+	}
+
+	err = s.db.Transactional(func(tx database.DB) error {
+		ns, getErr := tx.NamespaceByID(ctx, userID, namespace)
+		if getErr != nil {
+			return getErr
+		}
+
+		return tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accessList)
 	})
 
 	return err
