@@ -121,7 +121,7 @@ func (v *VolumeManagerHTTPClient) DeleteNamespaceVolume(ctx context.Context, nsI
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetPathParams(map[string]string{
 			"namespace": nsID,
-			"volumes":   volume,
+			"volume":    volume,
 		}).
 		Delete("/namespaces/{namespace}/volumes/{volume}")
 	if err != nil {
