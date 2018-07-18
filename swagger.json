@@ -295,6 +295,63 @@
         }
       }
     },
+    "/groups/{group}/namespaces": {
+      "get": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Get groups namespaces.",
+        "operationId": "GetGroupNamespaces",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Group ID",
+            "name": "group",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespaces response",
+            "schema": {
+              "$ref": "#/definitions/getGroupNamespacesOKBody"
+            }
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      }
+    },
     "/namespaces": {
       "get": {
         "tags": [
@@ -782,6 +839,253 @@
         "responses": {
           "200": {
             "description": "access deleted"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      }
+    },
+    "/namespaces/{id}/groups": {
+      "get": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Get namespace groups.",
+        "operationId": "GetNamespaceGroups",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "namespace groups",
+            "schema": {
+              "$ref": "#/definitions/getNamespaceGroupsOKBody"
+            }
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Add group to namespace (admin only).",
+        "operationId": "AddGroupToNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProjectAddGroupRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "group added to namespace"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      }
+    },
+    "/namespaces/{id}/groups/{group}": {
+      "put": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Change access of group member to namespace.",
+        "operationId": "SetGroupMemberNamespaceAccess",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Resource ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Group ID",
+            "name": "group",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SetGroupMemberAccessRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "access set"
+          },
+          "default": {
+            "description": "cherry error",
+            "schema": {
+              "$ref": "#/definitions/errOAIGen"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Namespaces"
+        ],
+        "summary": "Delete group permissions from namespace.",
+        "operationId": "DeleteGroupFromNamespace",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "name": "X-User-ID",
+            "in": "header",
+            "required": true
+          },
+          {
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "type": "string",
+            "name": "X-User-Role",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the of the user on behalf of which the administrator can perform the action",
+            "name": "user-id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project ID",
+            "name": "project",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Group ID",
+            "name": "group",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "group deleted"
           },
           "default": {
             "description": "cherry error",
@@ -3664,45 +3968,48 @@
       "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/blang/semver"
     },
     "Volume": {
-      "description": "Volume -- volume representation",
+      "description": "Volume describes volume",
       "type": "object",
       "properties": {
-        "access": {
-          "$ref": "#/definitions/AccessLevel"
-        },
         "access_mode": {
           "$ref": "#/definitions/PersistentVolumeAccessMode"
         },
         "capacity": {
           "type": "integer",
-          "format": "uint64",
+          "format": "int64",
           "x-go-name": "Capacity"
         },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
+        "create_time": {
           "type": "string",
-          "x-go-name": "CreatedAt"
+          "format": "date-time",
+          "x-go-name": "CreateTime"
         },
-        "deleted_at": {
+        "delete_time": {
           "type": "string",
-          "x-go-name": "DeletedAt"
+          "format": "date-time",
+          "x-go-name": "DeleteTime"
         },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
+        "deleted": {
+          "type": "boolean",
+          "x-go-name": "Deleted"
         },
-        "owner": {
+        "id": {
           "type": "string",
-          "x-go-name": "Owner"
+          "format": "uuid",
+          "x-go-name": "ID"
         },
-        "owner_login": {
+        "label": {
           "type": "string",
-          "x-go-name": "OwnerLogin"
+          "x-go-name": "Label"
         },
-        "status": {
-          "description": "delete date in RFC3339 format",
+        "namespace_id": {
           "type": "string",
-          "x-go-name": "Status"
+          "format": "uuid",
+          "x-go-name": "NamespaceID"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "x-go-name": "OwnerUserID"
         },
         "storage_name": {
           "type": "string",
@@ -3710,17 +4017,11 @@
         },
         "tariff_id": {
           "type": "string",
+          "format": "uuid",
           "x-go-name": "TariffID"
-        },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserAccess"
-          },
-          "x-go-name": "Users"
         }
       },
-      "x-go-package": "git.containerum.net/ch/permissions/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/permissions/vendor/git.containerum.net/ch/volume-manager/pkg/models"
     },
     "VolumeCreateRequest": {
       "description": "VolumeCreateRequest is a request object for creating volume",
@@ -3867,6 +4168,30 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/Namespace"
+          }
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "getGroupNamespacesOKBody": {
+      "type": "object",
+      "properties": {
+        "namespaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Namespace"
+          }
+        }
+      },
+      "x-go-gen-location": "operations"
+    },
+    "getNamespaceGroupsOKBody": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserGroup"
           }
         }
       },

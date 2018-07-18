@@ -360,14 +360,6 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			return chkErr
 		}
 
-		var oldTariff billing.NamespaceTariff
-		if ns.TariffID != nil {
-			oldTariff, getErr = s.clients.Billing.GetNamespaceTariff(ctx, *ns.TariffID)
-			if getErr != nil {
-				return getErr
-			}
-		}
-
 		ns.TariffID = &newTariff.ID
 		ns.MaxIntServices = newTariff.ExternalServices
 		ns.MaxIntServices = newTariff.InternalServices
@@ -394,9 +386,17 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			return resizeErr
 		}
 
-		if oldTariff.VolumeSize <= 0 && newTariff.VolumeSize > 0 {
-			if createErr := s.clients.Volume.CreateVolume(ctx, ns.ID, DefaultVolumeName, newTariff.VolumeSize); createErr != nil {
-				return createErr
+		if newTariff.VolumeSize == 0 {
+			volumes, err := s.clients.Volume.GetNamespaceVolumes(ctx, ns.ID)
+			if err != nil {
+				return err
+			}
+			for _, v := range volumes {
+				if *v.TariffID == "00000000-0000-0000-0000-000000000000" {
+					if createErr := s.clients.Volume.DeleteNamespaceVolume(ctx, ns.ID, v.Label); createErr != nil {
+						return createErr
+					}
+				}
 			}
 		}
 
