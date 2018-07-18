@@ -79,9 +79,9 @@ func NamespaceAddUsage(ctx context.Context, ns *kubeClientModel.Namespace, clien
 
 func UserGroupAccessToDBAccess(access kubeClientModel.UserGroupAccess) kubeClientModel.AccessLevel {
 	switch access {
-	case kubeClientModel.OwnerAccess, kubeClientModel.AdminAccess:
+	case kubeClientModel.OwnerAccess:
 		return kubeClientModel.Owner
-	case kubeClientModel.MasterAccess:
+	case kubeClientModel.MasterAccess, kubeClientModel.AdminAccess:
 		return kubeClientModel.Write
 	case kubeClientModel.MemberAccess:
 		return kubeClientModel.ReadDelete

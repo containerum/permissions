@@ -77,10 +77,10 @@ func (pgdb *PgDB) SetNamespaceAccess(ctx context.Context, ns model.Namespace, ac
 func (pgdb *PgDB) setResourceAccesses(ctx context.Context, perms []model.Permission) error {
 	_, err := pgdb.db.Model(&perms).
 		OnConflict(`(resource_type, resource_id, user_id) DO UPDATE`).
-		Set(`initial_access_level = ?initial_access_level`).
-		Set(`current_access_level = LEAST(?initial_access_level, ?current_access_level)::ACCESS_LEVEL`).
+		Set(`initial_access_level = EXCLUDED.initial_access_level`).
+		Set(`current_access_level = LEAST(EXCLUDED.initial_access_level, EXCLUDED.current_access_level)::ACCESS_LEVEL`).
+		Set(`group_id = EXCLUDED.group_id`).
 		Insert()
-
 	if err != nil {
 		return pgdb.handleError(err)
 	}
@@ -103,6 +103,7 @@ func (pgdb *PgDB) SetNamespaceAccesses(ctx context.Context, ns model.Namespace, 
 			UserID:             v.ToUserID,
 			InitialAccessLevel: v.AccessLevel,
 			CurrentAccessLevel: v.AccessLevel,
+			GroupID:            v.GroupID,
 		}
 	}
 
@@ -129,9 +130,11 @@ func (pgdb *PgDB) SetNamespacesAccesses(ctx context.Context, namespaces []model.
 				UserID:             access.ToUserID,
 				InitialAccessLevel: access.AccessLevel,
 				CurrentAccessLevel: access.AccessLevel,
+				GroupID:            access.GroupID,
 			})
 		}
 	}
+
 	return pgdb.setResourceAccesses(ctx, permissions)
 }
 

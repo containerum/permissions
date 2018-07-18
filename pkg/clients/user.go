@@ -158,6 +158,7 @@ func (u *UserManagerHTTPClient) GroupFullIDList(ctx context.Context, groupIDs ..
 	resp, err := u.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(groupIDs).
 		SetResult(kubeClientModel.UserGroups{}).
 		Post("/groups/labelidfull")
 

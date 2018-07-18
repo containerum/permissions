@@ -41,6 +41,29 @@ func (pgdb *PgDB) NamespaceByID(ctx context.Context, userID, id string) (ret mod
 	return
 }
 
+func (pgdb *PgDB) NamespaceByIDForEveryone(ctx context.Context, id string) (ret model.NamespaceWithPermissions, err error) {
+	pgdb.log.WithFields(logrus.Fields{
+		"id": id,
+	}).Debugf("get namespace by id")
+
+	ret.ID = id
+	err = pgdb.db.Model(&ret).
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		WherePK().
+		Where("NOT ?TableAlias.deleted").
+		Select()
+
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s not exists", id)
+	default:
+		err = pgdb.handleError(err)
+	}
+
+	return
+}
+
 func (pgdb *PgDB) NamespaceByLabel(ctx context.Context, userID, label string) (ret model.NamespaceWithPermissions, err error) {
 	pgdb.log.WithFields(logrus.Fields{
 		"user_id": userID,
