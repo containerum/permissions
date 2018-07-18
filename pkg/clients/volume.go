@@ -8,6 +8,7 @@ import (
 	"git.containerum.net/ch/volume-manager/pkg/models"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -18,7 +19,7 @@ type VolumeManagerClient interface {
 	CreateVolume(ctx context.Context, nsID, label string, capacity int) error
 	DeleteNamespaceVolume(ctx context.Context, nsID, volume string) error
 	DeleteNamespaceVolumes(ctx context.Context, nsID string) error
-	GetNamespaceVolumes(ctx context.Context, nsID string) ([]model.Volume, error)
+	GetNamespaceVolumes(ctx context.Context, nsID string) ([]kubeClientModel.Volume, error)
 	DeleteAllUserVolumes(ctx context.Context) error
 }
 
@@ -71,12 +72,12 @@ func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, nsID, label 
 	return nil
 }
 
-func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]model.Volume, error) {
+func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]kubeClientModel.Volume, error) {
 	v.log.WithFields(logrus.Fields{
 		"namespace_id": nsID,
 	}).Debugf("ger namespace volumes")
 
-	var volumes []model.Volume
+	var volumes []kubeClientModel.Volume
 	resp, err := v.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
@@ -187,7 +188,7 @@ func (v *VolumeManagerDummyClient) DeleteAllUserVolumes(ctx context.Context) err
 	return nil
 }
 
-func (v *VolumeManagerDummyClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]model.Volume, error) {
+func (v *VolumeManagerDummyClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]kubeClientModel.Volume, error) {
 	v.log.WithFields(logrus.Fields{
 		"namespace_id": nsID,
 	}).Debugf("ger namespace volumes")

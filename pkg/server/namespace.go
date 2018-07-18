@@ -390,8 +390,8 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 				return err
 			}
 			for _, v := range volumes {
-				if *v.TariffID == "00000000-0000-0000-0000-000000000000" {
-					if createErr := s.clients.Volume.DeleteNamespaceVolume(ctx, ns.ID, v.Label); createErr != nil {
+				if v.TariffID == "00000000-0000-0000-0000-000000000000" {
+					if createErr := s.clients.Volume.DeleteNamespaceVolume(ctx, ns.ID, v.Name); createErr != nil {
 						return createErr
 					}
 				}
