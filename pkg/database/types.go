@@ -17,6 +17,7 @@ type AccessWithLabel struct {
 type AccessListElement struct {
 	AccessLevel kubeClientModel.AccessLevel
 	ToUserID    string
+	GroupID     *string
 }
 
 type DB interface {
@@ -28,6 +29,7 @@ type DB interface {
 	DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error
 
 	NamespaceByID(ctx context.Context, userID, id string) (ret model.NamespaceWithPermissions, err error)
+	NamespaceByIDForEveryone(ctx context.Context, id string) (ret model.NamespaceWithPermissions, err error)
 	NamespacePermissions(ctx context.Context, ns *model.NamespaceWithPermissions) error
 	UserNamespaces(ctx context.Context, userID string, filter NamespaceFilter) (ret []model.NamespaceWithPermissions, err error)
 	AllNamespaces(ctx context.Context, filter NamespaceFilter) (ret []model.Namespace, err error)

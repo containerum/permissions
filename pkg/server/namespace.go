@@ -532,18 +532,20 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 
 	var accessList []database.AccessListElement
 	for _, v := range group.Members {
-		accessList = append(accessList, database.AccessListElement{
-			AccessLevel: UserGroupAccessToDBAccess(v.Access),
-			ToUserID:    v.Username,
-		})
+		if v.Access != kubeClientModel.OwnerAccess {
+			accessList = append(accessList, database.AccessListElement{
+				AccessLevel: UserGroupAccessToDBAccess(v.Access),
+				ToUserID:    v.ID,
+				GroupID:     &groupID,
+			})
+		}
 	}
 
 	err = s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, namespace)
+		ns, getErr := tx.NamespaceByIDForEveryone(ctx, namespace)
 		if getErr != nil {
 			return getErr
 		}
-
 		return tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accessList)
 	})
 
@@ -561,7 +563,7 @@ func (s *Server) SetGroupMemberNamespaceAccess(ctx context.Context, namespace, g
 	}).Infof("set group member access")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, namespace)
+		ns, getErr := tx.NamespaceByIDForEveryone(ctx, namespace)
 		if getErr != nil {
 			return getErr
 		}
@@ -591,8 +593,12 @@ func (s *Server) GetNamespaceGroups(ctx context.Context, namespace string) ([]ku
 		"user_id":   userID,
 	}).Infof("get project groups")
 
-	ns, err := s.db.NamespaceByID(ctx, userID, namespace)
+	ns, err := s.db.NamespaceByIDForEveryone(ctx, namespace)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.db.NamespacePermissions(ctx, &ns); err != nil {
 		return nil, err
 	}
 
