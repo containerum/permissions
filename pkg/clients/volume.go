@@ -77,7 +77,7 @@ func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID 
 		"namespace_id": nsID,
 	}).Debugf("ger namespace volumes")
 
-	var volumes []model.Volume
+	var volumes []kubeClientModel.Volume
 	resp, err := v.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
