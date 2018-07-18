@@ -75,7 +75,7 @@ func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, nsID, label 
 func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]kubeClientModel.Volume, error) {
 	v.log.WithFields(logrus.Fields{
 		"namespace_id": nsID,
-	}).Debugf("ger namespace volumes")
+	}).Debugf("get namespace volumes")
 
 	var volumes []kubeClientModel.Volume
 	resp, err := v.client.R().
