@@ -360,14 +360,6 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 			return chkErr
 		}
 
-		var oldTariff billing.NamespaceTariff
-		if ns.TariffID != nil {
-			oldTariff, getErr = s.clients.Billing.GetNamespaceTariff(ctx, *ns.TariffID)
-			if getErr != nil {
-				return getErr
-			}
-		}
-
 		ns.TariffID = &newTariff.ID
 		ns.MaxIntServices = newTariff.ExternalServices
 		ns.MaxIntServices = newTariff.InternalServices
