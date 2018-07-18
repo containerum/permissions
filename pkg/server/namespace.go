@@ -530,6 +530,11 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 		return err
 	}
 
+	ns, err := s.db.NamespaceByIDForEveryone(ctx, namespace)
+	if err != nil {
+		return err
+	}
+
 	var accessList []database.AccessListElement
 	for _, v := range group.Members {
 		if v.Access != kubeClientModel.OwnerAccess {
@@ -538,14 +543,17 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 				ToUserID:    v.ID,
 				GroupID:     &groupID,
 			})
+		} else {
+			ownerErr := s.db.Transactional(func(tx database.DB) error {
+				return tx.SetNamespaceAccess(ctx, ns.Namespace, UserGroupAccessToDBAccess(v.Access), v.ID)
+			})
+			if ownerErr != nil {
+				s.log.Warningln("Unabel add owner because he already exists:", ownerErr)
+			}
 		}
 	}
 
 	err = s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByIDForEveryone(ctx, namespace)
-		if getErr != nil {
-			return getErr
-		}
 		return tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accessList)
 	})
 
