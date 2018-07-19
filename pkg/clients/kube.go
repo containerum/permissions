@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"time"
+
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
@@ -36,6 +38,7 @@ func NewKubeAPIHTTPClient(url *url.URL) *KubeAPIHTTPClient {
 		SetHostURL(url.String()).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
@@ -143,9 +146,11 @@ func (k *KubeAPIHTTPClient) DeleteUserNamespaces(ctx context.Context, userID str
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Delete("/namespaces")
 	if err != nil {
+		fmt.Println("ERROR KUBE HERE?????", err)
 		return errors.ErrInternal().Log(err, k.log)
 	}
 	if resp.Error() != nil {
+		fmt.Println("ERROR KUBE HERE", resp.Error())
 		return resp.Error().(*cherry.Err)
 	}
 	return nil

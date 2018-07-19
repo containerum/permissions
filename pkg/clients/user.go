@@ -42,6 +42,7 @@ func NewUserManagerHTTPClient(url *url.URL) *UserManagerHTTPClient {
 		SetHostURL(url.String()).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal

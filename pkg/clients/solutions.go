@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"time"
+
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
@@ -31,6 +33,7 @@ func NewSolutionsHTTPClient(url *url.URL) *SolutionsHTTPClient {
 		SetHostURL(url.String()).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
