@@ -18,6 +18,7 @@ type RegisterRequest struct {
 // swagger:model
 type UserList struct {
 	Users []User `json:"users,omitempty"`
+	Pages uint   `json:"pages,omitempty"`
 }
 
 // User -- user model
@@ -61,6 +62,7 @@ type Profile struct {
 	CreatedAt     string   `json:"created_at,omitempty"`
 	DeletedAt     string   `json:"deleted_at,omitempty"`
 	BlacklistedAt string   `json:"blacklisted_at,omitempty"`
+	LastLogin     string   `json:"last_login,omitempty"`
 	Data          UserData `json:"data,omitempty"`
 }
 
