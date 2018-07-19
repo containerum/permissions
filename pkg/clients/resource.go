@@ -4,6 +4,10 @@ import (
 	"context"
 	"net/url"
 
+	"fmt"
+
+	"time"
+
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
@@ -30,6 +34,7 @@ func NewResourceServiceHTTPClient(url *url.URL) *ResourceServiceHTTPClient {
 		SetHostURL(url.String()).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
@@ -65,9 +70,11 @@ func (r *ResourceServiceHTTPClient) DeleteAllUserNamespaces(ctx context.Context)
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Delete("/namespaces")
 	if err != nil {
+		fmt.Println("ERROR HERE?", err)
 		return errors.ErrInternal().Log(err, r.log)
 	}
 	if resp.Error() != nil {
+		fmt.Println("ERROR HERE??", resp.Error())
 		return resp.Error().(*cherry.Err)
 	}
 	return nil

@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 
+	"time"
+
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/volume-manager/pkg/models"
 	"github.com/containerum/cherry"
@@ -35,6 +37,7 @@ func NewVolumeManagerHTTPClient(url *url.URL) *VolumeManagerHTTPClient {
 		SetHostURL(url.String()).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
