@@ -140,7 +140,7 @@ func SetupVolumeClient(addr string) (clients.VolumeManagerClient, error) {
 
 func SetupSolutionsClient(addr string) (clients.SolutionsClient, error) {
 	switch {
-	case opMode == modeDebug && addr == "":
+	case addr == "":
 		return clients.NewSolutionsDummyClient(), nil
 	case addr != "":
 		return clients.NewSolutionsHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
