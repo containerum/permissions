@@ -151,6 +151,69 @@ func (nh *namespaceHandlers) resizeNamespaceHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
+func (nh *namespaceHandlers) addGroupToNamespaceHandler(ctx *gin.Context) {
+	var req model.ProjectAddGroupRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := nh.acts.AddGroupNamespace(ctx.Request.Context(), ctx.Param("id"), req.GroupID); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func (nh *namespaceHandlers) setGroupMemberNamespaceAccessHandler(ctx *gin.Context) {
+	var req model.SetGroupMemberAccessRequest
+
+	if err := ctx.ShouldBindWith(&req, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.BadRequest(ctx, err))
+		return
+	}
+
+	if err := nh.acts.SetGroupMemberNamespaceAccess(ctx.Request.Context(), ctx.Param("id"), ctx.Param("group"), req); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func (nh *namespaceHandlers) getNamespaceGroupsHandler(ctx *gin.Context) {
+	groups, err := nh.acts.GetNamespaceGroups(ctx.Request.Context(), ctx.Param("id"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"groups": groups})
+}
+
+func (nh *namespaceHandlers) deleteGroupFromNamespaceHandler(ctx *gin.Context) {
+	if err := nh.acts.DeleteGroupFromNamespace(ctx.Request.Context(), ctx.Param("id"), ctx.Param("group")); err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func (nh *namespaceHandlers) getGroupNamespacesHandler(ctx *gin.Context) {
+	ret, err := nh.acts.GetGroupsNamespaces(ctx.Request.Context(), ctx.Param("group"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
+		return
+	}
+	for i := range ret {
+		httputil.MaskForNonAdmin(ctx, &ret[i])
+	}
+	ctx.JSON(http.StatusOK, gin.H{"namespaces": ret})
+}
+
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	handlers := &namespaceHandlers{tv: r.tv, acts: acts}
 
@@ -363,4 +426,115 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.GET("/admin/namespaces", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.getAllNamespacesHandler)
+
+	// swagger:operation POST /namespaces/{id}/groups Namespaces AddGroupToNamespace
+	//
+	// Add group to namespace (admin only).
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ResourceID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/ProjectAddGroupRequest'
+	// responses:
+	//   '202':
+	//     description: group added to namespace
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.POST("/namespaces/:id/groups", httputil.RequireAdminRole(errors.ErrAdminRequired), handlers.addGroupToNamespaceHandler)
+
+	// swagger:operation PUT /namespaces/{id}/groups/{group} Namespaces SetGroupMemberNamespaceAccess
+	//
+	// Change access of group member to namespace.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ResourceID'
+	//  - $ref: '#/parameters/GroupID'
+	//  - name: body
+	//    in: body
+	//    required: true
+	//    schema:
+	//      $ref: '#/definitions/SetGroupMemberAccessRequest'
+	// responses:
+	//   '202':
+	//     description: access set
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.PUT("/namespaces/:id/groups/:group", handlers.setGroupMemberNamespaceAccessHandler)
+
+	// swagger:operation GET /namespaces/{id}/groups Namespaces GetNamespaceGroups
+	//
+	// Get namespace groups.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ResourceID'
+	// responses:
+	//   '200':
+	//     description: namespace groups
+	//     schema:
+	//       type: object
+	//       properties:
+	//         groups:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/UserGroup'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/namespaces/:id/groups", handlers.getNamespaceGroupsHandler)
+
+	// swagger:operation DELETE /namespaces/{id}/groups/{group} Namespaces DeleteGroupFromNamespace
+	//
+	// Delete group permissions from namespace.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/ProjectID'
+	//  - $ref: '#/parameters/GroupID'
+	// responses:
+	//   '202':
+	//     description: group deleted
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.DELETE("/namespaces/:id/groups/:group", handlers.deleteGroupFromNamespaceHandler)
+
+	// swagger:operation GET /groups/{group}/namespaces Namespaces GetGroupNamespaces
+	//
+	// Get groups namespaces.
+	//
+	// ---
+	// parameters:
+	//  - $ref: '#/parameters/UserIDHeader'
+	//  - $ref: '#/parameters/UserRoleHeader'
+	//  - $ref: '#/parameters/SubstitutedUserID'
+	//  - $ref: '#/parameters/GroupID'
+	// responses:
+	//   '200':
+	//     description: namespaces response
+	//     schema:
+	//       type: object
+	//       properties:
+	//         namespaces:
+	//           type: array
+	//           items:
+	//             $ref: '#/definitions/Namespace'
+	//   default:
+	//     $ref: '#/responses/error'
+	r.engine.GET("/groups/:group/namespaces", handlers.getGroupNamespacesHandler)
 }

@@ -41,6 +41,29 @@ func (pgdb *PgDB) NamespaceByID(ctx context.Context, userID, id string) (ret mod
 	return
 }
 
+func (pgdb *PgDB) NamespaceByIDForEveryone(ctx context.Context, id string) (ret model.NamespaceWithPermissions, err error) {
+	pgdb.log.WithFields(logrus.Fields{
+		"id": id,
+	}).Debugf("get namespace by id")
+
+	ret.ID = id
+	err = pgdb.db.Model(&ret).
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		WherePK().
+		Where("NOT ?TableAlias.deleted").
+		Select()
+
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s not exists", id)
+	default:
+		err = pgdb.handleError(err)
+	}
+
+	return
+}
+
 func (pgdb *PgDB) NamespaceByLabel(ctx context.Context, userID, label string) (ret model.NamespaceWithPermissions, err error) {
 	pgdb.log.WithFields(logrus.Fields{
 		"user_id": userID,
@@ -106,6 +129,28 @@ func (pgdb *PgDB) UserNamespaces(ctx context.Context, userID string, filter data
 	switch err {
 	case pg.ErrNoRows:
 		err = errors.ErrResourceNotExists().AddDetailF("user has no namespaces")
+	default:
+		err = pgdb.handleError(err)
+	}
+
+	return
+}
+
+func (pgdb *PgDB) GroupNamespaces(ctx context.Context, groupID string) (ret []model.NamespaceWithPermissions, err error) {
+	pgdb.log.WithFields(logrus.Fields{
+		"group_id": groupID,
+	}).Debugf("get user namespaces")
+
+	ret = make([]model.NamespaceWithPermissions, 0)
+
+	err = pgdb.db.Model(&ret).
+		ColumnExpr("?TableAlias.*").
+		Column("Permission").
+		Where("permission.group_id = ?", groupID).
+		Select()
+	switch err {
+	case pg.ErrNoRows:
+		err = errors.ErrResourceNotExists().AddDetailF("group has no namespaces")
 	default:
 		err = pgdb.handleError(err)
 	}
@@ -236,6 +281,28 @@ func (pgdb *PgDB) DeleteAllUserNamespaces(ctx context.Context, userID string) (d
 	if result.RowsAffected() <= 0 {
 		err = errors.ErrResourceNotExists().AddDetailF("user %s has no namespaces", userID)
 		return
+	}
+
+	return
+}
+
+func (pgdb *PgDB) DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) (deletedPerms []model.Permission, err error) {
+	pgdb.log.WithFields(logrus.Fields{
+		"namespace": namespace,
+		"group_id":  groupID,
+	}).Debugf("delete group from namespace")
+
+	_, err = pgdb.db.Model(&deletedPerms).
+		Where("group_id = ?", groupID).
+		Where("resource_type = ?", model.ResourceNamespace).
+		Returning("*").
+		Delete()
+
+	switch err {
+	case pg.ErrNoRows:
+		err = nil
+	default:
+		err = pgdb.handleError(err)
 	}
 
 	return

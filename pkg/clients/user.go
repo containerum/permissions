@@ -42,6 +42,7 @@ func NewUserManagerHTTPClient(url *url.URL) *UserManagerHTTPClient {
 		SetHostURL(url.String()).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
@@ -158,6 +159,7 @@ func (u *UserManagerHTTPClient) GroupFullIDList(ctx context.Context, groupIDs ..
 	resp, err := u.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
+		SetBody(groupIDs).
 		SetResult(kubeClientModel.UserGroups{}).
 		Post("/groups/labelidfull")
 
@@ -269,12 +271,12 @@ func (u *UserManagerDummyClient) GroupFullIDList(ctx context.Context, groupIDs .
 						{
 							ID:       "947b90d9-5c61-4828-adc2-aaa7155de47b",
 							Username: "fake-member@test.com",
-							Access:   kubeClientModel.AdminAccess,
+							Access:   kubeClientModel.Owner,
 						},
 					},
 				},
 				MembersCount: 1,
-				UserAccess:   kubeClientModel.OwnerAccess,
+				UserAccess:   kubeClientModel.Owner,
 				CreatedAt:    time.Now().Format(time.RFC3339),
 			},
 		},

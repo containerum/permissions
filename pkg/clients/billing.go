@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"time"
+
 	"git.containerum.net/ch/permissions/pkg/errors"
 	berrors "github.com/containerum/bill-external/errors"
 	btypes "github.com/containerum/bill-external/models"
@@ -119,6 +121,7 @@ func NewBillingHTTPClient(u *url.URL) *BillingHTTPClient {
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
