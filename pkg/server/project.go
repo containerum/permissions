@@ -105,6 +105,10 @@ func (s *Server) GetProjectGroups(ctx context.Context, projectID string) ([]kube
 		}
 	}
 
+	if len(groupIDs) == 0 {
+		return make([]kubeClientModel.UserGroup, 0), nil
+	}
+
 	groups, err := s.clients.User.GroupFullIDList(ctx, groupIDs...)
 	if err != nil {
 		return nil, err
