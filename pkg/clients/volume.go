@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	"time"
@@ -153,6 +154,10 @@ func (v *VolumeManagerHTTPClient) DeleteAllUserVolumes(ctx context.Context) erro
 	return nil
 }
 
+func (v *VolumeManagerHTTPClient) String() string {
+	return fmt.Sprintf("volume-manager http client: url=%s", v.client.HostURL)
+}
+
 type VolumeManagerDummyClient struct {
 	log *logrus.Entry
 }
@@ -197,4 +202,8 @@ func (v *VolumeManagerDummyClient) GetNamespaceVolumes(ctx context.Context, nsID
 	}).Debugf("ger namespace volumes")
 
 	return nil, nil
+}
+
+func (v *VolumeManagerDummyClient) String() string {
+	return "volume-manager dummy client"
 }

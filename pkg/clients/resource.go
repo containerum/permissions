@@ -80,6 +80,10 @@ func (r *ResourceServiceHTTPClient) DeleteAllUserNamespaces(ctx context.Context)
 	return nil
 }
 
+func (r *ResourceServiceHTTPClient) String() string {
+	return fmt.Sprintf("resource-service http client: url=%s", r.client.HostURL)
+}
+
 type ResourceServiceDummyClient struct {
 	log *logrus.Entry
 }
@@ -100,4 +104,8 @@ func (r *ResourceServiceDummyClient) DeleteAllUserNamespaces(ctx context.Context
 	r.log.Debugf("delete all user namespaces")
 
 	return nil
+}
+
+func (r *ResourceServiceDummyClient) String() string {
+	return "resource-service dummy client"
 }
