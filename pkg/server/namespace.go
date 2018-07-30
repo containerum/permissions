@@ -617,6 +617,10 @@ func (s *Server) GetNamespaceGroups(ctx context.Context, namespace string) ([]ku
 		}
 	}
 
+	if len(ns.Permissions) == 0 {
+		return []kubeClientModel.UserGroup{}, nil
+	}
+
 	groups, err := s.clients.User.GroupFullIDList(ctx, groupIDs...)
 	if err != nil {
 		return nil, err
