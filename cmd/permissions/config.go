@@ -118,7 +118,7 @@ func setupResourceClient(addr string) (clients.ResourceServiceClient, error) {
 
 func setupBillingClient(addr string) (clients.BillingClient, error) {
 	switch {
-	case opMode == modeDebug && addr == "":
+	case addr == "":
 		return clients.NewBillingDummyClient(), nil
 	case addr != "":
 		return clients.NewBillingHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
@@ -129,7 +129,7 @@ func setupBillingClient(addr string) (clients.BillingClient, error) {
 
 func SetupVolumeClient(addr string) (clients.VolumeManagerClient, error) {
 	switch {
-	case opMode == modeDebug && addr == "":
+	case addr == "":
 		return clients.NewVolumeManagerDummyClient(), nil
 	case addr != "":
 		return clients.NewVolumeManagerHTTPClient(&url.URL{Scheme: "http", Host: addr}), nil
