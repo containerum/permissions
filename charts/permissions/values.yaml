@@ -30,6 +30,7 @@ env:
     KUBE_API_ADDR: "kube-api:1214"
     RESOURCE_SERVICE_ADDR: "resource-service:1213"
     BILLING_ADDR: "billing-manager:5000"
+    VOLUME_MANAGER_ADDR: "volume-manager:4343"
     DB_PASSWORD:
     SOLUTIONS_ADDR: "solutions:6767"
 
