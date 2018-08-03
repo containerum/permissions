@@ -52,7 +52,7 @@ func (pgdb *PgDB) NamespaceByIDForEveryone(ctx context.Context, id string) (ret 
 		Column("Permission").
 		WherePK().
 		Where("NOT ?TableAlias.deleted").
-		Select()
+		First()
 
 	switch err {
 	case pg.ErrNoRows:

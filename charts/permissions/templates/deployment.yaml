@@ -67,6 +67,13 @@ spec:
             - name: RESOURCE_SERVICE_ADDR
               value: "{{ .Release.Name }}-resource:1213"
             {{- end }}
+            {{- if .Values.env.local.VOLUME_MANAGER_ADDR }}
+            - name: VOLUME_MANAGER_ADDR
+              value: "{{ .Values.env.local.VOLUME_MANAGER_ADDR }}"
+            {{- else }}
+            - name: VOLUME_MANAGER_ADDR
+              value: "{{ .Release.Name }}-volume:4343"
+            {{- end }}
             {{- if .Values.env.local.BILLING_ADDR }}
             - name: BILLING_ADDR
               value: "{{ .Values.env.local.BILLING_ADDR }}"
