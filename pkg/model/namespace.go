@@ -6,7 +6,6 @@ import (
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/kube-client/pkg/model"
 	"github.com/go-pg/pg/orm"
-	"github.com/sirupsen/logrus"
 )
 
 // Namespace describes namespace
@@ -53,23 +52,6 @@ func (ns *Namespace) AfterInsert(db orm.DB) error {
 		InitialAccessLevel: model.Owner,
 		CurrentAccessLevel: model.Owner,
 	})
-}
-
-func (ns *Namespace) BeforeUpdate(db orm.DB) error {
-	if ns.Deleted {
-		cnt, err := db.Model(&Volume{NamespaceID: ns.ID}).
-			Where("ns_id = ?ns_id").
-			Where("NOT deleted").
-			Count()
-		if err != nil {
-			return err
-		}
-		if cnt > 0 {
-			logrus.Error("trying to delete namespace with volumes")
-			return errors.ErrInternal()
-		}
-	}
-	return nil
 }
 
 // NamespaceWithPermissions is a response object for get requests

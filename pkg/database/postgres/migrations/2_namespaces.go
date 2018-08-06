@@ -8,6 +8,10 @@ import (
 
 func init() {
 	migrations.Register(func(db migrations.DB) error {
+		if _, err := db.Exec( /* language=sql */ `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`); err != nil {
+			return err
+		}
+
 		if _, err := orm.CreateTable(db, &model.Namespace{}, &orm.CreateTableOptions{IfNotExists: true, FKConstraints: true}); err != nil {
 			return err
 		}
@@ -27,6 +31,8 @@ func init() {
 		if _, err := orm.DropTable(db, &model.Namespace{}, &orm.DropTableOptions{IfExists: true}); err != nil {
 			return err
 		}
+		_, err := db.Exec( /* language=sql */ `DROP EXTENSION IF EXISTS "uuid-ossp"`)
+		return err
 
 		return nil
 	})
