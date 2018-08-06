@@ -54,7 +54,7 @@ func (s *Server) AddGroup(ctx context.Context, project, groupID string) error {
 	var accessList []database.AccessListElement
 	for _, v := range group.Members {
 		accessList = append(accessList, database.AccessListElement{
-			AccessLevel: UserGroupAccessToDBAccess(v.Access),
+			AccessLevel: v.Access,
 			ToUserID:    v.Username,
 		})
 	}
@@ -105,6 +105,10 @@ func (s *Server) GetProjectGroups(ctx context.Context, projectID string) ([]kube
 		}
 	}
 
+	if len(groupIDs) == 0 {
+		return make([]kubeClientModel.UserGroup, 0), nil
+	}
+
 	groups, err := s.clients.User.GroupFullIDList(ctx, groupIDs...)
 	if err != nil {
 		return nil, err
@@ -133,7 +137,7 @@ func (s *Server) SetGroupMemberAccess(ctx context.Context, projectID, groupID st
 		}
 
 		accesses := []database.AccessListElement{
-			{ToUserID: user.ID, AccessLevel: UserGroupAccessToDBAccess(req.AccessLevel)},
+			{ToUserID: user.ID, AccessLevel: req.AccessLevel},
 		}
 		if setErr := tx.SetNamespacesAccesses(ctx, project.Namespaces, accesses); setErr != nil {
 			return setErr
@@ -192,7 +196,7 @@ func (s *Server) AddMemberToProject(ctx context.Context, projectID string, req m
 		}
 
 		access := []database.AccessListElement{
-			{ToUserID: user.ID, AccessLevel: UserGroupAccessToDBAccess(req.AccessLevel)},
+			{ToUserID: user.ID, AccessLevel: req.AccessLevel},
 		}
 		if setErr := tx.SetNamespacesAccesses(ctx, project.Namespaces, access); setErr != nil {
 			return setErr

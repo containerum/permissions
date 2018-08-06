@@ -3,12 +3,10 @@ package server
 import (
 	"context"
 
-	"git.containerum.net/ch/kube-api/pkg/kubeErrors"
 	"git.containerum.net/ch/permissions/pkg/database"
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/pkg/model"
 	billing "github.com/containerum/bill-external/models"
-	"github.com/containerum/cherry"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
@@ -392,8 +390,8 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 				return err
 			}
 			for _, v := range volumes {
-				if *v.TariffID == "00000000-0000-0000-0000-000000000000" {
-					if createErr := s.clients.Volume.DeleteNamespaceVolume(ctx, ns.ID, v.Label); createErr != nil {
+				if v.TariffID == "00000000-0000-0000-0000-000000000000" {
+					if createErr := s.clients.Volume.DeleteNamespaceVolume(ctx, ns.ID, v.Name); createErr != nil {
 						return createErr
 					}
 				}
@@ -489,18 +487,8 @@ func (s *Server) DeleteAllUserNamespaces(ctx context.Context) error {
 			return delErr
 		}
 
-		// kube-api don`t have method to delete list of namespaces
-		for _, ns := range deletedNamespaces {
-			nsPerm := model.NamespaceWithPermissions{Namespace: ns}
-			if delErr := s.clients.Kube.DeleteNamespace(ctx, nsPerm.ToKube()); delErr != nil {
-				switch {
-				case delErr == nil: //pass
-				case cherry.Equals(delErr, kubeErrors.ErrResourceNotExist()):
-					s.log.WithError(delErr).Warnf("namespace not found in kube")
-				default:
-					return delErr
-				}
-			}
+		if delErr := s.clients.Kube.DeleteUserNamespaces(ctx, userID); delErr != nil {
+			return delErr
 		}
 
 		if delErr := s.clients.Volume.DeleteAllUserVolumes(ctx); delErr != nil {
@@ -537,15 +525,15 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 
 	var accessList []database.AccessListElement
 	for _, v := range group.Members {
-		if v.Access != kubeClientModel.OwnerAccess {
+		if v.Access != kubeClientModel.Owner {
 			accessList = append(accessList, database.AccessListElement{
-				AccessLevel: UserGroupAccessToDBAccess(v.Access),
+				AccessLevel: v.Access,
 				ToUserID:    v.ID,
 				GroupID:     &groupID,
 			})
 		} else {
 			ownerErr := s.db.Transactional(func(tx database.DB) error {
-				return tx.SetNamespaceAccess(ctx, ns.Namespace, UserGroupAccessToDBAccess(v.Access), v.ID)
+				return tx.SetNamespaceAccess(ctx, ns.Namespace, v.Access, v.ID)
 			})
 			if ownerErr != nil {
 				s.log.Warningln("Unabel add owner because he already exists:", ownerErr)
@@ -582,7 +570,7 @@ func (s *Server) SetGroupMemberNamespaceAccess(ctx context.Context, namespace, g
 		}
 
 		accesses := []database.AccessListElement{
-			{ToUserID: user.ID, AccessLevel: UserGroupAccessToDBAccess(req.AccessLevel)},
+			{ToUserID: user.ID, AccessLevel: req.AccessLevel},
 		}
 		if setErr := tx.SetNamespacesAccesses(ctx, []model.Namespace{ns.Namespace}, accesses); setErr != nil {
 			return setErr

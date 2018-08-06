@@ -8,19 +8,19 @@
     ".",
     "proto"
   ]
-  revision = "d5c31e2e613c3aeadf0d3cf8a8256c336da39fb1"
+  revision = "5ec6f11de6e7d388b0d877593cccbdeebfce8558"
 
 [[projects]]
   branch = "develop"
   name = "git.containerum.net/ch/kube-api"
   packages = ["pkg/kubeErrors"]
-  revision = "765f4d41b76cccef7ed6c696cb7aebf45528b579"
+  revision = "bd98c1bcafafa076a0597dfd00a5b1c669592e07"
 
 [[projects]]
   branch = "develop"
   name = "git.containerum.net/ch/user-manager"
   packages = ["pkg/models"]
-  revision = "9a9cb6024efb51db6a6672b9492091ec3685e34f"
+  revision = "46d765f63e8ba1b65354a7b93c42f00840523e62"
 
 [[projects]]
   branch = "develop"
@@ -29,7 +29,7 @@
     "pkg/errors",
     "pkg/models"
   ]
-  revision = "303cd0b0b39acfa4b2208ff6a792e08774ace37e"
+  revision = "36a756b6149f4ac82caf13293b352d06e4fe25c4"
 
 [[projects]]
   name = "github.com/blang/semver"
@@ -63,14 +63,14 @@
     ".",
     "pkg/model"
   ]
-  revision = "dbfd7cb7735022ac3e819a199a4e07a44772bb45"
-  version = "v0.23.2"
+  revision = "37641c903bb9814885c1a619d7fdf69bb6fea877"
+  version = "v0.23.18"
 
 [[projects]]
   name = "github.com/containerum/utils"
   packages = ["httputil"]
-  revision = "0d81250fc88af062d5836ecd83db9867eb6ee34c"
-  version = "v1.0.3"
+  revision = "f396ca4039012a63f7025cba99a5d514d2824421"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -97,7 +97,7 @@
   branch = "master"
   name = "github.com/gin-gonic/contrib"
   packages = ["ginrus"]
-  revision = "6ea35d32286ce194572a0dc2a3398aac0091228d"
+  revision = "39cfb9727134fef3120d2458fce5fab14265a46c"
 
 [[projects]]
   name = "github.com/gin-gonic/gin"
@@ -125,8 +125,8 @@
     "orm",
     "types"
   ]
-  revision = "8c7fa0eed0d9e9d07fca2cc9e08e3171da0521d5"
-  version = "v6.13.5"
+  revision = "1ddcce74abb167edaee8a5a3a467eff45a2886bf"
+  version = "v6.13.6"
 
 [[projects]]
   name = "github.com/go-playground/locales"
@@ -158,7 +158,7 @@
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "3a3da3a4e26776cc22a79ef46d5d58477532dede"
+  revision = "14aad3d5ea4c323bcd7a2137e735da24a76e814c"
 
 [[projects]]
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -182,8 +182,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "ca39e5af3ece67bbcda3d0f4f56a8e24d9f2dad4"
-  version = "1.1.3"
+  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
+  version = "1.1.4"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -200,14 +200,14 @@
 [[projects]]
   name = "github.com/modern-go/reflect2"
   packages = ["."]
-  revision = "1df9eeb2bb81f327b96228865c5687bc2194af3f"
-  version = "1.0.0"
+  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
+  version = "1.0.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/ninedraft/boxofstuff"
   packages = ["strset"]
-  revision = "402d25bcc03750de7fc34975a397beb9ea32d17e"
+  revision = "2b74bc874f1a8ee6911d655378be9025aeaf6021"
+  version = "v0.3.7"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -231,7 +231,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "ab813273cd59e1333f7ae7bff5d027d4aadf528c"
+  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
 
 [[projects]]
   branch = "master"
@@ -248,7 +248,7 @@
     "webdav",
     "webdav/internal/xml"
   ]
-  revision = "dfa909b99c79129e1100513e5cd36307665e5723"
+  revision = "81d44fd177a98d09fe3bc40a5a78d495d3f042ea"
 
 [[projects]]
   branch = "master"
@@ -257,7 +257,7 @@
     "unix",
     "windows"
   ]
-  revision = "c11f84a56e43e20a78cee75a7c034031ecf57d1f"
+  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -284,7 +284,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "694d95ba50e67b2e363f3483057db5d4910c18f9"
+  revision = "fedd2861243fd1a8152376292b921b394c7bef7e"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -352,6 +352,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "29cd6c145e49a0c32bb4c81fd85735cfb3a2c4493beaa64ebed0ca8f9cee9e93"
+  inputs-digest = "589b710ea0765e302df379edea44fd2fcd01a5efac1b23eeb2c9bb26c2b2c425"
   solver-name = "gps-cdcl"
   solver-version = 1

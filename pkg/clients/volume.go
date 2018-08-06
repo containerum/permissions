@@ -2,12 +2,16 @@ package clients
 
 import (
 	"context"
+	"fmt"
 	"net/url"
+
+	"time"
 
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/volume-manager/pkg/models"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/cherrylog"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -18,7 +22,7 @@ type VolumeManagerClient interface {
 	CreateVolume(ctx context.Context, nsID, label string, capacity int) error
 	DeleteNamespaceVolume(ctx context.Context, nsID, volume string) error
 	DeleteNamespaceVolumes(ctx context.Context, nsID string) error
-	GetNamespaceVolumes(ctx context.Context, nsID string) ([]model.Volume, error)
+	GetNamespaceVolumes(ctx context.Context, nsID string) ([]kubeClientModel.Volume, error)
 	DeleteAllUserVolumes(ctx context.Context) error
 }
 
@@ -34,6 +38,7 @@ func NewVolumeManagerHTTPClient(url *url.URL) *VolumeManagerHTTPClient {
 		SetHostURL(url.String()).
 		SetDebug(true).
 		SetError(cherry.Err{}).
+		SetTimeout(10*time.Second).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Accept", "application/json")
 	client.JSONMarshal = jsoniter.Marshal
@@ -71,12 +76,12 @@ func (v *VolumeManagerHTTPClient) CreateVolume(ctx context.Context, nsID, label 
 	return nil
 }
 
-func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]model.Volume, error) {
+func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]kubeClientModel.Volume, error) {
 	v.log.WithFields(logrus.Fields{
 		"namespace_id": nsID,
-	}).Debugf("ger namespace volumes")
+	}).Debugf("get namespace volumes")
 
-	var volumes []model.Volume
+	var volumes []kubeClientModel.Volume
 	resp, err := v.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
@@ -121,7 +126,7 @@ func (v *VolumeManagerHTTPClient) DeleteNamespaceVolume(ctx context.Context, nsI
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		SetPathParams(map[string]string{
 			"namespace": nsID,
-			"volumes":   volume,
+			"volume":    volume,
 		}).
 		Delete("/namespaces/{namespace}/volumes/{volume}")
 	if err != nil {
@@ -147,6 +152,10 @@ func (v *VolumeManagerHTTPClient) DeleteAllUserVolumes(ctx context.Context) erro
 		return resp.Error().(*cherry.Err)
 	}
 	return nil
+}
+
+func (v *VolumeManagerHTTPClient) String() string {
+	return fmt.Sprintf("volume-manager http client: url=%s", v.client.HostURL)
 }
 
 type VolumeManagerDummyClient struct {
@@ -187,10 +196,14 @@ func (v *VolumeManagerDummyClient) DeleteAllUserVolumes(ctx context.Context) err
 	return nil
 }
 
-func (v *VolumeManagerDummyClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]model.Volume, error) {
+func (v *VolumeManagerDummyClient) GetNamespaceVolumes(ctx context.Context, nsID string) ([]kubeClientModel.Volume, error) {
 	v.log.WithFields(logrus.Fields{
 		"namespace_id": nsID,
 	}).Debugf("ger namespace volumes")
 
 	return nil, nil
+}
+
+func (v *VolumeManagerDummyClient) String() string {
+	return "volume-manager dummy client"
 }
