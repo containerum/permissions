@@ -617,7 +617,7 @@ func (s *Server) GetNamespaceGroups(ctx context.Context, namespace string) ([]ku
 		}
 	}
 
-	if len(ns.Permissions) == 0 {
+	if len(groupIDs) == 0 {
 		return []kubeClientModel.UserGroup{}, nil
 	}
 
