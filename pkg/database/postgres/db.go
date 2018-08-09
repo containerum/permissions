@@ -43,6 +43,7 @@ func Connect(dbURL string) (*PgDB, error) {
 
 	entry.WithField("addr", options.Addr).Info("run migrations")
 
+	migrations.SetTableName("migrations_perm")
 	oldVer, newVer, err := migrations.Run(db, "up")
 	logrus.WithError(err).WithFields(logrus.Fields{
 		"addr":    options.Addr,

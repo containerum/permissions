@@ -12,15 +12,9 @@
 
 [[projects]]
   branch = "develop"
-  name = "git.containerum.net/ch/kube-api"
-  packages = ["pkg/kubeErrors"]
-  revision = "bd98c1bcafafa076a0597dfd00a5b1c669592e07"
-
-[[projects]]
-  branch = "develop"
   name = "git.containerum.net/ch/user-manager"
   packages = ["pkg/models"]
-  revision = "46d765f63e8ba1b65354a7b93c42f00840523e62"
+  revision = "e731e0b7ddcf9495bb3d0dfae82de9f8a203d653"
 
 [[projects]]
   branch = "develop"
@@ -29,7 +23,7 @@
     "pkg/errors",
     "pkg/models"
   ]
-  revision = "36a756b6149f4ac82caf13293b352d06e4fe25c4"
+  revision = "46e5fcdd1797292c1da204e2db71e8fa77344483"
 
 [[projects]]
   name = "github.com/blang/semver"
@@ -54,8 +48,8 @@
     "adaptors/cherrylog",
     "adaptors/gonic"
   ]
-  revision = "34f7a2a139b36c20a34b93738dda33476efad47d"
-  version = "v1.0.1"
+  revision = "f4fe137f837222131dcefcfa49845d189b5fc6f2"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/containerum/kube-client"
@@ -63,8 +57,8 @@
     ".",
     "pkg/model"
   ]
-  revision = "37641c903bb9814885c1a619d7fdf69bb6fea877"
-  version = "v0.23.18"
+  revision = "90bd8c0759be7f3cedd93e56e264fab8e8b5139f"
+  version = "v0.23.20"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -158,7 +152,7 @@
     "ptypes/struct",
     "ptypes/timestamp"
   ]
-  revision = "14aad3d5ea4c323bcd7a2137e735da24a76e814c"
+  revision = "89a0c16f4dc2a70c0ed864d8ef64878f24fdaa51"
 
 [[projects]]
   name = "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -182,8 +176,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
-  version = "1.1.4"
+  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
+  version = "1.1.5"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -218,8 +212,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/ugorji/go"
@@ -231,7 +225,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
+  revision = "56440b844dfe139a8ac053f4ecac0b20b79058f4"
 
 [[projects]]
   branch = "master"
@@ -248,7 +242,7 @@
     "webdav",
     "webdav/internal/xml"
   ]
-  revision = "81d44fd177a98d09fe3bc40a5a78d495d3f042ea"
+  revision = "f4c29de78a2a91c00474a2e689954305c350adf9"
 
 [[projects]]
   branch = "master"
@@ -257,7 +251,7 @@
     "unix",
     "windows"
   ]
-  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
+  revision = "0ffbfd41fbef8ffcf9b62b0b0aa3a5873ed7a4fe"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -284,7 +278,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "fedd2861243fd1a8152376292b921b394c7bef7e"
+  revision = "daca94659cb50e9f37c1b834680f2e46358f10b0"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -352,6 +346,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "589b710ea0765e302df379edea44fd2fcd01a5efac1b23eeb2c9bb26c2b2c425"
+  inputs-digest = "78f2e3b96f11d3c194abf592605beb628daee8d79dd818412c6509aec7f22e6a"
   solver-name = "gps-cdcl"
   solver-version = 1
