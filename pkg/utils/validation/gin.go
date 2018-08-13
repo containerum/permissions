@@ -16,7 +16,7 @@ var _ binding.StructValidator = &GinValidatorV9{}
 func (v *GinValidatorV9) ValidateStruct(obj interface{}) error {
 	if kindOfData(obj) == reflect.Struct {
 		if err := v.Validate.Struct(obj); err != nil {
-			return error(err)
+			return err
 		}
 	}
 
