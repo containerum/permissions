@@ -98,7 +98,7 @@ func (s *Server) SetNamespaceAccess(ctx context.Context, id, targetUser string, 
 			return err
 		}
 
-		ns, getErr := tx.NamespaceByID(ctx, ownerID, id)
+		ns, getErr := s.db.NamespaceByID(ctx, ownerID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -132,7 +132,7 @@ func (s *Server) GetNamespaceAccess(ctx context.Context, id string) (kubeClientM
 		"id":      id,
 	}).Infof("get namespace access")
 
-	ns, err := s.db.NamespaceByID(ctx, userID, id)
+	ns, err := s.db.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
 	if err != nil {
 		return kubeClientModel.Namespace{}, err
 	}
@@ -161,7 +161,7 @@ func (s *Server) DeleteNamespaceAccess(ctx context.Context, id string, targetUse
 			return err
 		}
 
-		ns, getErr := tx.NamespaceByID(ctx, ownerID, id)
+		ns, getErr := tx.NamespaceByID(ctx, ownerID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
