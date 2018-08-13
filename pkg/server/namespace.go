@@ -416,7 +416,7 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 	}).Infof("delete namespace")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, id)
+		ns, getErr := tx.NamespaceByIDForEveryone(ctx, id)
 		if getErr != nil {
 			return getErr
 		}
