@@ -98,8 +98,7 @@ var (
 )
 
 func init() {
-	var err error
-	err = jsoniter.Unmarshal([]byte(fakeNSData), &fakeNSTariffs)
+	err := jsoniter.Unmarshal([]byte(fakeNSData), &fakeNSTariffs)
 	if err != nil {
 		panic(err)
 	}
