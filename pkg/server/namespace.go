@@ -28,6 +28,7 @@ type NamespaceActions interface {
 	GetNamespaceGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
 	DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) error
 	GetGroupsNamespaces(ctx context.Context, groupID string) ([]kubeClientModel.Namespace, error)
+	ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) error
 }
 
 var StandardNamespaceFilter = database.NamespaceFilter{
@@ -238,6 +239,40 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 	})
 
 	return err
+}
+
+func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) error {
+	s.log.
+		Infof("importing namespaces %+v", req)
+
+	for _, reqns := range req.Namespaces {
+		err := s.db.Transactional(func(tx database.DB) error {
+			ns := model.NamespaceWithPermissions{
+				Namespace: model.Namespace{
+					Resource: model.Resource{
+						OwnerUserID: reqns.Owner,
+						Label:       reqns.ID,
+						ID: reqns.ID,
+					},
+					CPU:            int(reqns.Resources.Hard.CPU),
+					RAM:            int(reqns.Resources.Hard.Memory),
+					MaxExtServices: 100,
+					MaxIntServices: 100,
+					MaxTraffic:     10000000,
+				},
+			}
+
+			if createErr := tx.CreateNamespace(ctx, &ns.Namespace); createErr != nil {
+				return createErr
+			}
+			return nil
+		})
+		if err!=nil {
+			s.log.Debugln("Unable to add namespace:",err)
+		}
+	}
+
+	return nil
 }
 
 func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.NamespaceAdminResizeRequest) error {
