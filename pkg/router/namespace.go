@@ -7,10 +7,10 @@ import (
 	"git.containerum.net/ch/permissions/pkg/model"
 	"git.containerum.net/ch/permissions/pkg/server"
 	"github.com/containerum/cherry/adaptors/gonic"
+	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 )
 
 type namespaceHandlers struct {
@@ -223,12 +223,7 @@ func (nh *namespaceHandlers) importNamespacesHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := nh.acts.ImportNamespaces(ctx.Request.Context(), req); err != nil {
-		ctx.AbortWithStatusJSON(nh.tv.HandleError(err))
-		return
-	}
-
-	ctx.Status(http.StatusCreated)
+	ctx.JSON(http.StatusAccepted, nh.acts.ImportNamespaces(ctx.Request.Context(), req))
 }
 
 func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
@@ -278,7 +273,7 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 
 	// swagger:operation POST /import/namespaces Namespaces ImportNamespaces
 	//
-	// Import namespaces without creating permissions or in kube-api.
+	// Import namespaces from kube.
 	//
 	// ---
 	// parameters:
@@ -288,8 +283,10 @@ func (r *Router) SetupNamespaceRoutes(acts server.NamespaceActions) {
 	//    schema:
 	//      $ref: '#/definitions/NamespacesList'
 	// responses:
-	//   '201':
-	//     description: namespace created
+	//   '202':
+	//     description: namespace imported
+	//     schema:
+	//       $ref: '#/definitions/ImportResponse'
 	//   default:
 	//     $ref: '#/responses/error'
 	r.engine.POST("/import/namespaces", handlers.importNamespacesHandler)

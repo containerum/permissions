@@ -28,7 +28,7 @@ type NamespaceActions interface {
 	GetNamespaceGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
 	DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) error
 	GetGroupsNamespaces(ctx context.Context, groupID string) ([]kubeClientModel.Namespace, error)
-	ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) error
+	ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) kubeClientModel.ImportResponse
 }
 
 var StandardNamespaceFilter = database.NamespaceFilter{
@@ -241,9 +241,13 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 	return err
 }
 
-func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) error {
-	s.log.
-		Infof("importing namespaces %+v", req)
+func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) kubeClientModel.ImportResponse {
+	s.log.Infof("importing namespaces")
+
+	resp := kubeClientModel.ImportResponse{
+		Imported: []kubeClientModel.ImportResult{},
+		Failed:   []kubeClientModel.ImportResult{},
+	}
 
 	for _, reqns := range req.Namespaces {
 		err := s.db.Transactional(func(tx database.DB) error {
@@ -252,7 +256,7 @@ func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.Names
 					Resource: model.Resource{
 						OwnerUserID: reqns.Owner,
 						Label:       reqns.ID,
-						ID: reqns.ID,
+						ID:          reqns.ID,
 					},
 					CPU:            int(reqns.Resources.Hard.CPU),
 					RAM:            int(reqns.Resources.Hard.Memory),
@@ -267,12 +271,15 @@ func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.Names
 			}
 			return nil
 		})
-		if err!=nil {
-			s.log.Debugln("Unable to add namespace:",err)
+		if err != nil {
+			s.log.Debugln("Unable to add namespace:", err)
+			resp.ImportFailed(reqns.ID, reqns.ID, err.Error())
+		} else {
+			resp.ImportSuccessful(reqns.ID, reqns.ID)
 		}
 	}
 
-	return nil
+	return resp
 }
 
 func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.NamespaceAdminResizeRequest) error {
