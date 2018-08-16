@@ -19,20 +19,23 @@ type ImportResponse struct {
 //
 // swagger:model
 type ImportResult struct {
-	Name    string `json:"name" yaml:"name"`
-	Message string `json:"message" yaml:"message"`
+	Name      string `json:"name" yaml:"name"`
+	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
+	Message   string `json:"message" yaml:"message"`
 }
 
-func (resp *ImportResponse) ImportSuccessful(name string) {
+func (resp *ImportResponse) ImportSuccessful(name, namespace string) {
 	resp.Imported = append(resp.Imported, ImportResult{
-		Name:    name,
-		Message: ImportSuccessfulMessage,
+		Name:      name,
+		Namespace: namespace,
+		Message:   ImportSuccessfulMessage,
 	})
 }
 
-func (resp *ImportResponse) ImportFailed(name, message string) {
+func (resp *ImportResponse) ImportFailed(name, namespace, message string) {
 	resp.Failed = append(resp.Failed, ImportResult{
-		Name:    name,
-		Message: message,
+		Name:      name,
+		Namespace: namespace,
+		Message:   message,
 	})
 }

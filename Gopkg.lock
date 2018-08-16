@@ -64,15 +64,15 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:33eefa719692caa3f246bdeddb4055303ef19d9c46d46079c623263efcd33064"
+  digest = "1:5eba59b0e19d7727e7e4294c7435cbde6e38a396b20dd47738600380e7569428"
   name = "github.com/containerum/kube-client"
   packages = [
     ".",
     "pkg/model",
   ]
   pruneopts = "UT"
-  revision = "25d3508faf4725ddf0e5d87123eb53234ef75b46"
-  version = "v0.23.25"
+  revision = "23dd0850d05cd21c41f0699fced4c5791dea2df6"
+  version = "v0.23.26"
 
 [[projects]]
   digest = "1:f332cfcc393a262145934ed77269e485c04987ca5ed836c6937e36147d3103d5"

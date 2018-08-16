@@ -273,9 +273,9 @@ func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.Names
 		})
 		if err != nil {
 			s.log.Debugln("Unable to add namespace:", err)
-			resp.ImportFailed(reqns.ID, err.Error())
+			resp.ImportFailed(reqns.ID, reqns.ID, err.Error())
 		} else {
-			resp.ImportSuccessful(reqns.ID)
+			resp.ImportSuccessful(reqns.ID, reqns.ID)
 		}
 	}
 
