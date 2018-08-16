@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"git.containerum.net/ch/volume-manager/pkg/errors"
 	"github.com/go-pg/pg/orm"
 )
@@ -18,6 +20,10 @@ type Storage struct {
 	Used int `sql:"used,notnull" json:"used" binding:"gte=0,ltecsfield=Size"`
 
 	Volumes []*Volume `pg:"fk:storage_id" sql:"-" json:"volumes"`
+
+	Deleted bool `sql:"deleted,notnull" json:"deleted,omitempty"`
+
+	DeleteTime *time.Time `sql:"delete_time" json:"delete_time,omitempty"`
 }
 
 func (s *Storage) BeforeInsert(db orm.DB) error {
@@ -38,25 +44,11 @@ func (s *Storage) BeforeUpdate(db orm.DB) error {
 	return nil
 }
 
-func (s *Storage) BeforeDelete(db orm.DB) error {
-	cnt, err := db.Model(&Volume{StorageName: s.Name}).
-		WherePK().
-		Where("NOT deleted").
-		Count()
-	if err != nil {
-		return err
-	}
-	if cnt > 0 {
-		return errors.ErrStorageDelete()
-	}
-	return nil
-}
-
 // UpdateStorageRequest represents request object for updating storage
 //
 // swagger:model
 type UpdateStorageRequest struct {
 	Name *string `json:"name,omitempty"`
 	Size *int    `json:"size,omitempty" binding:"omitempty,gt=0,gtecsfield=Used"`
-	Used *int    `json:"size,omitempty"`
+	Used *int    `json:"used,omitempty"`
 }

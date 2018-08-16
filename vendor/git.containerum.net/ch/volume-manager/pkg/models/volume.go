@@ -100,6 +100,7 @@ type VolumeCreateRequest = model.CreateVolume
 type DirectVolumeCreateRequest struct {
 	Label    string `json:"label" binding:"required"`
 	Capacity int    `json:"capacity" binding:"gt=0"`
+	Storage  string `json:"storage" binding:"required"`
 }
 
 // VolumeRenameRequest is a request object for renaming volume
