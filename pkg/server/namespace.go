@@ -9,6 +9,7 @@ import (
 	billing "github.com/containerum/bill-external/models"
 	kubeClientModel "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
+	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -63,13 +64,17 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 		return chkErr
 	}
 
+	nsuuid := uuid.NewV4().String()
+
 	err = s.db.Transactional(func(tx database.DB) error {
 		ns := model.NamespaceWithPermissions{
 			Namespace: model.Namespace{
 				Resource: model.Resource{
 					OwnerUserID: userID,
 					Label:       req.Label,
+					ID:          nsuuid,
 				},
+				KubeName:       nsuuid,
 				TariffID:       &req.TariffID,
 				CPU:            tariff.CPULimit,
 				RAM:            tariff.MemoryLimit,
@@ -91,7 +96,7 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 			TariffID:      tariff.ID,
 			ResourceType:  billing.Namespace,
 			ResourceLabel: ns.Label,
-			ResourceID:    ns.ID,
+			ResourceID:    ns.KubeName,
 		}); subErr != nil {
 			return subErr
 		}
@@ -106,15 +111,15 @@ func (s *Server) CreateNamespace(ctx context.Context, req model.NamespaceCreateR
 	return err
 }
 
-func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.Namespace, error) {
+func (s *Server) GetNamespace(ctx context.Context, name string) (kubeClientModel.Namespace, error) {
 	userID := httputil.MustGetUserID(ctx)
 
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
-		"id":      id,
+		"name":    name,
 	}).Infof("get namespace")
 
-	ns, err := s.db.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
+	ns, err := s.db.NamespaceByName(ctx, userID, name, IsAdminRole(ctx))
 	if err != nil {
 		return kubeClientModel.Namespace{}, err
 	}
@@ -123,7 +128,7 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.N
 	if kubeErr := NamespaceAddUsage(ctx, &kubeNS, s.clients.Kube); kubeErr != nil {
 		s.log.WithError(kubeErr).Warn("NamespaceAddUsage failed")
 		return kubeClientModel.Namespace{},
-			errors.ErrResourceNotExists().AddDetailF("namespace %s not exists", id)
+			errors.ErrResourceNotExists().AddDetailF("namespace %s not exists", name)
 	}
 
 	AddOwnerLogin(ctx, &ns.Resource, s.clients.User)
@@ -208,13 +213,17 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 		WithField("user_id", userID).
 		Infof("admin create namespace %+v", req)
 
+	nsuuid := uuid.NewV4().String()
+
 	err := s.db.Transactional(func(tx database.DB) error {
 		ns := model.NamespaceWithPermissions{
 			Namespace: model.Namespace{
 				Resource: model.Resource{
 					OwnerUserID: userID,
 					Label:       req.Label,
+					ID:          nsuuid,
 				},
+				KubeName:       nsuuid,
 				CPU:            req.CPU,
 				RAM:            req.Memory,
 				MaxExtServices: req.MaxExtServices,
@@ -256,8 +265,8 @@ func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.Names
 					Resource: model.Resource{
 						OwnerUserID: reqns.Owner,
 						Label:       reqns.ID,
-						ID:          reqns.ID,
 					},
+					KubeName:       reqns.ID,
 					CPU:            int(reqns.Resources.Hard.CPU),
 					RAM:            int(reqns.Resources.Hard.Memory),
 					MaxExtServices: 100,
@@ -282,16 +291,16 @@ func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.Names
 	return resp
 }
 
-func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.NamespaceAdminResizeRequest) error {
+func (s *Server) AdminResizeNamespace(ctx context.Context, name string, req model.NamespaceAdminResizeRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 
 	s.log.
 		WithField("user_id", userID).
-		WithField("id", id).
+		WithField("name", name).
 		Infof("admin resize namespace %+v", req)
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
+		ns, getErr := tx.NamespaceByName(ctx, userID, name, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -312,7 +321,7 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 			ns.MaxTraffic = *req.MaxTraffic
 		}
 
-		nsWithUsage, getErr := s.clients.Kube.GetNamespace(ctx, ns.ID)
+		nsWithUsage, getErr := s.clients.Kube.GetNamespace(ctx, ns.KubeName)
 		if getErr != nil {
 			return getErr
 		}
@@ -346,7 +355,7 @@ func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error
 	}).Infof("rename namespace")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
+		ns, getErr := tx.NamespaceByName(ctx, userID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -359,7 +368,7 @@ func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error
 			return renameErr
 		}
 
-		if renameErr := s.clients.Billing.Rename(ctx, ns.ID, newLabel); renameErr != nil {
+		if renameErr := s.clients.Billing.Rename(ctx, ns.KubeName, newLabel); renameErr != nil {
 			return renameErr
 		}
 
@@ -391,7 +400,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 	}
 
 	err = s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := s.db.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
+		ns, getErr := s.db.NamespaceByName(ctx, userID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -407,7 +416,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		ns.CPU = newTariff.CPULimit
 		ns.RAM = newTariff.MemoryLimit
 
-		nsWithUsage, getErr := s.clients.Kube.GetNamespace(ctx, ns.ID)
+		nsWithUsage, getErr := s.clients.Kube.GetNamespace(ctx, ns.KubeName)
 		if getErr != nil {
 			return getErr
 		}
@@ -427,20 +436,20 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 		}
 
 		if newTariff.VolumeSize == 0 {
-			volumes, err := s.clients.Volume.GetNamespaceVolumes(ctx, ns.ID)
+			volumes, err := s.clients.Volume.GetNamespaceVolumes(ctx, ns.KubeName)
 			if err != nil {
 				return err
 			}
 			for _, v := range volumes {
 				if v.TariffID == "00000000-0000-0000-0000-000000000000" {
-					if createErr := s.clients.Volume.DeleteNamespaceVolume(ctx, ns.ID, v.Name); createErr != nil {
+					if createErr := s.clients.Volume.DeleteNamespaceVolume(ctx, ns.KubeName, v.Name); createErr != nil {
 						return createErr
 					}
 				}
 			}
 		}
 
-		if resizeErr := s.clients.Billing.UpdateSubscription(ctx, ns.ID, newTariff.ID); resizeErr != nil {
+		if resizeErr := s.clients.Billing.UpdateSubscription(ctx, ns.KubeName, newTariff.ID); resizeErr != nil {
 			return resizeErr
 		}
 
@@ -450,15 +459,15 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 	return err
 }
 
-func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
+func (s *Server) DeleteNamespace(ctx context.Context, name string) error {
 	userID := httputil.MustGetUserID(ctx)
 	s.log.WithFields(logrus.Fields{
 		"user_id": userID,
-		"id":      id,
+		"id":      name,
 	}).Infof("delete namespace")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := s.db.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
+		ns, getErr := s.db.NamespaceByName(ctx, userID, name, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -471,19 +480,19 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 			return delErr
 		}
 
-		if delErr := s.clients.Solutions.DeleteNamespaceSolutions(ctx, ns.ID); delErr != nil {
+		if delErr := s.clients.Solutions.DeleteNamespaceSolutions(ctx, ns.KubeName); delErr != nil {
 			return delErr
 		}
 
-		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.ID); delErr != nil {
+		if delErr := s.clients.Resource.DeleteNamespaceResources(ctx, ns.KubeName); delErr != nil {
 			return delErr
 		}
 
-		if delErr := s.clients.Volume.DeleteNamespaceVolumes(ctx, ns.ID); delErr != nil {
+		if delErr := s.clients.Volume.DeleteNamespaceVolumes(ctx, ns.KubeName); delErr != nil {
 			return delErr
 		}
 
-		resourceIDs := []string{ns.ID}
+		resourceIDs := []string{ns.KubeName}
 		if unsubErr := s.clients.Billing.MassiveUnsubscribe(ctx, resourceIDs); unsubErr != nil {
 			return unsubErr
 		}
@@ -560,7 +569,7 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 		return err
 	}
 
-	ns, err := s.db.NamespaceByID(ctx, userID, namespace, IsAdminRole(ctx))
+	ns, err := s.db.NamespaceByName(ctx, userID, namespace, IsAdminRole(ctx))
 	if err != nil {
 		return err
 	}
@@ -601,7 +610,7 @@ func (s *Server) SetGroupMemberNamespaceAccess(ctx context.Context, namespace, g
 	}).Infof("set group member access")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, err := s.db.NamespaceByID(ctx, userID, namespace, IsAdminRole(ctx))
+		ns, err := s.db.NamespaceByName(ctx, userID, namespace, IsAdminRole(ctx))
 		if err != nil {
 			return err
 		}
@@ -631,7 +640,7 @@ func (s *Server) GetNamespaceGroups(ctx context.Context, namespace string) ([]ku
 		"user_id":   userID,
 	}).Infof("get project groups")
 
-	ns, err := s.db.NamespaceByID(ctx, userID, namespace, IsAdminRole(ctx))
+	ns, err := s.db.NamespaceByName(ctx, userID, namespace, IsAdminRole(ctx))
 	if err != nil {
 		return nil, err
 	}

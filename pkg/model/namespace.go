@@ -6,6 +6,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"github.com/containerum/kube-client/pkg/model"
 	"github.com/go-pg/pg/orm"
+	"github.com/satori/go.uuid"
 )
 
 // Namespace describes namespace
@@ -23,6 +24,7 @@ type Namespace struct {
 	MaxExtServices int     `sql:"max_ext_services,notnull" json:"max_external_services"`
 	MaxIntServices int     `sql:"max_int_services,notnull" json:"max_internal_services"`
 	MaxTraffic     int     `sql:"max_traffic,notnull" json:"max_traffic"`
+	KubeName       string  `sql:"kube_name,unique:kube_name,notnull" json:"kube_name"`
 	// swagger:strfmt uuid
 	ProjectID *string `sql:"project_id,type:uuid" json:"project_id,omitempty"`
 }
@@ -37,6 +39,11 @@ func (ns *Namespace) BeforeInsert(db orm.DB) error {
 		return err
 	}
 
+	if ns.KubeName == "" {
+		ns.KubeName = uuid.NewV4().String()
+		ns.ID = ns.KubeName
+	}
+
 	if cnt > 0 {
 		return errors.ErrResourceAlreadyExists().AddDetailF("namespace %s already exists", ns.Label)
 	}
@@ -45,6 +52,7 @@ func (ns *Namespace) BeforeInsert(db orm.DB) error {
 }
 
 func (ns *Namespace) AfterInsert(db orm.DB) error {
+
 	return db.Insert(&Permission{
 		ResourceID:         ns.ID,
 		UserID:             ns.OwnerUserID,
@@ -67,7 +75,7 @@ type NamespaceWithPermissions struct {
 
 func (np *NamespaceWithPermissions) ToKube() model.Namespace {
 	ns := model.Namespace{
-		ID:            np.ID,
+		ID:            np.KubeName,
 		CreatedAt:     new(string),
 		Owner:         np.OwnerUserID,
 		OwnerLogin:    np.OwnerUserLogin,

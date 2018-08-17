@@ -63,7 +63,7 @@ func (pgdb *PgDB) setResourceAccess(ctx context.Context, permission model.Permis
 }
 
 func (pgdb *PgDB) SetNamespaceAccess(ctx context.Context, ns model.Namespace, accessLevel kubeClientModel.AccessLevel, toUserID string) error {
-	pgdb.log.WithField("ns_id", ns.ID).Debugf("set namespace access %s to %s", accessLevel, toUserID)
+	pgdb.log.WithField("ns_id", ns.KubeName).Debugf("set namespace access %s to %s", accessLevel, toUserID)
 
 	return pgdb.setResourceAccess(ctx, model.Permission{
 		ResourceType:       model.ResourceNamespace,
@@ -89,7 +89,7 @@ func (pgdb *PgDB) setResourceAccesses(ctx context.Context, perms []model.Permiss
 }
 
 func (pgdb *PgDB) SetNamespaceAccesses(ctx context.Context, ns model.Namespace, accessList []database.AccessListElement) error {
-	pgdb.log.WithField("ns_id", ns.ID).Debugf("set namespace accesses %v", accessList)
+	pgdb.log.WithField("ns_id", ns.KubeName).Debugf("set namespace accesses %v", accessList)
 
 	if len(accessList) == 0 {
 		return nil
@@ -154,7 +154,7 @@ func (pgdb *PgDB) deleteResourceAccess(ctx context.Context, resource model.Resou
 }
 
 func (pgdb *PgDB) DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error {
-	pgdb.log.WithField("ns_id", ns.ID).Debugf("delete namespace access to user %s", userID)
+	pgdb.log.WithField("ns_id", ns.KubeName).Debugf("delete namespace access to user %s", userID)
 
 	return pgdb.deleteResourceAccess(ctx, ns.Resource, model.ResourceNamespace, userID)
 }
