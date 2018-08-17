@@ -51,12 +51,12 @@ func (s *Server) AddGroup(ctx context.Context, project, groupID string) error {
 		return err
 	}
 
-	var accessList []database.AccessListElement
-	for _, v := range group.Members {
-		accessList = append(accessList, database.AccessListElement{
+	accessList := make([]database.AccessListElement, len(group.Members))
+	for i, v := range group.Members {
+		accessList[i] = database.AccessListElement{
 			AccessLevel: v.Access,
 			ToUserID:    v.Username,
-		})
+		}
 	}
 
 	err = s.db.Transactional(func(tx database.DB) error {

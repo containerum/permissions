@@ -28,6 +28,7 @@ type NamespaceActions interface {
 	GetNamespaceGroups(ctx context.Context, projectID string) ([]kubeClientModel.UserGroup, error)
 	DeleteGroupFromNamespace(ctx context.Context, namespace, groupID string) error
 	GetGroupsNamespaces(ctx context.Context, groupID string) ([]kubeClientModel.Namespace, error)
+	ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) kubeClientModel.ImportResponse
 }
 
 var StandardNamespaceFilter = database.NamespaceFilter{
@@ -113,7 +114,7 @@ func (s *Server) GetNamespace(ctx context.Context, id string) (kubeClientModel.N
 		"id":      id,
 	}).Infof("get namespace")
 
-	ns, err := s.db.NamespaceByID(ctx, userID, id)
+	ns, err := s.db.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
 	if err != nil {
 		return kubeClientModel.Namespace{}, err
 	}
@@ -240,6 +241,47 @@ func (s *Server) AdminCreateNamespace(ctx context.Context, req model.NamespaceAd
 	return err
 }
 
+func (s *Server) ImportNamespaces(ctx context.Context, req kubeClientModel.NamespacesList) kubeClientModel.ImportResponse {
+	s.log.Infof("importing namespaces")
+
+	resp := kubeClientModel.ImportResponse{
+		Imported: []kubeClientModel.ImportResult{},
+		Failed:   []kubeClientModel.ImportResult{},
+	}
+
+	for _, reqns := range req.Namespaces {
+		err := s.db.Transactional(func(tx database.DB) error {
+			ns := model.NamespaceWithPermissions{
+				Namespace: model.Namespace{
+					Resource: model.Resource{
+						OwnerUserID: reqns.Owner,
+						Label:       reqns.ID,
+						ID:          reqns.ID,
+					},
+					CPU:            int(reqns.Resources.Hard.CPU),
+					RAM:            int(reqns.Resources.Hard.Memory),
+					MaxExtServices: 100,
+					MaxIntServices: 100,
+					MaxTraffic:     10000000,
+				},
+			}
+
+			if createErr := tx.CreateNamespace(ctx, &ns.Namespace); createErr != nil {
+				return createErr
+			}
+			return nil
+		})
+		if err != nil {
+			s.log.Debugln("Unable to add namespace:", err)
+			resp.ImportFailed(reqns.ID, reqns.ID, err.Error())
+		} else {
+			resp.ImportSuccessful(reqns.ID, reqns.ID)
+		}
+	}
+
+	return resp
+}
+
 func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.NamespaceAdminResizeRequest) error {
 	userID := httputil.MustGetUserID(ctx)
 
@@ -249,7 +291,7 @@ func (s *Server) AdminResizeNamespace(ctx context.Context, id string, req model.
 		Infof("admin resize namespace %+v", req)
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, id)
+		ns, getErr := tx.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -304,7 +346,7 @@ func (s *Server) RenameNamespace(ctx context.Context, id, newLabel string) error
 	}).Infof("rename namespace")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, id)
+		ns, getErr := tx.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -349,7 +391,7 @@ func (s *Server) ResizeNamespace(ctx context.Context, id, newTariffID string) er
 	}
 
 	err = s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, id)
+		ns, getErr := s.db.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -416,7 +458,7 @@ func (s *Server) DeleteNamespace(ctx context.Context, id string) error {
 	}).Infof("delete namespace")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByID(ctx, userID, id)
+		ns, getErr := s.db.NamespaceByID(ctx, userID, id, IsAdminRole(ctx))
 		if getErr != nil {
 			return getErr
 		}
@@ -518,7 +560,7 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 		return err
 	}
 
-	ns, err := s.db.NamespaceByIDForEveryone(ctx, namespace)
+	ns, err := s.db.NamespaceByID(ctx, userID, namespace, IsAdminRole(ctx))
 	if err != nil {
 		return err
 	}
@@ -559,9 +601,9 @@ func (s *Server) SetGroupMemberNamespaceAccess(ctx context.Context, namespace, g
 	}).Infof("set group member access")
 
 	err := s.db.Transactional(func(tx database.DB) error {
-		ns, getErr := tx.NamespaceByIDForEveryone(ctx, namespace)
-		if getErr != nil {
-			return getErr
+		ns, err := s.db.NamespaceByID(ctx, userID, namespace, IsAdminRole(ctx))
+		if err != nil {
+			return err
 		}
 
 		user, getErr := s.clients.User.UserInfoByLogin(ctx, req.Username)
@@ -589,7 +631,7 @@ func (s *Server) GetNamespaceGroups(ctx context.Context, namespace string) ([]ku
 		"user_id":   userID,
 	}).Infof("get project groups")
 
-	ns, err := s.db.NamespaceByIDForEveryone(ctx, namespace)
+	ns, err := s.db.NamespaceByID(ctx, userID, namespace, IsAdminRole(ctx))
 	if err != nil {
 		return nil, err
 	}

@@ -64,8 +64,8 @@ func setupDB(ctx *cli.Context) (database.DB, error) {
 		}()))
 }
 
-func getListenAddr(ctx *cli.Context) (string, error) {
-	return ctx.String(ListenAddrFlag.Name), nil
+func getListenAddr(ctx *cli.Context) string {
+	return ctx.String(ListenAddrFlag.Name)
 }
 
 func setupTranslator() *ut.UniversalTranslator {

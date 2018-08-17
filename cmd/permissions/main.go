@@ -85,11 +85,6 @@ func main() {
 				return err
 			}
 
-			listenAddr, err := getListenAddr(ctx)
-			if err != nil {
-				return err
-			}
-
 			translate := setupTranslator()
 			validate := validation.StandardPermissionsValidator(translate)
 
@@ -127,7 +122,7 @@ func main() {
 
 			// for graceful shutdown
 			httpsrv := &http.Server{
-				Addr:    listenAddr,
+				Addr:    getListenAddr(ctx),
 				Handler: g,
 			}
 
@@ -159,6 +154,5 @@ func main() {
 			return nil
 		},
 	}
-
 	exitOnError(app.Run(os.Args))
 }
