@@ -575,10 +575,14 @@ func (s *Server) AddGroupNamespace(ctx context.Context, namespace, groupID strin
 			})
 		} else {
 			ownerErr := s.db.Transactional(func(tx database.DB) error {
-				return tx.SetNamespaceAccess(ctx, ns.Namespace, v.Access, v.ID)
+				if err = tx.SetNamespaceAccess(ctx, ns.Namespace, v.Access, v.ID); err != nil {
+					s.log.Warningln("Unable to add owner. Trying to add user with 'Write' permissions")
+					err = tx.SetNamespaceAccess(ctx, ns.Namespace, kubeClientModel.Write, v.ID)
+				}
+				return err
 			})
 			if ownerErr != nil {
-				s.log.Warningln("Unabel add owner because he already exists:", ownerErr)
+				s.log.Warningln("Unable to add owner:", ownerErr)
 			}
 		}
 	}
