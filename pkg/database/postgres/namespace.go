@@ -15,26 +15,25 @@ import (
 
 var _ = NamespaceFilter(database.NamespaceFilter{})
 
-func (pgdb *PgDB) NamespaceByID(ctx context.Context, userID, id string, isAdmin bool) (ret model.NamespaceWithPermissions, err error) {
+func (pgdb *PgDB) NamespaceByName(ctx context.Context, userID, name string, isAdmin bool) (ret model.NamespaceWithPermissions, err error) {
 	pgdb.log.WithFields(logrus.Fields{
-		"id":      id,
+		"name":    name,
 		"user_id": userID,
-	}).Debugf("get namespace by id")
+	}).Debugf("get namespace by name")
 
-	ret.ID = id
-
+	ret.KubeName = name
 	if isAdmin {
 		err = pgdb.db.Model(&ret).
 			ColumnExpr("?TableAlias.*").
 			Column("Permission").
-			WherePK().
+			Where("kube_name = ?", name).
 			Where("NOT ?TableAlias.deleted").
 			First()
 	} else {
 		err = pgdb.db.Model(&ret).
 			ColumnExpr("?TableAlias.*").
 			Column("Permission").
-			WherePK().
+			Where("kube_name = ?", name).
 			Where("permission.resource_id = ?TableAlias.id").
 			Where("permission.user_id = ?", userID).
 			Where("coalesce(permission.current_access_level, ?0) > ?0", kubeClientModel.None).
@@ -43,7 +42,7 @@ func (pgdb *PgDB) NamespaceByID(ctx context.Context, userID, id string, isAdmin 
 	}
 	switch err {
 	case pg.ErrNoRows:
-		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s not exists", id)
+		err = errors.ErrResourceNotExists().AddDetailF("namespace with id %s not exists", name)
 	default:
 		err = pgdb.handleError(err)
 	}
