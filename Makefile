@@ -5,7 +5,7 @@ CMD_DIR:=cmd/permissions
 # make directory and store path to variable
 BUILDS_DIR:=$(PWD)/build
 EXECUTABLE:=permissions
-LDFLAGS=-X 'main.version=$(VERSION)'
+LDFLAGS=-X 'main.version=$(VERSION)' -w -s -extldflags '-static'
 
 # go has build artifacts caching so soruce tracking not needed
 build:
