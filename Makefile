@@ -1,10 +1,6 @@
-.PHONY: build test clean release single_release
+.PHONY: build build-for-docker test clean release single_release
 
 CMD_DIR:=cmd/permissions
-CLI_DIR:=cmd/permissions
-#get current package, assuming it`s in GOPATH sources
-PACKAGE := $(shell go list -f '{{.ImportPath}}' ./$(CLI_DIR))
-PACKAGE := $(PACKAGE:%/$(CLI_DIR)=%)
 
 # make directory and store path to variable
 BUILDS_DIR:=$(PWD)/build
@@ -13,8 +9,13 @@ LDFLAGS=-X 'main.version=$(VERSION)'
 
 # go has build artifacts caching so soruce tracking not needed
 build:
-	@echo "Building volume-manager for current OS/architecture"
-	@go build -v -ldflags="$(LDFLAGS)" -o $(BUILDS_DIR)/$(EXECUTABLE) ./$(CMD_DIR)
+	@echo "Building mail-templater for current OS/architecture"
+	@echo $(LDFLAGS)
+	@CGO_ENABLED=0 go build -v -ldflags="$(LDFLAGS)" -tags="jsoniter" -o $(BUILDS_DIR)/$(EXECUTABLE) ./$(CMD_DIR)
+
+build-for-docker:
+	@echo $(LDFLAGS)
+	@CGO_ENABLED=0 go build -v -ldflags="$(LDFLAGS)" -tags="jsoniter" -o  /tmp/$(EXECUTABLE) ./$(CMD_DIR)
 
 test:
 	@echo "Running tests"

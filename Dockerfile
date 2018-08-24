@@ -1,12 +1,11 @@
 FROM golang:1.10-alpine as builder
-
-WORKDIR /go/src/git.containerum.net/ch/permissions
+RUN apk add --update make git
+WORKDIR src/git.containerum.net/ch/permissions
 COPY . .
-RUN go build -v -ldflags="-w -s" -o /bin/permissions ./cmd/permissions
+RUN VERSION=$(git describe --abbrev=0 --tags) make build-for-docker
 
 FROM alpine:3.7
-RUN mkdir -p /app
-COPY --from=builder /bin/permissions /app
+COPY --from=builder /tmp/permissions /
 
 ENV MODE="release" \
     LOG_LEVEL=4 \
@@ -26,4 +25,4 @@ ENV MODE="release" \
 
 EXPOSE 4242
 
-CMD "/app/permissions"
+CMD "/permissions"
