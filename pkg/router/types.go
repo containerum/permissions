@@ -6,6 +6,7 @@ import (
 	"git.containerum.net/ch/permissions/pkg/errors"
 	"git.containerum.net/ch/permissions/static"
 	"github.com/containerum/cherry"
+	"github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/universal-translator"
@@ -77,13 +78,16 @@ type Router struct {
 	tv     *TranslateValidate
 }
 
-func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
+func NewRouter(engine gin.IRouter, status *model.ServiceStatus, tv *TranslateValidate) *Router {
 	engine.StaticFS("/static", static.HTTP)
+
+	engine.GET("/status", httputil.ServiceStatus(status))
 
 	ret := &Router{
 		engine: engine,
 		tv:     tv,
 	}
+
 	ret.engine.Use(httputil.SaveHeaders)
 	ret.engine.Use(httputil.PrepareContext)
 	ret.engine.Use(httputil.RequireHeaders(errors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader))
@@ -91,9 +95,7 @@ func NewRouter(engine gin.IRouter, tv *TranslateValidate) *Router {
 		httputil.UserIDXHeader:   "uuid",
 		httputil.UserRoleXHeader: "eq=admin|eq=user",
 	}))
-	ret.engine.Use(tv.ValidateURLParams(map[string]string{
-		"id": "omitempty,uuid",
-	}))
 	ret.engine.Use(httputil.SubstituteUserMiddleware(tv.Validate, tv.UniversalTranslator, errors.ErrRequestValidationFailed))
+
 	return ret
 }

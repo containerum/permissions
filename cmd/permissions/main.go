@@ -13,9 +13,9 @@ import (
 	"git.containerum.net/ch/permissions/pkg/router"
 	"git.containerum.net/ch/permissions/pkg/server"
 	"git.containerum.net/ch/permissions/pkg/utils/validation"
-	"git.containerum.net/ch/permissions/pkg/utils/version"
 	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/cherry/adaptors/gonic"
+	"github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/contrib/ginrus"
@@ -55,11 +55,13 @@ func prettyPrintFlags(ctx *cli.Context) {
 
 const httpServerContextKey = "httpsrv"
 
+var version string
+
 func main() {
 	app := cli.App{
 		Name:        "permissions",
 		Description: "Resources permissions management service for Container hosting",
-		Version:     version.VERSION,
+		Version:     version,
 		Flags: []cli.Flag{
 			&ModeFlag,
 			&LogLevelFlag,
@@ -115,7 +117,13 @@ func main() {
 				g.Use(cors.New(corsCfg))
 			}
 
-			r := router.NewRouter(g, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
+			status := model.ServiceStatus{
+				Name:     ctx.App.Name,
+				Version:  ctx.App.Version,
+				StatusOK: true,
+			}
+
+			r := router.NewRouter(g, &status, &router.TranslateValidate{UniversalTranslator: translate, Validate: validate})
 			r.SetupAccessRoutes(srv)
 			r.SetupNamespaceRoutes(srv)
 			r.SetupProjectRoutes(srv)

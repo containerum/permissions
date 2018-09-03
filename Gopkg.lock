@@ -18,18 +18,18 @@
   name = "git.containerum.net/ch/user-manager"
   packages = ["pkg/models"]
   pruneopts = "NUT"
-  revision = "93790d63d281f2d883315ba52176f17ab7eae30f"
+  revision = "e5ec59200f6ba6b605fc7b60752981b52bb68c62"
 
 [[projects]]
   branch = "develop"
-  digest = "1:4bdef758c1714c994cc010174313b5437f546c081daae09044dc5754726a6050"
+  digest = "1:9d3ba01b7bc8bbd4859d5c45199edb423dd7048c136a36b985edb7a696884436"
   name = "git.containerum.net/ch/volume-manager"
   packages = [
     "pkg/errors",
     "pkg/models",
   ]
   pruneopts = "NUT"
-  revision = "19c78b05a23409f32f3d2f4253496d81952040a3"
+  revision = "803b67cef80f62845cfb6722801995380aebef0e"
 
 [[projects]]
   digest = "1:aba270497eb2d49f5cba6f4162d524b9a1195a24cbce8be20bf56a0051f47deb"
@@ -64,23 +64,23 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:5eba59b0e19d7727e7e4294c7435cbde6e38a396b20dd47738600380e7569428"
+  digest = "1:232b4ef5db92a5016d8f7c668d8114ea3df1341cff76691ddbd36915d049ff47"
   name = "github.com/containerum/kube-client"
   packages = [
     ".",
     "pkg/model",
   ]
   pruneopts = "UT"
-  revision = "23dd0850d05cd21c41f0699fced4c5791dea2df6"
-  version = "v0.23.26"
+  revision = "d9a1865782bb10b027248a9770a42a53ed11a423"
+  version = "v0.23.27"
 
 [[projects]]
-  digest = "1:f332cfcc393a262145934ed77269e485c04987ca5ed836c6937e36147d3103d5"
+  digest = "1:30b68702657dd0cb860432e0ac74af43606fdbda7ca1a7171c34df8506f218e0"
   name = "github.com/containerum/utils"
   packages = ["httputil"]
   pruneopts = "UT"
-  revision = "f396ca4039012a63f7025cba99a5d514d2824421"
-  version = "v1.0.6"
+  revision = "d5ad116d65495380f8dba105acb9ffcb7ae935cc"
+  version = "v1.0.7"
 
 [[projects]]
   digest = "1:3cabbabc9e0e4aa7e12b882bdc213f41cf8bd2b2ce2a7b5e0aceaf8a6a78049b"
@@ -175,7 +175,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9f8b0aa88fd9a475fb20e24895e2ae6475a30d2e5711fe4ff8c87ec3ed23317e"
+  digest = "1:8744fab4edfe4535ef331e0ba51e392a59a446756bb67cf0baae908842a132cb"
   name = "github.com/golang/protobuf"
   packages = [
     "jsonpb",
@@ -188,7 +188,7 @@
     "ptypes/timestamp",
   ]
   pruneopts = "NUT"
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  revision = "b27b920f9e71b439b873b17bf99f56467623814a"
 
 [[projects]]
   digest = "1:fdd5eb4503e8d129faf7413aaf6474c49b503e793adcee9be608afc695bf1b76"
@@ -283,11 +283,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "de0752318171da717af4ce24d0a2e8626afaeb11"
+  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
 
 [[projects]]
   branch = "master"
-  digest = "1:c6fb57beed752dab3b98635e17cbd4e4369b546bd3d3714541317720af2c25c0"
+  digest = "1:3ca4fec506837a586e3fd9f8d51716b03a47a2e43189963dbadae0fe873f03bb"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -302,18 +302,18 @@
     "webdav/internal/xml",
   ]
   pruneopts = "NUT"
-  revision = "c39426892332e1bb5ec0a434a079bf82f5d30c54"
+  revision = "922f4815f713f213882e8ef45e0d315b164d705c"
 
 [[projects]]
   branch = "master"
-  digest = "1:51bfac9fe01b6a949bfed6db70b00bada281f0d64e5296ec644163aa977bfee0"
+  digest = "1:f8130e9e646175a1dcce75cfe1b57fa4cb07015c79690b03aa87bf9c912209fe"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded"
+  revision = "4ea2f632f6e912459fe60b26b1749377f0d889d5"
 
 [[projects]]
   digest = "1:e7071ed636b5422cc51c0e3a6cebc229d6c9fffc528814b519a980641422d619"
@@ -344,7 +344,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "NUT"
-  revision = "d0a8f471bba2dbb160885b0000d814ee5d559bad"
+  revision = "c66870c02cf823ceb633bcd05be3c7cda29976f4"
 
 [[projects]]
   digest = "1:3d43152515ea791363eb0d1d21378fbf70e7df4a3954fd315898532cf5e64a8c"

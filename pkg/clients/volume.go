@@ -81,7 +81,7 @@ func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID 
 		"namespace_id": nsID,
 	}).Debugf("get namespace volumes")
 
-	var volumes []kubeClientModel.Volume
+	var volumes kubeClientModel.VolumesList
 	resp, err := v.client.R().
 		SetContext(ctx).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
@@ -96,7 +96,7 @@ func (v *VolumeManagerHTTPClient) GetNamespaceVolumes(ctx context.Context, nsID 
 	if resp.Error() != nil {
 		return nil, resp.Error().(*cherry.Err)
 	}
-	return volumes, nil
+	return volumes.Volumes, nil
 }
 
 func (v *VolumeManagerHTTPClient) DeleteNamespaceVolumes(ctx context.Context, nsID string) error {

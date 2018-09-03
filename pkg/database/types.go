@@ -28,7 +28,7 @@ type DB interface {
 	SetNamespacesAccesses(ctx context.Context, namespaces []model.Namespace, accessList []AccessListElement) error
 	DeleteNamespaceAccess(ctx context.Context, ns model.Namespace, userID string) error
 
-	NamespaceByID(ctx context.Context, userID, id string, isAdmin bool) (ret model.NamespaceWithPermissions, err error)
+	NamespaceByName(ctx context.Context, userID, name string, isAdmin bool) (ret model.NamespaceWithPermissions, err error)
 	NamespacePermissions(ctx context.Context, ns *model.NamespaceWithPermissions) error
 	UserNamespaces(ctx context.Context, userID string, filter NamespaceFilter) (ret []model.NamespaceWithPermissions, err error)
 	AllNamespaces(ctx context.Context, filter NamespaceFilter) (ret []model.Namespace, err error)

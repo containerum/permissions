@@ -49,10 +49,6 @@ required = [
   version = "~0.16.0"
 
 [[constraint]]
-  name = "github.com/containerum/utils"
-  version = "~1.0.0"
-
-[[constraint]]
   name = "github.com/go-playground/locales"
   version = "~0.12.1"
 
@@ -86,7 +82,7 @@ required = [
 
 [[constraint]]
   name = "github.com/containerum/kube-client"
-  version = "~0.23.26"
+  version = "~0.23.27"
 
 [[constraint]]
   branch = "develop"
@@ -95,3 +91,7 @@ required = [
 [[constraint]]
   branch = "develop"
   name = "git.containerum.net/ch/kube-api"
+
+[[constraint]]
+  name = "github.com/containerum/utils"
+  version = "1.0.7"
